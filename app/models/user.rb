@@ -12,6 +12,15 @@ class User < ApplicationRecord
   # Active Storage association for avatar
   has_one_attached :avatar
 
+  # Avatar image variants
+  def avatar_thumbnail
+    avatar.variant(resize_to_fill: [50, 50])
+  end
+
+  def avatar_medium
+    avatar.variant(resize_to_fill: [200, 200])
+  end
+
   # Project association
   has_many :projects, dependent: :destroy
 
@@ -29,6 +38,21 @@ class User < ApplicationRecord
             format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]),
                      message: "must be a valid URL" },
             allow_blank: true
+
+  # Avatar validations
+  validate :avatar_format
+
+  def avatar_format
+    return unless avatar.attached?
+
+    unless avatar.content_type.in?(%w[image/jpeg image/jpg image/png])
+      errors.add(:avatar, 'must be a JPEG or PNG image')
+    end
+
+    if avatar.byte_size > 5.megabytes
+      errors.add(:avatar, 'must be less than 5MB')
+    end
+  end
 
   # Callbacks for URL normalization
   before_save :normalize_urls

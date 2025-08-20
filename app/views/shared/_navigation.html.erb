@@ -36,9 +36,15 @@
                     class="flex items-center justify-between w-full py-2 px-3 text-secondary-900 rounded hover:bg-secondary-100 md:hover:bg-transparent md:border-0 md:hover:text-primary-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-primary-500 dark:focus:text-white dark:border-secondary-700 dark:hover:bg-secondary-700 md:dark:hover:bg-transparent"
                     data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
               <div class="flex items-center space-x-2">
-                <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-                  <span class="text-white text-sm font-medium"><%= current_user.username.first.upcase %></span>
-                </div>
+                <% if current_user.avatar.attached? %>
+                  <%= image_tag current_user.avatar_thumbnail, 
+                      class: "w-8 h-8 rounded-full object-cover",
+                      alt: "#{current_user.username}'s avatar" %>
+                <% else %>
+                  <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                    <span class="text-white text-sm font-medium"><%= current_user.username.first.upcase %></span>
+                  </div>
+                <% end %>
                 <span class="hidden md:block"><%= current_user.username %></span>
               </div>
               <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
@@ -53,8 +59,18 @@
               </div>
               <ul class="py-2 text-sm text-secondary-700 dark:text-secondary-200">
                 <li>
+                  <%= link_to profile_path, class: "block px-4 py-2 hover:bg-secondary-100 dark:hover:bg-secondary-600 dark:hover:text-white" do %>
+                    View Profile
+                  <% end %>
+                </li>
+                <li>
+                  <%= link_to edit_profile_path, class: "block px-4 py-2 hover:bg-secondary-100 dark:hover:bg-secondary-600 dark:hover:text-white" do %>
+                    Edit Profile
+                  <% end %>
+                </li>
+                <li>
                   <%= link_to edit_user_registration_path, class: "block px-4 py-2 hover:bg-secondary-100 dark:hover:bg-secondary-600 dark:hover:text-white" do %>
-                    Profile Settings
+                    Account Settings
                   <% end %>
                 </li>
               </ul>

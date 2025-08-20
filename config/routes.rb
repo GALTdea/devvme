@@ -2,6 +2,10 @@ Rails.application.routes.draw do
   # Dashboard routes
   get "dashboard", to: "dashboard#index"
   devise_for :users
+
+  # Profile routes
+  resource :profile, only: [:show, :edit, :update]
+
   root "home#index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
