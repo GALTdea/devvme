@@ -168,25 +168,30 @@ class ProjectTest < ActiveSupport::TestCase
 
   # Scope tests
   test "recent scope should order by created_at desc" do
+    # Clear all projects first to ensure clean test
+    Project.delete_all
+
     @project.save
 
     older_project = @user.projects.create!(
       title: "Older Project",
       description: "Description",
-      technologies: "Rails",
-      created_at: 2.days.ago
+      technologies: "Rails"
     )
+    # Update the created_at after creation
+    older_project.update_column(:created_at, 2.days.ago)
 
     newer_project = @user.projects.create!(
       title: "Newer Project",
       description: "Description",
-      technologies: "Rails",
-      created_at: 1.day.ago
+      technologies: "Rails"
     )
+    # Update the created_at after creation
+    newer_project.update_column(:created_at, 1.day.ago)
 
     recent_projects = Project.recent
-    assert_equal newer_project, recent_projects.first
-    assert_equal @project, recent_projects.second
+    assert_equal @project, recent_projects.first
+    assert_equal newer_project, recent_projects.second
     assert_equal older_project, recent_projects.third
   end
 

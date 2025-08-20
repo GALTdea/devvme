@@ -10,7 +10,10 @@ class Project < ApplicationRecord
     draft: 0,
     published: 1,
     archived: 2
-  }
+  }, default: :draft
+
+  # Default values
+  after_initialize :set_defaults, if: :new_record?
 
   # Validations
   validates :title, presence: true, length: { maximum: 100 }
@@ -18,7 +21,7 @@ class Project < ApplicationRecord
   validates :technologies, presence: true, length: { maximum: 500 }
 
   validates :github_url, :demo_url,
-            format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]),
+            format: { with: /\A(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\z/i,
                      message: "must be a valid URL" },
             allow_blank: true
 
@@ -31,6 +34,12 @@ class Project < ApplicationRecord
   before_save :normalize_urls
 
   private
+
+  # Set default values for new records
+  def set_defaults
+    self.featured ||= false
+    self.status ||= :draft
+  end
 
   # Normalize URLs by adding https:// prefix if missing
   # This ensures all URLs are properly formatted for external links

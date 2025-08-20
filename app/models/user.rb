@@ -37,7 +37,7 @@ class User < ApplicationRecord
   validates :bio, length: { maximum: 500 }
 
   validates :github_url, :linkedin_url, :website_url,
-            format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]),
+            format: { with: /\A(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\z/i,
                      message: "must be a valid URL" },
             allow_blank: true
 

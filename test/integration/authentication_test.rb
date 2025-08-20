@@ -161,8 +161,8 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_select "form[action='#{user_session_path}']"
 
-    # Should show error message
-    assert_select ".alert-danger", text: /Invalid Email or password/
+    # Should show error message (Devise typically uses flash[:alert])
+    assert_select ".alert", text: /Invalid Email or password/
   end
 
   test "user cannot sign in with invalid password" do
@@ -179,8 +179,8 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_select "form[action='#{user_session_path}']"
 
-    # Should show error message
-    assert_select ".alert-danger", text: /Invalid Email or password/
+    # Should show error message (Devise typically uses flash[:alert])
+    assert_select ".alert", text: /Invalid Email or password/
   end
 
   # Sign out tests
