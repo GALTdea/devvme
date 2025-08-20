@@ -29,14 +29,14 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     published_project = @user.projects.create!(
       title: "Published Project",
       description: "A published project",
-      technologies: "Rails, Ruby",
+      technologies_used: ["Rails", "Ruby"],
       status: "published"
     )
 
     draft_project = @user.projects.create!(
       title: "Draft Project",
       description: "A draft project",
-      technologies: "Rails, Ruby",
+      technologies_used: ["Rails", "Ruby"],
       status: "draft"
     )
 
@@ -87,7 +87,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     old_project = @user.projects.create!(
       title: "Old Project",
       description: "An old project",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "published",
       created_at: 2.days.ago
     )
@@ -95,7 +95,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     new_project = @user.projects.create!(
       title: "New Project",
       description: "A new project",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "published",
       created_at: 1.day.ago
     )
@@ -119,14 +119,14 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     published_project = @user.projects.create!(
       title: "Published Project",
       description: "A published project",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "published"
     )
 
     draft_project = @user.projects.create!(
       title: "Draft Project",
       description: "A draft project",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "draft"
     )
 
@@ -148,7 +148,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
       @user.projects.create!(
         title: "Project #{i + 1}",
         description: "Description #{i + 1}",
-        technologies: "Rails",
+        technologies_used: ["Rails"],
         status: "published"
       )
     end

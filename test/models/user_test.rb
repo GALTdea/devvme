@@ -186,7 +186,7 @@ class UserTest < ActiveSupport::TestCase
     @user.projects.create!(
       title: "Test Project",
       description: "Test Description",
-      technologies: "Rails, Ruby",
+      technologies_used: ["Rails", "Ruby"],
       status: "published"
     )
 
@@ -220,7 +220,7 @@ class UserTest < ActiveSupport::TestCase
     @user.projects.create!(
       title: "Project 1",
       description: "Description 1",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "published"
     )
 
@@ -233,14 +233,14 @@ class UserTest < ActiveSupport::TestCase
     @user.projects.create!(
       title: "Draft Project",
       description: "Description",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "draft"
     )
 
     @user.projects.create!(
       title: "Published Project",
       description: "Description",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "published"
     )
 
@@ -278,7 +278,7 @@ class UserTest < ActiveSupport::TestCase
     old_project = @user.projects.create!(
       title: "Old Project",
       description: "Description",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "published",
       created_at: 2.days.ago
     )
@@ -286,7 +286,7 @@ class UserTest < ActiveSupport::TestCase
     new_project = @user.projects.create!(
       title: "New Project",
       description: "Description",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "published",
       created_at: 1.day.ago
     )
@@ -294,7 +294,7 @@ class UserTest < ActiveSupport::TestCase
     draft_project = @user.projects.create!(
       title: "Draft Project",
       description: "Description",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "draft"
     )
 

@@ -11,7 +11,7 @@ class ProjectTest < ActiveSupport::TestCase
     @project = @user.projects.build(
       title: "Test Project",
       description: "A test project description",
-      technologies: "Rails, Ruby, PostgreSQL",
+      technologies_used: ["Rails", "Ruby", "PostgreSQL"],
       status: "published"
     )
   end
@@ -34,9 +34,9 @@ class ProjectTest < ActiveSupport::TestCase
   end
 
   test "should require technologies" do
-    @project.technologies = nil
+    @project.technologies_used = []
     assert_not @project.valid?
-    assert_includes @project.errors[:technologies], "can't be blank"
+    assert_includes @project.errors[:technologies_used], "must include at least one technology"
   end
 
   test "should require user" do
@@ -59,29 +59,36 @@ class ProjectTest < ActiveSupport::TestCase
   end
 
   test "should enforce technologies maximum length" do
-    @project.technologies = "a" * 501
+    long_tech = "a" * 51
+    @project.technologies_used = [long_tech]  # Each tech limited to 50 chars
     assert_not @project.valid?
-    assert_includes @project.errors[:technologies], "is too long (maximum is 500 characters)"
+    assert_includes @project.errors[:technologies_used], "technology '#{long_tech}' is too long (maximum 50 characters)"
+  end
+
+  test "should enforce maximum number of technologies" do
+    @project.technologies_used = (1..11).map { |i| "Tech#{i}" }  # 11 technologies, max is 10
+    assert_not @project.valid?
+    assert_includes @project.errors[:technologies_used], "too many technologies (maximum 10)"
   end
 
   # URL validation tests
-  test "should validate github_url format" do
+  test "should validate live_url format" do
     invalid_urls = [ "not-a-url", "ftp://example.com", "javascript:alert('xss')" ]
 
     invalid_urls.each do |invalid_url|
-      @project.github_url = invalid_url
-      assert_not @project.valid?, "#{invalid_url} should be invalid for github_url"
-      assert_includes @project.errors[:github_url], "must be a valid URL"
+      @project.live_url = invalid_url
+      assert_not @project.valid?, "#{invalid_url} should be invalid for live_url"
+      assert_includes @project.errors[:live_url], "must be a valid URL"
     end
   end
 
-  test "should validate demo_url format" do
+  test "should validate source_code_url format" do
     invalid_urls = [ "not-a-url", "ftp://example.com", "javascript:alert('xss')" ]
 
     invalid_urls.each do |invalid_url|
-      @project.demo_url = invalid_url
-      assert_not @project.valid?, "#{invalid_url} should be invalid for demo_url"
-      assert_includes @project.errors[:demo_url], "must be a valid URL"
+      @project.source_code_url = invalid_url
+      assert_not @project.valid?, "#{invalid_url} should be invalid for source_code_url"
+      assert_includes @project.errors[:source_code_url], "must be a valid URL"
     end
   end
 
@@ -89,35 +96,35 @@ class ProjectTest < ActiveSupport::TestCase
     valid_urls = [ "https://example.com", "http://example.com", "https://subdomain.example.com/path" ]
 
     valid_urls.each do |valid_url|
-      @project.github_url = valid_url
-      @project.demo_url = valid_url
+      @project.live_url = valid_url
+      @project.source_code_url = valid_url
       assert @project.valid?, "#{valid_url} should be valid"
     end
   end
 
   test "should allow blank URLs" do
-    @project.github_url = ""
-    @project.demo_url = ""
+    @project.live_url = ""
+    @project.source_code_url = ""
     assert @project.valid?
   end
 
   # URL normalization tests
   test "should normalize URLs on save" do
-    @project.github_url = "github.com/user/repo"
-    @project.demo_url = "example.com"
+    @project.live_url = "github.com/user/repo"
+    @project.source_code_url = "example.com"
     @project.save
 
-    assert_equal "https://github.com/user/repo", @project.github_url
-    assert_equal "https://example.com", @project.demo_url
+    assert_equal "https://github.com/user/repo", @project.live_url
+    assert_equal "https://example.com", @project.source_code_url
   end
 
   test "should not modify URLs that already have protocol" do
-    @project.github_url = "https://github.com/user/repo"
-    @project.demo_url = "http://example.com"
+    @project.live_url = "https://github.com/user/repo"
+    @project.source_code_url = "http://example.com"
     @project.save
 
-    assert_equal "https://github.com/user/repo", @project.github_url
-    assert_equal "http://example.com", @project.demo_url
+    assert_equal "https://github.com/user/repo", @project.live_url
+    assert_equal "http://example.com", @project.source_code_url
   end
 
   # Status enum tests
@@ -176,7 +183,7 @@ class ProjectTest < ActiveSupport::TestCase
     older_project = @user.projects.create!(
       title: "Older Project",
       description: "Description",
-      technologies: "Rails"
+      technologies_used: ["Rails"]
     )
     # Update the created_at after creation
     older_project.update_column(:created_at, 2.days.ago)
@@ -184,7 +191,7 @@ class ProjectTest < ActiveSupport::TestCase
     newer_project = @user.projects.create!(
       title: "Newer Project",
       description: "Description",
-      technologies: "Rails"
+      technologies_used: ["Rails"]
     )
     # Update the created_at after creation
     newer_project.update_column(:created_at, 1.day.ago)
@@ -201,14 +208,14 @@ class ProjectTest < ActiveSupport::TestCase
     featured_project = @user.projects.create!(
       title: "Featured Project",
       description: "Description",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       featured: true
     )
 
     regular_project = @user.projects.create!(
       title: "Regular Project",
       description: "Description",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       featured: false
     )
 
@@ -224,14 +231,14 @@ class ProjectTest < ActiveSupport::TestCase
     draft_project = @user.projects.create!(
       title: "Draft Project",
       description: "Description",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "draft"
     )
 
     archived_project = @user.projects.create!(
       title: "Archived Project",
       description: "Description",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "archived"
     )
 
@@ -241,12 +248,83 @@ class ProjectTest < ActiveSupport::TestCase
     assert_not_includes published_projects, archived_project
   end
 
-  # Featured attribute tests
-  test "should default featured to false" do
-    new_project = Project.new
-    assert_equal false, new_project.featured
+  test "by_display_order scope should order by display_order" do
+    # Clear projects and create in specific order
+    Project.delete_all
+
+    project1 = @user.projects.create!(
+      title: "Third", description: "Desc", technologies_used: ["Rails"], display_order: 3
+    )
+    project2 = @user.projects.create!(
+      title: "First", description: "Desc", technologies_used: ["Rails"], display_order: 1
+    )
+    project3 = @user.projects.create!(
+      title: "Second", description: "Desc", technologies_used: ["Rails"], display_order: 2
+    )
+
+    ordered_projects = Project.by_display_order
+    assert_equal [project2, project3, project1], ordered_projects.to_a
   end
 
+  test "for_user scope should filter by user" do
+    other_user = User.create!(email: "other@example.com", password: "password123", username: "otheruser")
+    @project.save!
+
+    other_project = other_user.projects.create!(
+      title: "Other Project", description: "Desc", technologies_used: ["Rails"]
+    )
+
+    user_projects = Project.for_user(@user)
+    assert_includes user_projects, @project
+    assert_not_includes user_projects, other_project
+  end
+
+  # Display order tests
+  test "should auto-set display_order on creation" do
+    # Save the first project
+    @project.save!
+    assert_equal 1, @project.display_order
+
+    # Create second project for same user
+    second_project = @user.projects.create!(
+      title: "Second Project",
+      description: "Another project",
+      technologies_used: ["Vue"]
+    )
+    assert_equal 2, second_project.display_order
+  end
+
+  test "should allow manual display_order setting" do
+    @project.display_order = 5
+    @project.save!
+    assert_equal 5, @project.display_order
+  end
+
+  test "should validate display_order is positive integer" do
+    @project.display_order = 0
+    assert_not @project.valid?
+    assert_includes @project.errors[:display_order], "must be greater than 0"
+
+    @project.display_order = -1
+    assert_not @project.valid?
+    assert_includes @project.errors[:display_order], "must be greater than 0"
+  end
+
+  # Technologies display tests
+  test "should handle technologies_display getter and setter" do
+    @project.technologies_used = ["Rails", "Ruby", "PostgreSQL"]
+    assert_equal "Rails, Ruby, PostgreSQL", @project.technologies_display
+
+    @project.technologies_display = "Vue, Node.js, MongoDB"
+    assert_equal ["Vue", "Node.js", "MongoDB"], @project.technologies_used
+  end
+
+  test "should handle empty technologies_display" do
+    @project.technologies_display = ""
+    assert_equal [], @project.technologies_used
+  end
+
+  # Featured attribute tests - updated to match current model
   test "should allow setting featured to true" do
     @project.featured = true
     assert @project.valid?
@@ -260,7 +338,7 @@ class ProjectTest < ActiveSupport::TestCase
     draft_featured = @user.projects.create!(
       title: "Draft Featured",
       description: "Description",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "draft",
       featured: true
     )
@@ -268,7 +346,7 @@ class ProjectTest < ActiveSupport::TestCase
     published_regular = @user.projects.create!(
       title: "Published Regular",
       description: "Description",
-      technologies: "Rails",
+      technologies_used: ["Rails"],
       status: "published",
       featured: false
     )

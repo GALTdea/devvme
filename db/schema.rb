@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_20_194153) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_20_220143) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -64,6 +64,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_20_194153) do
     t.boolean "featured"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "live_url"
+    t.string "source_code_url"
+    t.integer "display_order"
+    t.json "technologies_used", default: []
+    t.index ["display_order"], name: "index_projects_on_display_order"
+    t.index ["status"], name: "index_projects_on_status"
+    t.index ["user_id", "display_order"], name: "index_projects_on_user_id_and_display_order"
     t.index ["user_id"], name: "index_projects_on_user_id"
   end
 
