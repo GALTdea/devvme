@@ -12,6 +12,9 @@ class User < ApplicationRecord
   # Active Storage association for avatar
   has_one_attached :avatar
 
+  # Project association
+  has_many :projects, dependent: :destroy
+
   # Validations
   validates :username, presence: true,
                       uniqueness: { case_sensitive: false },
@@ -33,6 +36,38 @@ class User < ApplicationRecord
   # Override FriendlyId should_generate_new_friendly_id? to regenerate slug when username changes
   def should_generate_new_friendly_id?
     username_changed? || super
+  end
+
+  # Statistics methods for dashboard
+  def projects_count
+    projects.count
+  end
+
+  def published_projects_count
+    projects.published.count
+  end
+
+  def profile_completion_percentage
+    total_fields = 7
+    completed_fields = 0
+
+    completed_fields += 1 if username.present?
+    completed_fields += 1 if full_name.present?
+    completed_fields += 1 if bio.present?
+    completed_fields += 1 if avatar.attached?
+    completed_fields += 1 if github_url.present?
+    completed_fields += 1 if linkedin_url.present?
+    completed_fields += 1 if website_url.present?
+
+    (completed_fields.to_f / total_fields * 100).round
+  end
+
+  def recent_projects(limit = 3)
+    projects.published.recent.limit(limit)
+  end
+
+  def display_name
+    full_name.present? ? full_name : username
   end
 
   private
