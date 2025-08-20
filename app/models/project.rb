@@ -9,7 +9,7 @@ class Project < ApplicationRecord
   enum :status, {
     draft: 0,
     published: 1,
-    archived: 2,
+    archived: 2
   }
 
   # Validations
@@ -32,6 +32,8 @@ class Project < ApplicationRecord
 
   private
 
+  # Normalize URLs by adding https:// prefix if missing
+  # This ensures all URLs are properly formatted for external links
   def normalize_urls
     normalize_url(:github_url)
     normalize_url(:demo_url)
@@ -41,6 +43,7 @@ class Project < ApplicationRecord
     url = self[field]
     return if url.blank?
 
+    # Add https:// prefix if no protocol is specified
     unless url.start_with?("http://", "https://")
       self[field] = "https://#{url}"
     end

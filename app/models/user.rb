@@ -12,13 +12,15 @@ class User < ApplicationRecord
   # Active Storage association for avatar
   has_one_attached :avatar
 
-  # Avatar image variants
+  # Avatar image variants for different display sizes
+  # Used in navigation and small UI components
   def avatar_thumbnail
-    avatar.variant(resize_to_fill: [50, 50])
+    avatar.variant(resize_to_fill: [ 50, 50 ])
   end
 
+  # Used in profile pages and larger displays
   def avatar_medium
-    avatar.variant(resize_to_fill: [200, 200])
+    avatar.variant(resize_to_fill: [ 200, 200 ])
   end
 
   # Project association
@@ -39,18 +41,20 @@ class User < ApplicationRecord
                      message: "must be a valid URL" },
             allow_blank: true
 
-  # Avatar validations
+  # Avatar validations - ensures uploaded images meet requirements
   validate :avatar_format
 
   def avatar_format
     return unless avatar.attached?
 
+    # Check file type - only allow JPEG and PNG formats
     unless avatar.content_type.in?(%w[image/jpeg image/jpg image/png])
-      errors.add(:avatar, 'must be a JPEG or PNG image')
+      errors.add(:avatar, "must be a JPEG or PNG image")
     end
 
+    # Check file size - limit to 5MB to prevent large uploads
     if avatar.byte_size > 5.megabytes
-      errors.add(:avatar, 'must be less than 5MB')
+      errors.add(:avatar, "must be less than 5MB")
     end
   end
 
@@ -62,7 +66,7 @@ class User < ApplicationRecord
     username_changed? || super
   end
 
-  # Statistics methods for dashboard
+  # Statistics methods for dashboard display
   def projects_count
     projects.count
   end
@@ -71,10 +75,13 @@ class User < ApplicationRecord
     projects.published.count
   end
 
+  # Calculates profile completion percentage based on filled fields
+  # Used to encourage users to complete their profiles
   def profile_completion_percentage
     total_fields = 7
     completed_fields = 0
 
+    # Count each completed profile field
     completed_fields += 1 if username.present?
     completed_fields += 1 if full_name.present?
     completed_fields += 1 if bio.present?
@@ -83,6 +90,7 @@ class User < ApplicationRecord
     completed_fields += 1 if linkedin_url.present?
     completed_fields += 1 if website_url.present?
 
+    # Return percentage rounded to nearest integer
     (completed_fields.to_f / total_fields * 100).round
   end
 
@@ -96,6 +104,8 @@ class User < ApplicationRecord
 
   private
 
+  # Normalize URLs by adding https:// prefix if missing
+  # This ensures all URLs are properly formatted for external links
   def normalize_urls
     normalize_url(:github_url)
     normalize_url(:linkedin_url)
@@ -106,6 +116,7 @@ class User < ApplicationRecord
     url = self[field]
     return if url.blank?
 
+    # Add https:// prefix if no protocol is specified
     unless url.start_with?("http://", "https://")
       self[field] = "https://#{url}"
     end

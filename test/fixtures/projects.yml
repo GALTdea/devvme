@@ -1,21 +1,21 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  title: MyString
-  description: MyText
-  technologies: MyText
-  github_url: MyString
-  demo_url: MyString
+  title: Test Project One
+  description: This is a test project description for project one
+  technologies: Ruby on Rails, PostgreSQL, Tailwind CSS
+  github_url: https://github.com/user1/project-one
+  demo_url: https://project-one.herokuapp.com
   user: one
-  status: 1
+  status: published
   featured: false
 
 two:
-  title: MyString
-  description: MyText
-  technologies: MyText
-  github_url: MyString
-  demo_url: MyString
+  title: Test Project Two
+  description: This is a test project description for project two
+  technologies: React, Node.js, MongoDB
+  github_url: https://github.com/user2/project-two
+  demo_url: https://project-two.netlify.app
   user: two
-  status: 1
-  featured: false
+  status: published
+  featured: true
