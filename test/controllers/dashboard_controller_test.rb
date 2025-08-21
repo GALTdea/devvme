@@ -44,15 +44,15 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Should display projects count
-    assert_select ".stats", text: /2.*Projects?/ # Total projects
-    assert_select ".stats", text: /1.*Published/ # Published projects
+    assert_select "dd", text: /2/ # Total projects
+    assert_select "dd", text: /1/ # Published projects
 
     # Should display profile completion
-    assert_select ".profile-completion"
+    assert_select "dd", text: /#{@user.profile_completion_percentage}%/
 
     # Should display recent projects section
-    assert_select ".recent-projects"
-    assert_select ".project-card", text: /Published Project/
+    assert_select "h2", text: /Recent Projects/
+    assert_select "h3", text: /Published Project/
   end
 
   test "should display welcome message for new users" do
@@ -66,8 +66,8 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     get dashboard_path
     assert_response :success
 
-    # Should show welcome message or onboarding hints
-    assert_select ".welcome, .getting-started"
+    # Should show welcome message
+    assert_select "h1", text: /Welcome back/
   end
 
   test "should display profile completion percentage" do
@@ -77,7 +77,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
 
     # Should show profile completion
     completion_percentage = @user.profile_completion_percentage
-    assert_select ".profile-completion", text: /#{completion_percentage}%/
+    assert_select "dd", text: /#{completion_percentage}%/
   end
 
   test "should show recent projects in correct order" do
@@ -134,10 +134,11 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Should show published project
-    assert_select ".recent-projects", text: /Published Project/
+    assert_select "h2", text: /Recent Projects/
+    assert_select "h3", text: /Published Project/
 
     # Should not show draft project
-    assert_no_selector ".recent-projects", text: /Draft Project/
+    assert_select "h3", text: /Draft Project/, count: 0
   end
 
   test "should limit recent projects to 3" do
@@ -157,7 +158,10 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Should only show 3 projects in recent section
-    assert_select ".recent-projects .project-card", count: 3
+    # Find the Recent Projects section and count projects within it
+    recent_section = css_select("div.mb-8").find { |div| div.text.include?("Recent Projects") }
+    project_cards_in_recent = recent_section.css(".bg-white")
+    assert_equal 3, project_cards_in_recent.length
   end
 
   private
