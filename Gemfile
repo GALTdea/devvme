@@ -28,6 +28,10 @@ gem "devise", "~> 4.9.4"
 # Friendly URLs for Rails models [https://github.com/norman/friendly_id]
 gem "friendly_id", "~> 5.5"
 
+# Markdown processing with syntax highlighting
+gem "redcarpet", "~> 3.6"
+gem "rouge", "~> 4.2"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

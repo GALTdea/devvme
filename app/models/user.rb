@@ -26,6 +26,9 @@ class User < ApplicationRecord
   # Project association
   has_many :projects, dependent: :destroy
 
+  # Blog post association
+  has_many :blog_posts, dependent: :destroy
+
   # Validations
   validates :username, presence: true,
                       uniqueness: { case_sensitive: false },
