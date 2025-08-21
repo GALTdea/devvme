@@ -1,19 +1,76 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  title: MyString
-  content: MyText
-  excerpt: MyText
-  published: false
-  published_at: 2025-08-21 13:38:02
-  slug: MyString
+published_post:
+  title: "Getting Started with Ruby on Rails"
+  content: |
+    # Getting Started with Ruby on Rails
+    
+    Ruby on Rails is a powerful web application framework that makes development fast and fun.
+    
+    ## Key Features
+    
+    - Convention over Configuration
+    - DRY (Don't Repeat Yourself)
+    - MVC Architecture
+    - Active Record ORM
+    
+    ```ruby
+    class User < ApplicationRecord
+      has_many :posts
+    end
+    ```
+    
+    This is a great framework for building modern web applications.
+  excerpt: "Learn the basics of Ruby on Rails framework and why it's great for web development."
+  published: true
+  published_at: <%= 1.week.ago %>
+  slug: "getting-started-with-ruby-on-rails"
   user: one
 
-two:
-  title: MyString
-  content: MyText
-  excerpt: MyText
+draft_post:
+  title: "Advanced Rails Techniques"
+  content: |
+    # Advanced Rails Techniques
+    
+    This post covers advanced techniques in Rails development.
+    
+    ## Topics Covered
+    
+    - Service Objects
+    - Background Jobs
+    - Caching Strategies
+    - Database Optimization
+    
+    More content coming soon...
+  excerpt: "Explore advanced techniques for building scalable Rails applications."
   published: false
-  published_at: 2025-08-21 13:38:02
-  slug: MyString
+  published_at: 
+  slug: "advanced-rails-techniques"
+  user: one
+
+another_published_post:
+  title: "JavaScript and Rails Integration"
+  content: |
+    # JavaScript and Rails Integration
+    
+    Learn how to integrate JavaScript with your Rails application using Stimulus and Turbo.
+    
+    ## Hotwire Components
+    
+    - **Turbo**: Fast navigation without full page reloads
+    - **Stimulus**: Modest JavaScript framework
+    
+    ```javascript
+    import { Controller } from "@hotwired/stimulus"
+    
+    export default class extends Controller {
+      connect() {
+        console.log("Hello from Stimulus!")
+      }
+    }
+    ```
+  excerpt: "Discover how to use Hotwire to create dynamic Rails applications."
+  published: true
+  published_at: <%= 3.days.ago %>
+  slug: "javascript-and-rails-integration"
   user: two

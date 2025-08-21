@@ -67,7 +67,7 @@ class BlogPostsController < ApplicationController
         redirect_to @blog_post, notice: 'Blog post draft was saved successfully.'
       end
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -94,7 +94,7 @@ class BlogPostsController < ApplicationController
         redirect_to @blog_post, notice: 'Blog post was updated successfully.'
       end
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
