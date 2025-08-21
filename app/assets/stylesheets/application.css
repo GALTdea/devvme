@@ -23,3 +23,184 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+/* Sortable animation classes */
+.sortable-ghost {
+    opacity: 0.4;
+    background: #f3f4f6;
+    border: 2px dashed #d1d5db;
+    transform: rotate(5deg);
+}
+
+.sortable-drag {
+    transform: rotate(5deg);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.sortable-chosen {
+    transform: scale(1.02);
+}
+
+.sortable-fallback {
+    display: none;
+}
+
+.dragging {
+    z-index: 999;
+    transform: rotate(5deg);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.sorting-active .sorting-inactive {
+    opacity: 0.6;
+    transform: scale(0.98);
+}
+
+.drop-target {
+    background-color: #eff6ff;
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+}
+
+.show-drop-zones [data-sortable-item] {
+    border: 2px dashed transparent;
+    transition: all 0.2s ease;
+}
+
+.show-drop-zones [data-sortable-item]:hover {
+    border-color: #3b82f6;
+    background-color: #f8fafc;
+}
+
+.updating-order {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.updating-order::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.1) 50%, transparent 100%);
+    animation: loading-sweep 1.5s infinite;
+}
+
+@keyframes loading-sweep {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Form loading states */
+.loading {
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.loading:hover {
+    transform: none !important;
+}
+
+/* Form section animations */
+.form-section {
+    transition: all 0.3s ease-out;
+}
+
+/* Button loading animation */
+.btn-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+    animation: button-loading 1.5s infinite;
+}
+
+@keyframes button-loading {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+/* Image upload animations */
+.image-upload-zone {
+    transition: all 0.3s ease-out;
+}
+
+.image-upload-zone:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.image-preview-enter {
+    animation: imagePreviewEnter 0.4s ease-out;
+}
+
+@keyframes imagePreviewEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Error and success states */
+.error-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+.success-pulse {
+    animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}

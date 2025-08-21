@@ -3,19 +3,21 @@
 one:
   title: Test Project One
   description: This is a test project description for project one
-  technologies: Ruby on Rails, PostgreSQL, Tailwind CSS
-  github_url: https://github.com/user1/project-one
-  demo_url: https://project-one.herokuapp.com
+  technologies_used: ["Ruby on Rails", "PostgreSQL", "Tailwind CSS"]
+  source_code_url: https://github.com/user1/project-one
+  live_url: https://project-one.herokuapp.com
   user: one
   status: published
   featured: false
+  display_order: 1
 
 two:
   title: Test Project Two
   description: This is a test project description for project two
-  technologies: React, Node.js, MongoDB
-  github_url: https://github.com/user2/project-two
-  demo_url: https://project-two.netlify.app
+  technologies_used: ["React", "Node.js", "MongoDB"]
+  source_code_url: https://github.com/user2/project-two
+  live_url: https://project-two.netlify.app
   user: two
   status: published
   featured: true
+  display_order: 2

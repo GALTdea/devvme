@@ -1,6 +1,11 @@
 <%= form_with model: project, local: true, multipart: true, 
     class: "max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6",
-    data: { controller: "project-form" } do |form| %>
+    data: { 
+      controller: "project-form loading notification", 
+      project_form_target: "form",
+      loading_target: "form",
+      action: "submit->loading#showFormLoading"
+    } do |form| %>
   
   <% if project.errors.any? %>
     <div class="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
@@ -27,7 +32,7 @@
   <% end %>
 
   <!-- Basic Information Section -->
-  <div class="mb-8">
+  <div class="form-section mb-8">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
     
     <div class="grid grid-cols-1 gap-6">
@@ -52,7 +57,7 @@
   </div>
 
   <!-- Media Section -->
-  <div class="mb-8">
+  <div class="form-section mb-8">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Project Images</h3>
     
     <!-- Thumbnail Upload -->
@@ -127,7 +132,7 @@
   </div>
 
   <!-- Technology Tags Section -->
-  <div class="mb-8">
+  <div class="form-section mb-8">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Technologies Used</h3>
     
     <div>
@@ -165,7 +170,7 @@
   </div>
 
   <!-- URLs Section -->
-  <div class="mb-8">
+  <div class="form-section mb-8">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Project Links</h3>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -188,7 +193,7 @@
   </div>
 
   <!-- Project Settings Section -->
-  <div class="mb-8">
+  <div class="form-section mb-8">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Project Settings</h3>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -234,10 +239,18 @@
     <div class="flex items-center gap-3">
       <% if project.persisted? %>
         <%= form.submit "Update Project", 
-            class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200",
+            data: { 
+              project_form_target: "submitButton",
+              loading_target: "button"
+            } %>
       <% else %>
         <%= form.submit "Create Project", 
-            class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200",
+            data: { 
+              project_form_target: "submitButton",
+              loading_target: "button"
+            } %>
       <% end %>
     </div>
   </div>

@@ -20,7 +20,7 @@ class ProjectsController < ApplicationController
     if @project.save
       redirect_to @project, notice: "Project was successfully created."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -31,7 +31,7 @@ class ProjectsController < ApplicationController
     if @project.update(project_params)
       redirect_to @project, notice: "Project was successfully updated."
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -46,7 +46,7 @@ class ProjectsController < ApplicationController
     if Project.reorder_for_user(current_user, project_ids)
       render json: { status: "success", message: "Projects reordered successfully" }
     else
-      render json: { status: "error", message: "Failed to reorder projects" }, status: :unprocessable_entity
+      render json: { status: "error", message: "Failed to reorder projects" }, status: :unprocessable_content
     end
   end
 
