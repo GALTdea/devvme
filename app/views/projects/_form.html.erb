@@ -138,11 +138,12 @@
         
         <!-- Hidden field for form submission -->
         <%= form.hidden_field :technologies_display, 
+            value: project.technologies_display,
             data: { technology_tags_target: "hiddenField" } %>
         
         <!-- Tag input area -->
         <div class="min-h-[42px] w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus-within:ring-blue-500 focus-within:border-blue-500 bg-white cursor-text"
-             data-technology_tags_target="container"
+             data-technology-tags-target="container"
              data-action="click->technology-tags#focusInput">
           
           <!-- Tags display -->

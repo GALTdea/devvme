@@ -6,7 +6,6 @@ export default class extends Controller {
     static values = { technologies: Array }
 
     connect() {
-        console.log("Technology tags controller connected")
         this.tags = this.technologiesValue || []
         this.renderTags()
         this.updateHiddenField()
@@ -50,6 +49,7 @@ export default class extends Controller {
         // Check for duplicates
         if (this.tags.includes(value)) {
             this.inputTarget.value = ''
+            this.showError("Technology already added")
             return
         }
 
@@ -111,7 +111,9 @@ export default class extends Controller {
     }
 
     updateHiddenField() {
-        this.hiddenFieldTarget.value = this.tags.join(', ')
+        if (this.hasHiddenFieldTarget) {
+            this.hiddenFieldTarget.value = this.tags.join(', ')
+        }
     }
 
     showError(message) {
