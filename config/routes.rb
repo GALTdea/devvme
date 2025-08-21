@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
-  resources :projects
+  resources :projects do
+    patch :reorder, on: :collection
+  end
   # Dashboard routes
   get "dashboard", to: "dashboard#index"
   devise_for :users

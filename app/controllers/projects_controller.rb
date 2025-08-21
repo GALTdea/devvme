@@ -40,6 +40,16 @@ class ProjectsController < ApplicationController
     redirect_to projects_path, notice: "Project was successfully deleted."
   end
 
+  def reorder
+    project_ids = params[:project_ids]
+
+    if Project.reorder_for_user(current_user, project_ids)
+      render json: { status: "success", message: "Projects reordered successfully" }
+    else
+      render json: { status: "error", message: "Failed to reorder projects" }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_project

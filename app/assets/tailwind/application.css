@@ -65,3 +65,160 @@
 
 /* Flowbite CDN import */
 @import url('https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css');
+
+/* Drag and Drop Styles */
+.project-card {
+    transition: all 0.3s ease;
+}
+
+.project-card:hover .drag-handle {
+    opacity: 0.6 !important;
+}
+
+/* Sortable States */
+.sortable-ghost {
+    opacity: 0.4;
+    background: #f0f9ff;
+    border: 2px dashed #3b82f6;
+    transform: rotate(2deg);
+}
+
+.sortable-drag {
+    opacity: 1;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: rotate(-2deg) scale(1.05);
+    z-index: 1000;
+}
+
+.sortable-chosen {
+    cursor: grabbing !important;
+}
+
+.sortable-fallback {
+    opacity: 0.8;
+    background: #ffffff;
+    border: 2px solid #3b82f6;
+    border-radius: 0.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Dragging state */
+.dragging {
+    opacity: 0.9;
+    transform: rotate(-2deg) scale(1.02);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* When sorting is active */
+.sorting-active {
+    position: relative;
+}
+
+.sorting-active .project-card:not(.dragging) {
+    transition: all 0.3s ease;
+}
+
+.sorting-inactive {
+    opacity: 0.6;
+    transform: scale(0.98);
+}
+
+/* Drop target feedback */
+.drop-target {
+    transform: scale(1.02);
+    background: #f0f9ff;
+    border-color: #3b82f6;
+}
+
+/* Drop zones */
+.show-drop-zones .project-card {
+    position: relative;
+}
+
+.show-drop-zones .project-card::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 2px dashed transparent;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+.show-drop-zones .project-card:hover::after {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+}
+
+/* Update order loading state */
+.updating-order {
+    position: relative;
+    pointer-events: none;
+}
+
+.updating-order::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(1px);
+    z-index: 100;
+    border-radius: 0.5rem;
+}
+
+.updating-order::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2rem;
+    height: 2rem;
+    margin-left: -1rem;
+    margin-top: -1rem;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 101;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Touch device improvements */
+@media (pointer: coarse) {
+    .drag-handle {
+        opacity: 0.6 !important;
+        padding: 0.5rem;
+        margin: -0.5rem;
+    }
+
+    .project-card {
+        touch-action: manipulation;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sortable-drag {
+        transform: rotate(-1deg) scale(1.02);
+    }
+
+    .dragging {
+        transform: rotate(-1deg) scale(1.01);
+    }
+}

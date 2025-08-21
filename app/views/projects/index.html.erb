@@ -16,10 +16,28 @@
     </div>
 
     <% if @projects.any? %>
+      <!-- Drag-and-Drop Instructions -->
+      <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div class="flex items-start">
+          <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div>
+            <h3 class="text-sm font-medium text-blue-800 mb-1">Reorder Your Projects</h3>
+            <p class="text-sm text-blue-700">Drag and drop your project cards to reorder them. Changes are saved automatically.</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Projects Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+           data-controller="sortable"
+           data-sortable-url-value="<%= reorder_projects_path %>"
+           data-sortable-animation-value="200">
         <% @projects.each do |project| %>
-          <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+          <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 project-card"
+               data-sortable-target="item"
+               data-project-id="<%= project.id %>">
             <!-- Project Image -->
             <div class="relative h-48 bg-gray-200">
               <% if project.thumbnail.attached? %>
@@ -64,7 +82,13 @@
             </div>
 
             <!-- Project Content -->
-            <div class="p-6">
+            <div class="p-6 relative">
+              <!-- Drag Handle -->
+              <div class="absolute top-2 right-2 opacity-30 hover:opacity-60 cursor-move transition-opacity drag-handle" title="Drag to reorder">
+                <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M7 2a2 2 0 11-4 0 2 2 0 014 0zM7 8a2 2 0 11-4 0 2 2 0 014 0zM7 14a2 2 0 11-4 0 2 2 0 014 0zM17 2a2 2 0 11-4 0 2 2 0 014 0zM17 8a2 2 0 11-4 0 2 2 0 014 0zM17 14a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+              </div>
               <h3 class="text-lg font-semibold text-gray-900 mb-2">
                 <%= link_to project.title, project, class: "hover:text-blue-600 transition-colors" %>
               </h3>

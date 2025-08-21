@@ -356,4 +356,66 @@ class ProjectTest < ActiveSupport::TestCase
     assert_not_includes published_featured, draft_featured
     assert_not_includes published_featured, published_regular
   end
+
+  test "reorder_for_user should update display_order correctly" do
+    user = users(:one)
+    project1 = Project.create!(
+      title: "First Project",
+      description: "First project description",
+      technologies_used: ["Ruby", "Rails"],
+      user: user,
+      display_order: 1
+    )
+    project2 = Project.create!(
+      title: "Second Project",
+      description: "Second project description",
+      technologies_used: ["JavaScript", "React"],
+      user: user,
+      display_order: 2
+    )
+    project3 = Project.create!(
+      title: "Third Project",
+      description: "Third project description",
+      technologies_used: ["Python", "Django"],
+      user: user,
+      display_order: 3
+    )
+
+    # Reorder: project3, project1, project2
+    new_order = [project3.id, project1.id, project2.id]
+    result = Project.reorder_for_user(user, new_order)
+
+    assert result, "Reorder should succeed"
+
+    # Reload and check new order
+    project1.reload
+    project2.reload
+    project3.reload
+
+    assert_equal 2, project1.display_order
+    assert_equal 3, project2.display_order
+    assert_equal 1, project3.display_order
+  end
+
+  test "reorder_for_user should reject invalid project ids" do
+    user = users(:one)
+    result = Project.reorder_for_user(user, [999, 1000])
+    assert_not result, "Reorder should fail with invalid IDs"
+  end
+
+  test "reorder_for_user should reject projects not owned by user" do
+    user1 = users(:one)
+    user2 = users(:two)
+
+    project = Project.create!(
+      title: "User 2 Project",
+      description: "Project belonging to user 2",
+      technologies_used: ["Ruby"],
+      user: user2,
+      display_order: 1
+    )
+
+    result = Project.reorder_for_user(user1, [project.id])
+    assert_not result, "Reorder should fail for projects not owned by user"
+  end
 end

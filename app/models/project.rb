@@ -33,6 +33,29 @@ class Project < ApplicationRecord
   scope :published, -> { where(status: :published) }
   scope :for_user, ->(user) { where(user: user) }
 
+  # Class method to reorder projects for a user
+  def self.reorder_for_user(user, project_ids)
+    return false if user.blank? || project_ids.blank?
+
+    # Ensure all project IDs belong to the user
+    user_project_ids = user.projects.pluck(:id)
+    valid_ids = project_ids.select { |id| user_project_ids.include?(id.to_i) }
+
+    return false if valid_ids.empty?
+
+    # Update display_order for each project
+    ActiveRecord::Base.transaction do
+      valid_ids.each_with_index do |project_id, index|
+        user.projects.where(id: project_id).update_all(display_order: index + 1)
+      end
+    end
+
+    true
+  rescue StandardError => e
+    Rails.logger.error "Failed to reorder projects: #{e.message}"
+    false
+  end
+
   # Callbacks
   before_validation :set_display_order, on: :create
   before_save :normalize_urls
