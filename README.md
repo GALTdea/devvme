@@ -1,290 +1,327 @@
-# DevVme - Developer Portfolio Platform
+# DevvMe - Developer Portfolio Platform
 
-A modern developer portfolio platform built with Ruby on Rails 8, featuring user authentication, project management, and responsive design.
+[![Ruby on Rails](https://img.shields.io/badge/Ruby%20on%20Rails-8.0.2-red.svg)](https://rubyonrails.org/)
+[![Ruby](https://img.shields.io/badge/Ruby-3.4.1-red.svg)](https://www.ruby-lang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue.svg)](https://www.postgresql.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-Styling-38B2AC.svg)](https://tailwindcss.com/)
+[![Hotwire](https://img.shields.io/badge/Hotwire-SPA--like-orange.svg)](https://hotwired.dev/)
 
-## Features
+DevvMe is a modern, feature-rich platform that empowers developers to create stunning professional portfolios. Built with Rails 8 and the latest web technologies, it provides an intuitive interface for showcasing projects, skills, and professional experience.
 
-- **User Authentication**: Secure sign up/sign in with Devise
-- **Profile Management**: Complete user profiles with avatars, bio, and social links
-- **Project Showcase**: Create and manage portfolio projects with images
-- **Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
-- **Modern UI**: Built with Tailwind CSS and Flowbite components
-- **SEO-Friendly URLs**: Using FriendlyId for clean URLs
-- **Image Processing**: Active Storage with image variants for different sizes
-- **Real-time Updates**: Hotwire/Turbo for fast, modern web experience
+## 🚀 Features
 
-## Technology Stack
+### Portfolio Management
+- **Project Showcase**: Create detailed project entries with descriptions, technologies, images, and live demos
+- **Drag & Drop Reordering**: Easily reorder projects with intuitive drag-and-drop functionality
+- **Status Management**: Organize projects as draft, published, or archived
+- **Image Uploads**: Upload project images and thumbnails with Active Storage
+- **URL Validation**: Automatic URL normalization and validation for project links
+
+### User Experience
+- **Professional Profiles**: Comprehensive user profiles with avatars, bio, and social links
+- **Dashboard Analytics**: Track portfolio performance with detailed statistics
+- **Progress Tracking**: Profile completion percentage to encourage full setup
+- **Responsive Design**: Mobile-first design that looks great on all devices
+- **Dark Mode Support**: Built-in dark/light theme switching
+
+### Technical Excellence
+- **Modern Rails 8**: Latest Rails features with Solid Queue for background jobs
+- **Hotwire Integration**: SPA-like experience with Turbo and Stimulus
+- **Performance Optimized**: Database indexing, eager loading, and caching strategies
+- **Security First**: Comprehensive authentication with Devise and security validations
+- **SEO Friendly**: Friendly URLs with FriendlyId gem
+
+## 🛠 Technology Stack
 
 ### Backend
-- **Ruby 3.4.1** - Latest Ruby version
-- **Rails 8.0.2** - Latest Rails framework
-- **PostgreSQL** - Primary database
-- **Devise** - Authentication
+- **Ruby 3.4.1** - Latest Ruby features and performance improvements
+- **Rails 8.0.2** - Modern Rails with enhanced performance
+- **PostgreSQL** - Robust, scalable database solution
+- **Devise** - Flexible authentication system
+- **Active Storage** - File upload and image processing
+- **Solid Queue** - Database-backed job processing (Rails default)
 - **FriendlyId** - SEO-friendly URLs
-- **Active Storage** - File uploads and image processing
-- **Solid Queue** - Background job processing [[memory:3928236]]
 
 ### Frontend
-- **Hotwire (Turbo + Stimulus)** - Modern JavaScript framework
-- **Tailwind CSS 4.1** - Utility-first CSS framework
-- **Flowbite Components v3.1.2** - Pre-built UI components
+- **Hotwire (Turbo + Stimulus)** - Modern, reactive user interface
+- **Tailwind CSS** - Utility-first CSS framework
+- **Flowbite Components** - Professional UI component library
+- **SortableJS** - Drag-and-drop functionality
 - **Responsive Design** - Mobile-first approach
 
-### Development Tools
-- **RuboCop** - Code linting and formatting
-- **Minitest** - Testing framework
-- **Brakeman** - Security scanner
+### DevOps & Deployment
+- **Docker & Kamal** - Containerized deployment
+- **Thruster** - HTTP asset caching and compression
+- **Solid Cache** - Database-backed caching
+- **Image Processing** - Automated image optimization
 
-## Installation & Setup
+## 📋 Prerequisites
 
-### Prerequisites
+- Ruby 3.4.1+
+- Node.js 18+
+- PostgreSQL 14+
+- Redis (optional, for advanced caching)
 
-- Ruby 3.4.1
-- Rails 8.0.2
-- PostgreSQL
-- Node.js (for JavaScript dependencies)
+## 🚀 Quick Start
 
-### Local Development Setup
+### Local Development
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/yourusername/devvme_app.git
    cd devvme_app
    ```
 
 2. **Install dependencies**
    ```bash
-   # Install Ruby gems
    bundle install
-   
-   # Install JavaScript packages
    npm install
    ```
 
-3. **Database setup**
+3. **Setup database**
    ```bash
-   # Create and setup the database
-   bin/rails db:create
+   bin/rails db:setup
    bin/rails db:migrate
-   
-   # Load sample data (development only)
    bin/rails db:seed
    ```
 
 4. **Start the development server**
    ```bash
-   # Option 1: Using the dev script (recommended)
    bin/dev
-   
-   # Option 2: Manual start
-   bin/rails server
    ```
 
-5. **Access the application**
-   - Open your browser to `http://localhost:3000`
-   - Sign up for a new account or use sample accounts from seeds
+5. **Visit the application**
+   Open [http://localhost:3000](http://localhost:3000) in your browser
 
-### Sample Accounts (Development)
+### Docker Development
 
-After running `bin/rails db:seed`, you can use these test accounts:
+```bash
+docker-compose up --build
+```
 
-- **Email**: john@example.com | **Password**: password123
-- **Email**: jane@example.com | **Password**: password123  
-- **Email**: alex@example.com | **Password**: password123
-- **Email**: sarah@example.com | **Password**: password123
-- **Email**: demo@example.com | **Password**: password123
+## 🏗 Project Structure
 
-## Testing
+```
+devvme_app/
+├── app/
+│   ├── controllers/         # Application controllers
+│   ├── models/             # ActiveRecord models
+│   ├── views/              # ERB templates
+│   ├── javascript/         # Stimulus controllers
+│   └── assets/             # CSS and images
+├── config/
+│   ├── environments/       # Environment-specific configs
+│   ├── initializers/       # App initialization
+│   └── deploy.yml          # Kamal deployment config
+├── db/
+│   ├── migrate/           # Database migrations
+│   └── seeds.rb           # Sample data
+└── test/                  # Comprehensive test suite
+```
 
-### Running Tests
+## 🎯 Key Models
+
+### User Model
+- Authentication with Devise
+- Profile information and social links
+- Avatar uploads with Active Storage
+- Profile completion tracking
+- SEO-friendly URLs with FriendlyId
+
+### Project Model
+- Comprehensive project information
+- Technology stack tracking (up to 10 technologies)
+- Status management (draft/published/archived)
+- Image attachments with thumbnails
+- Drag-and-drop reordering
+- URL validation and normalization
+
+## 🎨 UI Components
+
+### Dashboard Features
+- **Statistics Cards**: Project counts, status distribution
+- **Recent Activity**: Latest project updates
+- **Profile Completion**: Progress tracking
+- **Quick Actions**: Fast access to common tasks
+
+### Project Management
+- **Interactive Forms**: Dynamic technology tagging
+- **Image Previews**: Real-time image upload previews
+- **Sortable Lists**: Drag-and-drop project reordering
+- **Status Indicators**: Visual project status management
+
+## 🔒 Security Features
+
+- **Authentication**: Secure user authentication with Devise
+- **Authorization**: User-scoped data access
+- **Input Validation**: Comprehensive model validations
+- **File Upload Security**: Image type and size validation
+- **URL Sanitization**: Automatic URL normalization
+- **CSRF Protection**: Built-in Rails CSRF protection
+
+## 📊 Testing
+
+The application includes comprehensive tests:
 
 ```bash
 # Run all tests
 bin/rails test
 
-# Run specific test files
-bin/rails test test/models/user_test.rb
-bin/rails test test/controllers/dashboard_controller_test.rb
+# Run specific test suites
+bin/rails test:models
+bin/rails test:controllers
+bin/rails test:integration
+bin/rails test:system
 
-# Run tests with coverage
-COVERAGE=true bin/rails test
+# Run with coverage
+bin/rails test:coverage
 ```
 
-### Test Structure
+### Test Coverage
+- **Unit Tests**: Model validations and business logic
+- **Integration Tests**: User workflows and API endpoints
+- **System Tests**: End-to-end user interactions
+- **Security Tests**: Authentication and authorization
 
-- **Model Tests**: Comprehensive validation and business logic tests
-- **Controller Tests**: Authentication and authorization tests
-- **Integration Tests**: End-to-end user flow tests
-- **System Tests**: Browser-based feature tests
+## 🚀 Deployment
 
-## Code Quality
+### Production Deployment with Kamal
 
-### Linting and Formatting
+1. **Configure deployment**
+   ```bash
+   # Edit config/deploy.yml with your server details
+   vim config/deploy.yml
+   ```
+
+2. **Setup secrets**
+   ```bash
+   bin/kamal env push
+   ```
+
+3. **Deploy**
+   ```bash
+   bin/kamal deploy
+   ```
+
+### Environment Variables
 
 ```bash
-# Check code style
-bin/rubocop
+# Required for production
+RAILS_MASTER_KEY=your_master_key
+DATABASE_URL=postgresql://username:password@host:port/database
 
-# Auto-fix style issues
-bin/rubocop -A
-
-# Security scan
-bin/brakeman
+# Optional
+SOLID_QUEUE_IN_PUMA=true
+WEB_CONCURRENCY=2
+JOB_CONCURRENCY=3
 ```
 
-### Code Coverage
+## 🔧 Configuration
 
-Test coverage is tracked using SimpleCov. Run tests with `COVERAGE=true` to generate coverage reports.
-
-## Deployment
-
-### Production Checklist
-
-1. **Environment Variables**
-   ```bash
-   # Required environment variables
-   SECRET_KEY_BASE=<your-secret-key>
-   DATABASE_URL=<your-database-url>
-   RAILS_ENV=production
-   ```
-
-2. **Database Migration**
-   ```bash
-   bin/rails db:migrate RAILS_ENV=production
-   ```
-
-3. **Asset Compilation**
-   ```bash
-   bin/rails assets:precompile RAILS_ENV=production
-   ```
-
-### Deployment Options
-
-- **Heroku**: Ready for Heroku deployment with Procfile
-- **Docker**: Dockerfile included for containerized deployments
-- **Traditional VPS**: Compatible with Capistrano or manual deployment
-
-## Application Structure
-
-### Models
-
-- **User**: Handles authentication, profiles, and user data
-- **Project**: Manages portfolio projects and their metadata
-
-### Controllers
-
-- **HomeController**: Landing page and public content
-- **DashboardController**: User dashboard with statistics
-- **ProfilesController**: Profile management and editing
-- **Devise Controllers**: Authentication flows
-
-### Key Features Implementation
-
-#### User Authentication
-- Devise configuration with custom views
-- Username-based authentication alongside email
-- Profile completion tracking
-- Social media link validation and normalization
-
-#### Project Management
-- File upload with Active Storage
-- Image variants for different display sizes
-- Project status management (draft, published, archived)
-- URL validation and normalization
-
-#### SEO & Performance
-- FriendlyId for SEO-friendly URLs
-- Image optimization with variants
-- Responsive images with appropriate sizing
-- Meta tags and structured data ready
-
-## Development Workflow
-
-### Adding New Features
-
-1. **Create a new branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Write tests first** (TDD approach)
-   ```bash
-   # Create test file
-   touch test/models/your_model_test.rb
-   ```
-
-3. **Implement the feature**
-   - Add model validations and business logic
-   - Create controller actions
-   - Build views with Tailwind CSS
-   - Add Stimulus controllers for interactivity
-
-4. **Test thoroughly**
-   ```bash
-   bin/rails test
-   bin/rubocop
-   ```
-
-5. **Commit and push**
-   ```bash
-   git add .
-   git commit -m "feat: add your feature description"
-   git push origin feature/your-feature-name
-   ```
-
-### Database Changes
-
-```bash
-# Generate migration
-bin/rails generate migration DescriptiveName
-
-# Run migration
-bin/rails db:migrate
-
-# Rollback if needed
-bin/rails db:rollback
+### Database Configuration
+```yaml
+# config/database.yml
+production:
+  <<: *default
+  url: <%= ENV["DATABASE_URL"] %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 ```
 
-### Adding UI Components
+### Background Jobs
+The application uses Solid Queue (Rails 8 default) for background job processing:
 
-1. **Use Tailwind CSS** for styling
-2. **Leverage Flowbite components** for complex UI elements
-3. **Add Stimulus controllers** for JavaScript behavior
-4. **Ensure responsive design** on all screen sizes
+```ruby
+# config/queue.yml
+production:
+  dispatchers:
+    - polling_interval: 1
+      batch_size: 500
+  workers:
+    - queues: "*"
+      threads: 3
+      processes: 2
+```
 
-## Troubleshooting
+## 📈 Performance Optimizations
+
+- **Database Indexing**: Optimized queries with proper indexes
+- **Eager Loading**: Prevents N+1 queries
+- **Image Optimization**: Automatic image resizing and compression
+- **Caching**: Fragment and Russian Doll caching strategies
+- **Asset Pipeline**: Optimized CSS and JavaScript delivery
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+
+- Follow the [Ruby Style Guide](https://rubystyle.guide/)
+- Write comprehensive tests for new features
+- Use conventional commit messages
+- Update documentation for significant changes
+
+## 📝 API Documentation
+
+### Project Reordering API
+```javascript
+// POST /projects/reorder
+{
+  "project_ids": [3, 1, 2]
+}
+
+// Response
+{
+  "status": "success",
+  "message": "Projects reordered successfully"
+}
+```
+
+## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **Database connection errors**
-   - Check PostgreSQL is running
-   - Verify database.yml configuration
-   - Ensure database exists
+**Image uploads not working**
+- Check Active Storage configuration
+- Verify image processing dependencies
+- Ensure proper file permissions
 
-2. **Asset compilation issues**
-   - Clear tmp files: `bin/rails tmp:clear`
-   - Restart server: `bin/dev`
-   - Check for JavaScript errors in browser console
+**Background jobs not processing**
+- Verify Solid Queue configuration
+- Check database connectivity
+- Monitor job queue status
 
-3. **Test failures**
-   - Ensure test database is properly migrated
-   - Check for fixture conflicts
-   - Verify factory data is valid
+**Styling issues**
+- Rebuild Tailwind CSS: `bin/rails assets:precompile`
+- Check for conflicting CSS rules
+- Verify Flowbite component imports
 
-### Getting Help
+## 📄 License
 
-1. Check the Rails logs: `tail -f log/development.log`
-2. Use Rails console for debugging: `bin/rails console`
-3. Run tests in verbose mode: `bin/rails test -v`
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contributing
+## 🙏 Acknowledgments
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with tests
-4. Ensure all tests pass and code style is correct
-5. Submit a pull request
+- [Ruby on Rails](https://rubyonrails.org/) - The web framework
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [Hotwire](https://hotwired.dev/) - Modern web application framework
+- [Flowbite](https://flowbite.com/) - Component library
+- [Devise](https://github.com/heartcombo/devise) - Authentication solution
 
-## License
+## 📞 Support
 
-This project is available as open source under the terms of the [MIT License](LICENSE).
+- **Documentation**: [Wiki](https://github.com/yourusername/devvme_app/wiki)
+- **Issues**: [GitHub Issues](https://github.com/yourusername/devvme_app/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/devvme_app/discussions)
+
+---
+
+**Built with ❤️ for the developer community**
+
+---
+
+*DevvMe - Empowering developers to showcase their best work with professional, modern portfolios.*
