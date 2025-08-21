@@ -26,9 +26,9 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Should display user information
-    assert_select "h1, .username", text: /#{@user.username}/
-    assert_select ".full-name", text: /#{@user.full_name}/
-    assert_select ".bio", text: /#{@user.bio}/
+    assert_select "p", text: /@#{@user.username}/
+    assert_select "h1", text: /#{@user.full_name}/
+    assert_select "p", text: /#{@user.bio}/
   end
 
   test "should display social links on profile" do
@@ -49,7 +49,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
 
     # Should show profile completion
     completion_percentage = @user.profile_completion_percentage
-    assert_select ".profile-completion", text: /#{completion_percentage}%/
+    assert_select "dd", text: /#{completion_percentage}%/
   end
 
   test "should display edit profile link" do
@@ -106,7 +106,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
 
     # Should show success message
-    assert_select ".alert-success", text: /Profile updated successfully/
+    assert_select "#alert-success", text: /Profile updated successfully/
 
     # Should update user attributes
     @user.reload
@@ -149,7 +149,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{profile_path}']"
 
     # Should show error message
-    assert_select ".alert-danger, .error-message", text: /Username is too short/
+    assert_select "#alert-danger, .error-message", text: /Username is too short/
 
     # Should not update user
     @user.reload
@@ -168,7 +168,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{profile_path}']"
 
     # Should show error message
-    assert_select ".alert-danger, .error-message", text: /Github url must be a valid URL/
+    assert_select "#alert-danger, .error-message", text: /Github url must be a valid URL/
 
     # Should not update user
     @user.reload
@@ -194,7 +194,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{profile_path}']"
 
     # Should show error message
-    assert_select ".alert-danger, .error-message", text: /Username has already been taken/
+    assert_select "#alert-danger, .error-message", text: /Username has already been taken/
 
     # Should not update user
     @user.reload
@@ -231,8 +231,8 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{profile_path}']"
 
     # Should show error messages
-    assert_select ".alert-danger, .error-message", text: /Full name is too long/
-    assert_select ".alert-danger, .error-message", text: /Bio is too long/
+    assert_select "#alert-danger, .error-message", text: /Full name is too long/
+    assert_select "#alert-danger, .error-message", text: /Bio is too long/
   end
 
   test "should allow clearing optional fields" do

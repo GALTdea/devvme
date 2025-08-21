@@ -6,6 +6,11 @@ Rails.application.routes.draw do
   get "dashboard", to: "dashboard#index"
   devise_for :users
 
+  # Redirect already authenticated users to dashboard instead of root
+  authenticated :user do
+    root "dashboard#index", as: :authenticated_root
+  end
+
   # Profile routes
   resource :profile, only: [ :show, :edit, :update ]
 

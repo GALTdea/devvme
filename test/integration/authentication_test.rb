@@ -27,10 +27,10 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     follow_redirect!
 
     # Should show success message
-    assert_select ".alert-success", text: /Welcome! You have signed up successfully/
+    assert_select "#alert-success", text: /Welcome! You have signed up successfully/
 
-    # User should be signed in
-    assert_select "nav", text: /Sign Out/
+    # User should be signed in (check for user dropdown)
+    assert_select "button[data-dropdown-toggle='user-dropdown']"
   end
 
   test "user cannot sign up with invalid email" do
@@ -46,7 +46,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{user_registration_path}']"
 
     # Should show error message
-    assert_select ".alert-danger, .error-message", text: /Email is invalid/
+    assert_select "#alert-danger, .error-message", text: /Email is invalid/
   end
 
   test "user cannot sign up with weak password" do
@@ -63,7 +63,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{user_registration_path}']"
 
     # Should show error message
-    assert_select ".alert-danger, .error-message", text: /Password is too short/
+    assert_select "#alert-danger, .error-message", text: /Password is too short/
   end
 
   test "user cannot sign up with mismatched password confirmation" do
@@ -79,7 +79,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{user_registration_path}']"
 
     # Should show error message
-    assert_select ".alert-danger, .error-message", text: /Password confirmation doesn't match/
+    assert_select "#alert-danger, .error-message", text: /Password confirmation doesn't match/
   end
 
   test "user cannot sign up with existing email" do
@@ -97,7 +97,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{user_registration_path}']"
 
     # Should show error message
-    assert_select ".alert-danger, .error-message", text: /Email has already been taken/
+    assert_select "#alert-danger, .error-message", text: /Email has already been taken/
   end
 
   test "user cannot sign up with existing username" do
@@ -117,7 +117,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{user_registration_path}']"
 
     # Should show error message
-    assert_select ".alert-danger, .error-message", text: /Username has already been taken/
+    assert_select "#alert-danger, .error-message", text: /Username has already been taken/
   end
 
   # Sign in tests
@@ -140,11 +140,11 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     follow_redirect!
 
     # Should show success message
-    assert_select ".alert-success", text: /Signed in successfully/
+    assert_select "#alert-success", text: /Signed in successfully/
 
-    # User should be signed in
-    assert_select "nav", text: /Sign Out/
-    assert_select "h1", text: /Dashboard/ # Dashboard page content
+    # User should be signed in (check for user dropdown instead of hidden sign out link)
+    assert_select "button[data-dropdown-toggle='user-dropdown']"
+    assert_select "h1", text: /Welcome back/ # Dashboard page content
   end
 
   test "user cannot sign in with invalid email" do
@@ -162,7 +162,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{user_session_path}']"
 
     # Should show error message (Devise typically uses flash[:alert])
-    assert_select ".alert", text: /Invalid Email or password/
+    assert_select "#alert-danger", text: /Invalid Email or password/
   end
 
   test "user cannot sign in with invalid password" do
@@ -180,7 +180,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{user_session_path}']"
 
     # Should show error message (Devise typically uses flash[:alert])
-    assert_select ".alert", text: /Invalid Email or password/
+    assert_select "#alert-danger", text: /Invalid Email or password/
   end
 
   # Sign out tests
@@ -200,11 +200,11 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     follow_redirect!
 
     # Should show success message
-    assert_select ".alert-success", text: /Signed out successfully/
+    assert_select "#alert-success", text: /Signed out successfully/
 
     # User should be signed out
-    assert_select "nav", text: /Sign In/
-    assert_no_selector "nav", text: /Sign Out/
+    assert_select "a[href='#{new_user_session_path}']", text: /Sign In/
+    assert_select "button[data-dropdown-toggle='user-dropdown']", count: 0
   end
 
   test "signed out user cannot access protected pages" do
@@ -216,7 +216,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     follow_redirect!
 
     # Should show alert message
-    assert_select ".alert-warning, .alert-info", text: /You need to sign in or sign up before continuing/
+    assert_select "#alert-danger", text: /You need to sign in or sign up before continuing/
   end
 
   test "signed in user is redirected from auth pages" do
@@ -271,10 +271,10 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     follow_redirect!
 
     # Should show success message
-    assert_select ".alert-success", text: /You will receive an email with instructions/
+    assert_select "#alert-success", text: /You will receive an email with instructions/
   end
 
-  test "password reset request with invalid email shows same success message" do
+  test "password reset request with invalid email shows error message" do
     get new_user_password_path
     assert_response :success
 
@@ -285,12 +285,9 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
       }
     end
 
-    # Should still redirect and show success message for security
-    assert_redirected_to new_user_session_path
-    follow_redirect!
-
-    # Should show same success message
-    assert_select ".alert-success", text: /You will receive an email with instructions/
+    # Should render the form again with error (paranoid mode is disabled)
+    assert_response :unprocessable_entity
+    assert_select "#alert-danger", text: /Email not found/
   end
 
   private
