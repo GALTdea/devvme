@@ -32,6 +32,9 @@ gem "friendly_id", "~> 5.5"
 gem "redcarpet", "~> 3.6"
 gem "rouge", "~> 4.2"
 
+# Fast pagination for Rails [https://github.com/ddnexus/pagy]
+gem "pagy", "~> 9.2"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

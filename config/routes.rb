@@ -3,8 +3,12 @@ Rails.application.routes.draw do
     patch :reorder, on: :collection
   end
 
-  # Blog routes
-  resources :blog_posts, path: "blog" do
+  # Public blog routes (no authentication required)
+  get "blog", to: "public_blog#index", as: :public_blog_index
+  get "blog/:id", to: "public_blog#show", as: :public_blog_post
+
+  # Admin blog routes (authentication required)
+  resources :blog_posts, path: "admin/blog" do
     post :autosave, on: :member
   end
 

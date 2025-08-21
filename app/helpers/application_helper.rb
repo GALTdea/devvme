@@ -2,6 +2,7 @@ module ApplicationHelper
   require "redcarpet"
   require "rouge"
   require "rouge/plugins/redcarpet"
+  include Pagy::Frontend
 
   # Markdown renderer with syntax highlighting
   class CustomHTMLRenderer < Redcarpet::Render::HTML

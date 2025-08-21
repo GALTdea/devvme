@@ -3,7 +3,7 @@ class BlogPostsController < ApplicationController
   before_action :set_blog_post, only: [:show, :edit, :update, :destroy, :autosave]
   before_action :ensure_owner, only: [:show, :edit, :update, :destroy, :autosave]
 
-  # GET /blog
+  # GET /admin/blog
   def index
     @blog_posts = current_user.blog_posts.includes(:user)
 
@@ -25,6 +25,9 @@ class BlogPostsController < ApplicationController
     end
 
     @blog_posts = @blog_posts.recent
+
+    # Pagination with Pagy
+    @pagy, @blog_posts = pagy(@blog_posts, limit: 15)
 
     # Stats for status tabs
     @published_count = current_user.blog_posts.published.count
