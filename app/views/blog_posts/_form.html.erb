@@ -1,0 +1,151 @@
+<!-- Editor -->
+<div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+  <%= form_with model: blog_post, 
+      html: { 
+        class: "h-full",
+        data: { 
+          controller: "blog-editor",
+          blog_editor_autosave_url_value: blog_post.persisted? ? autosave_blog_post_path(blog_post) : "",
+          blog_editor_autosave_enabled_value: blog_post.persisted?
+        }
+      } do |form| %>
+    
+    <!-- Form Header -->
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Title -->
+        <div class="lg:col-span-2">
+          <%= form.label :title, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+          <%= form.text_field :title, 
+              placeholder: "Enter your post title...",
+              data: { blog_editor_target: "title" },
+              class: "w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex flex-col justify-end">
+          <div class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+            <div data-blog-editor-target="wordCount">0 words</div>
+            <div data-blog-editor-target="readingTime">1 min read</div>
+            <div data-blog-editor-target="autosaveStatus" class="font-medium"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Excerpt -->
+      <div class="mt-4">
+        <%= form.label :excerpt, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+        <%= form.text_area :excerpt, 
+            rows: 2,
+            placeholder: "Optional excerpt for your post...",
+            data: { blog_editor_target: "excerpt" },
+            class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" %>
+      </div>
+
+      <!-- Publishing Options -->
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Published Toggle -->
+        <div class="flex items-start">
+          <div class="flex items-center h-5">
+            <%= form.check_box :published, 
+                data: { 
+                  blog_editor_target: "publishedToggle",
+                  action: "change->blog-editor#publishedToggleChanged"
+                },
+                class: "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" %>
+          </div>
+          <div class="ml-3 text-sm">
+            <%= form.label :published, "Publish immediately", class: "font-medium text-gray-700 dark:text-gray-300" %>
+            <p class="text-gray-500 dark:text-gray-400">Make this post visible to the public</p>
+          </div>
+        </div>
+
+        <!-- Published At -->
+        <div class="published-at-container <%= 'hidden' unless blog_post.published? %>">
+          <%= form.label :published_at, "Publication Date", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+          <%= form.datetime_local_field :published_at,
+              data: { blog_editor_target: "publishedAt" },
+              class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+        </div>
+      </div>
+    </div>
+
+    <%= render 'markdown_toolbar' %>
+
+    <!-- Editor Content -->
+    <div class="relative" style="height: 500px;">
+      <!-- Textarea -->
+      <%= form.text_area :content, 
+          data: { 
+            blog_editor_target: "content",
+            action: "keydown->blog-editor#keydown"
+          },
+          placeholder: "Start writing your blog post...\n\nTip: Use Markdown for formatting. Press Ctrl+B for bold, Ctrl+I for italic, Ctrl+K for links.",
+          class: "w-full h-full p-6 border-0 resize-none focus:ring-0 focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-mono text-sm leading-relaxed" %>
+
+      <!-- Preview -->
+      <div data-blog-editor-target="preview" 
+           class="absolute inset-0 p-6 bg-white dark:bg-gray-800 overflow-auto hidden prose dark:prose-invert max-w-none">
+        <!-- Preview content will be inserted here -->
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="p-6 bg-gray-50 dark:bg-gray-750 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="text-sm text-gray-500 dark:text-gray-400">
+        <span class="hidden sm:inline">Use Markdown for formatting. </span>
+        <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+          Markdown guide
+        </a>
+      </div>
+
+      <div class="flex gap-3">
+        <%= link_to blog_posts_path, 
+            class: "px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" do %>
+          Cancel
+        <% end %>
+
+        <%= form.submit "Save Draft", 
+            name: "commit",
+            value: "Save Draft",
+            formnovalidate: true,
+            class: "px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors" %>
+
+        <%= form.submit "Publish Post", 
+            name: "commit",
+            value: "Publish Post",
+            class: "px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors" %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% content_for :head do %>
+  <style>
+    /* Syntax highlighting styles for highlight.js */
+    .hljs {
+      background: transparent !important;
+    }
+    
+    /* Preview prose styles */
+    .prose code {
+      @apply bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-sm;
+    }
+    
+    .prose pre {
+      @apply bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg;
+    }
+    
+    .prose pre code {
+      @apply bg-transparent p-0;
+    }
+    
+    .prose blockquote {
+      @apply border-l-4 border-blue-500 pl-4 italic;
+    }
+  </style>
+  
+  <!-- Highlight.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+<% end %>

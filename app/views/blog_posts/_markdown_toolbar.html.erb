@@ -1,0 +1,121 @@
+<!-- Markdown Toolbar -->
+<div class="px-6 py-4 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700">
+  <div class="flex flex-wrap items-center gap-2">
+    <!-- Formatting Buttons -->
+    <div class="flex items-center border-r border-gray-300 dark:border-gray-600 pr-3 mr-3">
+      <button type="button" 
+              data-action="click->blog-editor#insertMarkdown"
+              data-format="bold"
+              title="Bold (Ctrl+B)"
+              class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors">
+        <svg class="w-4 h-4 font-bold" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M6 4v12h2.9c1.5 0 2.7-.4 3.6-1.2.9-.8 1.4-1.9 1.4-3.3 0-1-.3-1.9-.8-2.6-.5-.7-1.2-1.2-2.1-1.4v-.1c.7-.2 1.3-.6 1.7-1.2.4-.6.6-1.3.6-2.1 0-1.3-.4-2.3-1.3-3C11.2 4.3 10 4 8.6 4H6zm2.1 5.4h1.4c.8 0 1.4.2 1.8.6.4.4.6.9.6 1.6 0 .7-.2 1.2-.6 1.6-.4.4-1 .6-1.8.6H8.1V9.4zm0-4.2v3.1h1.2c.7 0 1.2.2 1.5.5.3.3.5.8.5 1.4 0 .6-.2 1.1-.5 1.4-.3.3-.8.5-1.5.5H8.1V5.2z"/>
+        </svg>
+      </button>
+      
+      <button type="button" 
+              data-action="click->blog-editor#insertMarkdown"
+              data-format="italic"
+              title="Italic (Ctrl+I)"
+              class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors">
+        <svg class="w-4 h-4 italic" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M11.5 4h2.5l-4 12h-2.5l4-12zm-1 0h-2.5l1 3h2.5l-1-3z"/>
+        </svg>
+      </button>
+
+      <button type="button" 
+              data-action="click->blog-editor#insertMarkdown"
+              data-format="code"
+              title="Inline Code"
+              class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+        </svg>
+      </button>
+
+      <button type="button" 
+              data-action="click->blog-editor#insertMarkdown"
+              data-format="link"
+              title="Link (Ctrl+K)"
+              class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Headers -->
+    <div class="flex items-center border-r border-gray-300 dark:border-gray-600 pr-3 mr-3">
+      <button type="button" 
+              data-action="click->blog-editor#insertMarkdown"
+              data-format="h1"
+              title="Heading 1"
+              class="px-2 py-1 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors">H1</button>
+      
+      <button type="button" 
+              data-action="click->blog-editor#insertMarkdown"
+              data-format="h2"
+              title="Heading 2"
+              class="px-2 py-1 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors">H2</button>
+      
+      <button type="button" 
+              data-action="click->blog-editor#insertMarkdown"
+              data-format="h3"
+              title="Heading 3"
+              class="px-2 py-1 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors">H3</button>
+    </div>
+
+    <!-- Lists -->
+    <div class="flex items-center border-r border-gray-300 dark:border-gray-600 pr-3 mr-3">
+      <button type="button" 
+              data-action="click->blog-editor#insertMarkdown"
+              data-format="ul"
+              title="Bullet List"
+              class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+        </svg>
+      </button>
+      
+      <button type="button" 
+              data-action="click->blog-editor#insertMarkdown"
+              data-format="ol"
+              title="Numbered List"
+              class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+      </button>
+
+      <button type="button" 
+              data-action="click->blog-editor#insertMarkdown"
+              data-format="quote"
+              title="Quote"
+              class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Code Block -->
+    <div class="flex items-center border-r border-gray-300 dark:border-gray-600 pr-3 mr-3">
+      <button type="button" 
+              data-action="click->blog-editor#insertMarkdown"
+              data-format="codeblock"
+              title="Code Block"
+              class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Preview Toggle -->
+    <button type="button" 
+            data-action="click->blog-editor#togglePreview"
+            class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
+      Preview
+    </button>
+  </div>
+</div>

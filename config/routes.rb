@@ -2,6 +2,12 @@ Rails.application.routes.draw do
   resources :projects do
     patch :reorder, on: :collection
   end
+
+  # Blog routes
+  resources :blog_posts, path: "blog" do
+    post :autosave, on: :member
+  end
+
   # Dashboard routes
   get "dashboard", to: "dashboard#index"
   devise_for :users

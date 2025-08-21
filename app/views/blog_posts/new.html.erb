@@ -1,0 +1,24 @@
+<% content_for :title, "New Blog Post" %>
+
+<div class="container mx-auto px-4 py-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">New Blog Post</h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Create a new blog post and share your thoughts
+      </p>
+    </div>
+    
+    <%= link_to blog_posts_path, 
+        class: "inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Back to Posts
+    <% end %>
+  </div>
+
+  <!-- Form -->
+  <%= render 'form', blog_post: @blog_post %>
+</div>
