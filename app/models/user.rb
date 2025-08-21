@@ -102,6 +102,21 @@ class User < ApplicationRecord
     full_name.present? ? full_name : username
   end
 
+  # Generate public profile URL for sharing
+  def public_profile_url(base_url = nil)
+    if base_url
+      "#{base_url}/#{friendly_id}"
+    else
+      # This will be used with url helpers in controllers/views
+      friendly_id
+    end
+  end
+
+  # Generate shareable profile path
+  def public_profile_path
+    "/#{friendly_id}"
+  end
+
   private
 
   # Normalize URLs by adding https:// prefix if missing

@@ -11,8 +11,12 @@ Rails.application.routes.draw do
     root "dashboard#index", as: :authenticated_root
   end
 
-  # Profile routes
+  # Profile routes - authenticated user's own profile
   resource :profile, only: [ :show, :edit, :update ]
+
+  # Public profile routes - for sharing and visitor access
+  # Uses username with FriendlyId for clean URLs like /gustavo
+  get "/:username", to: "public_profiles#show", as: :public_profile, constraints: { username: /[a-zA-Z0-9_-]+/ }
 
   root "home#index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

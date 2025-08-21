@@ -2,8 +2,10 @@ class ProfilesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_user
 
-  # Display user profile page
+  # Display user profile page (authenticated user's own profile)
   def show
+    # Set the public profile URL for sharing
+    @public_profile_url = public_profile_url(@user.friendly_id)
   end
 
   # Show profile edit form
