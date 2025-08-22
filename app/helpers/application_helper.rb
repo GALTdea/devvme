@@ -195,4 +195,13 @@ module ApplicationHelper
   def canonical_url(url)
     content_for :canonical, tag.link(rel: "canonical", href: url)
   end
+
+  # Generate public profile URL helper method
+  def public_profile_url(username, options = {})
+    if options[:full_url]
+      "#{request.protocol}#{request.host_with_port}/#{username}"
+    else
+      public_profile_path(username: username)
+    end
+  end
 end
