@@ -61,6 +61,19 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{edit_profile_path}']", text: /Edit Profile/
   end
 
+  test "should display share profile button with correct data attributes" do
+    sign_in @user
+    get profile_path
+    assert_response :success
+
+    # Should have share button with Stimulus controller
+    assert_select "div[data-controller='share-button']"
+    assert_select "button[data-action='click->share-button#share']", text: /Share Profile/
+
+    # Should have correct data attributes
+    assert_select "div[data-share-button-title-value='#{@user.display_name}\\'s Profile']"
+  end
+
   # Edit profile tests
   test "should show edit profile form when authenticated" do
     sign_in @user

@@ -1,3 +1,67 @@
+<% page_title(@seo_title) %>
+<% meta_description(@seo_description) %>
+<% meta_keywords(@seo_keywords) %>
+<% canonical_url(@seo_profile_url) %>
+
+<% open_graph_tags(
+  title: "#{@user.display_name} - Developer Profile",
+  description: @seo_description,
+  image: @seo_avatar_url,
+  url: @seo_profile_url,
+  type: "profile"
+) %>
+
+<% twitter_card_tags(
+  title: @seo_title,
+  description: @seo_description,
+  image: @seo_avatar_url
+) %>
+
+<%# JSON-LD Structured Data %>
+<% content_for :structured_data do %>
+  <% schema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": @user.display_name,
+    "alternateName": "@#{@user.username}",
+    "description": @user.bio.presence || "Developer on Devvme App",
+    "url": @seo_profile_url,
+    "memberOf": {
+      "@type": "Organization",
+      "name": "Devvme App"
+    }
+  } %>
+  
+  <% if @user.avatar.attached? %>
+    <% schema[:image] = url_for(@user.avatar) %>
+  <% end %>
+  
+  <% same_as = [] %>
+  <% same_as << @user.github_url if @user.github_url.present? %>
+  <% same_as << @user.linkedin_url if @user.linkedin_url.present? %>
+  <% same_as << @user.website_url if @user.website_url.present? %>
+  <% schema[:sameAs] = same_as if same_as.any? %>
+  
+  <% if @recent_projects.any? %>
+    <% schema[:hasCreatedWork] = @recent_projects.map do |project| %>
+      <% {
+        "@type": "CreativeWork",
+        "name": project.title,
+        "description": project.description,
+        "dateCreated": project.created_at.iso8601,
+        "creator": {
+          "@type": "Person",
+          "name": @user.display_name
+        }
+      } %>
+    <% end %>
+  <% end %>
+  
+  <script type="application/ld+json">
+    <%= raw schema.to_json %>
+  </script>
+<% end %>
+
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
     
@@ -34,15 +98,17 @@
               
               <!-- Share Profile Button -->
               <div class="flex space-x-3">
-                <button id="share-profile-btn" 
-                        data-url="<%= request.original_url %>"
-                        data-title="<%= @user.display_name %>'s Profile"
-                        class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                  <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                  </svg>
-                  Share Profile
-                </button>
+                <div data-controller="share-button"
+                     data-share-button-url-value="<%= request.original_url %>"
+                     data-share-button-title-value="<%= @user.display_name %>'s Profile">
+                  <button data-action="click->share-button#share"
+                          class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                    </svg>
+                    Share Profile
+                  </button>
+                </div>
               </div>
             </div>
             
@@ -226,49 +292,4 @@
   </div>
 </div>
 
-<!-- Share Profile JavaScript -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const shareBtn = document.getElementById('share-profile-btn');
-  
-  if (shareBtn) {
-    shareBtn.addEventListener('click', async function() {
-      const url = this.dataset.url;
-      const title = this.dataset.title;
-      
-      // Check if Web Share API is supported
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: title,
-            url: url
-          });
-        } catch (error) {
-          console.log('Error sharing:', error);
-          fallbackShare(url);
-        }
-      } else {
-        fallbackShare(url);
-      }
-    });
-  }
-  
-  function fallbackShare(url) {
-    // Copy to clipboard as fallback
-    navigator.clipboard.writeText(url).then(function() {
-      // Show notification that URL was copied
-      const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
-      notification.textContent = 'Profile URL copied to clipboard!';
-      document.body.appendChild(notification);
-      
-      // Remove notification after 3 seconds
-      setTimeout(() => {
-        document.body.removeChild(notification);
-      }, 3000);
-    }).catch(function(err) {
-      console.error('Could not copy text: ', err);
-    });
-  }
-});
-</script>
+

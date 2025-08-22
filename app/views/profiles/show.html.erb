@@ -37,15 +37,17 @@
               <!-- Action Buttons -->
               <div class="flex space-x-3">
                 <!-- Share Profile Button -->
-                <button id="share-profile-btn" 
-                        data-url="<%= @public_profile_url %>"
-                        data-title="<%= @user.display_name %>'s Profile"
-                        class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                  <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                  </svg>
-                  Share Profile
-                </button>
+                <div data-controller="share-button"
+                     data-share-button-url-value="<%= @public_profile_url %>"
+                     data-share-button-title-value="<%= @user.display_name %>'s Profile">
+                  <button data-action="click->share-button#share"
+                          class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                    </svg>
+                    Share Profile
+                  </button>
+                </div>
                 
                 <!-- Edit Profile Button -->
                 <%= link_to edit_profile_path, 
@@ -301,49 +303,3 @@
   </div>
 </div>
 
-<!-- Share Profile JavaScript -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const shareBtn = document.getElementById('share-profile-btn');
-  
-  if (shareBtn) {
-    shareBtn.addEventListener('click', async function() {
-      const url = this.dataset.url;
-      const title = this.dataset.title;
-      
-      // Check if Web Share API is supported
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: title,
-            url: url
-          });
-        } catch (error) {
-          console.log('Error sharing:', error);
-          fallbackShare(url);
-        }
-      } else {
-        fallbackShare(url);
-      }
-    });
-  }
-  
-  function fallbackShare(url) {
-    // Copy to clipboard as fallback
-    navigator.clipboard.writeText(url).then(function() {
-      // Show notification that URL was copied
-      const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
-      notification.textContent = 'Profile URL copied to clipboard!';
-      document.body.appendChild(notification);
-      
-      // Remove notification after 3 seconds
-      setTimeout(() => {
-        document.body.removeChild(notification);
-      }, 3000);
-    }).catch(function(err) {
-      console.error('Could not copy text: ', err);
-    });
-  }
-});
-</script>

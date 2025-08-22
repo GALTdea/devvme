@@ -4,65 +4,56 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
     static values = {
         url: String,
-        title: String,
-        text: String
+        title: String
     }
 
-    connect() {
-        // Hide the button if Web Share API is not supported
-        if (!navigator.share) {
-            this.element.style.display = 'none'
-        }
-    }
+    async share(event) {
+        event.preventDefault()
 
-    async share() {
-        if (!navigator.share) {
-            // Fallback: copy URL to clipboard
+        const url = this.urlValue
+        const title = this.titleValue
+
+        // Check if Web Share API is supported
+        if (navigator.share) {
             try {
-                await navigator.clipboard.writeText(this.urlValue)
-                this.showToast('Link copied to clipboard!')
-            } catch (err) {
-                console.error('Failed to copy link:', err)
-                this.showToast('Failed to copy link', 'error')
+                await navigator.share({
+                    title: title,
+                    url: url
+                })
+            } catch (error) {
+                console.log('Error sharing:', error)
+                this.fallbackShare(url)
             }
-            return
-        }
-
-        try {
-            await navigator.share({
-                title: this.titleValue,
-                text: this.textValue,
-                url: this.urlValue
-            })
-        } catch (err) {
-            if (err.name !== 'AbortError') {
-                console.error('Error sharing:', err)
-                // Fallback to clipboard
-                try {
-                    await navigator.clipboard.writeText(this.urlValue)
-                    this.showToast('Link copied to clipboard!')
-                } catch (clipboardErr) {
-                    console.error('Failed to copy link:', clipboardErr)
-                    this.showToast('Failed to share', 'error')
-                }
-            }
+        } else {
+            this.fallbackShare(url)
         }
     }
 
-    showToast(message, type = 'success') {
-        // Create a simple toast notification
-        const toast = document.createElement('div')
-        toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white text-sm font-medium z-50 transition-opacity duration-300 ${type === 'error' ? 'bg-red-500' : 'bg-green-500'
-            }`
-        toast.textContent = message
+    fallbackShare(url) {
+        // Copy to clipboard as fallback
+        navigator.clipboard.writeText(url).then(() => {
+            this.showNotification('Profile URL copied to clipboard!')
+        }).catch((err) => {
+            console.error('Could not copy text: ', err)
+            this.showNotification('Failed to copy URL', 'error')
+        })
+    }
 
-        document.body.appendChild(toast)
+    showNotification(message, type = 'success') {
+        const notification = document.createElement('div')
+        const bgColor = type === 'error' ? 'bg-red-500' : 'bg-green-500'
+        notification.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded-md shadow-lg z-50 transition-opacity duration-300`
+        notification.textContent = message
 
-        // Auto-remove after 3 seconds
+        document.body.appendChild(notification)
+
+        // Remove notification after 3 seconds
         setTimeout(() => {
-            toast.style.opacity = '0'
+            notification.style.opacity = '0'
             setTimeout(() => {
-                document.body.removeChild(toast)
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification)
+                }
             }, 300)
         }, 3000)
     }

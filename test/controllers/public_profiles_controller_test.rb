@@ -52,4 +52,16 @@ class PublicProfilesControllerTest < ActionDispatch::IntegrationTest
     # Should not show draft project
     assert_select "h3", text: draft_project.title, count: 0
   end
+
+  test "should display share profile button with correct data attributes" do
+    get public_profile_path(@user.username)
+    assert_response :success
+
+    # Should have share button with Stimulus controller
+    assert_select "div[data-controller='share-button']"
+    assert_select "button[data-action='click->share-button#share']", text: /Share Profile/
+
+    # Should have correct data attributes
+    assert_select "div[data-share-button-title-value='#{@user.display_name}\\'s Profile']"
+  end
 end
