@@ -11,11 +11,21 @@ class PublicProfilesController < ApplicationController
       return
     end
 
-    # Only show published projects to public visitors
-    @recent_projects = @user.projects.published.recent.limit(6)
+    # Track profile visit asynchronously (only for external visitors)
+    track_profile_visit
+
+    # Only show published projects to public visitors with optimized queries
+    @recent_projects = @user.projects
+                           .published
+                           .includes(thumbnail_attachment: :blob)
+                           .recent
+                           .limit(6)
 
     # Only show published blog posts to public visitors
-    @recent_blog_posts = @user.blog_posts.published.recent.limit(3)
+    @recent_blog_posts = @user.blog_posts
+                             .published
+                             .recent
+                             .limit(3)
 
     # Prepare SEO data for the view
     prepare_seo_data
@@ -23,12 +33,21 @@ class PublicProfilesController < ApplicationController
 
   private
 
-  # Find user by username using FriendlyId
+  # Find user by username using FriendlyId with optimized includes
   # Returns 404 if user not found
   def set_user
-    @user = User.friendly.find(params[:username])
+    @user = User.friendly
+                .includes(
+                  avatar_attachment: :blob,
+                  resume_attachment: :blob,
+                  projects: {
+                    thumbnail_attachment: :blob
+                  },
+                  blog_posts: []
+                )
+                .find(params[:username])
   rescue ActiveRecord::RecordNotFound
-    render file: "#{Rails.root}/public/404.html", status: :not_found, layout: false
+    render file: "#{Rails.root}/public/404-profile.html", status: :not_found, layout: false
   end
 
     # Set cache headers for better performance
@@ -68,5 +87,19 @@ class PublicProfilesController < ApplicationController
 
     # Full profile URL
     @seo_profile_url = request.original_url
+  end
+
+  # Track profile visit asynchronously for analytics
+  def track_profile_visit
+    # Only track if we have visitor information
+    return unless request.remote_ip && request.user_agent
+
+    # Queue the tracking job to run in the background
+    TrackProfileViewJob.perform_later(
+      @user.id,
+      request.remote_ip,
+      request.user_agent,
+      request.referer
+    )
   end
 end

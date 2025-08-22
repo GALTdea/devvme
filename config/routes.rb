@@ -8,6 +8,9 @@ Rails.application.routes.draw do
   get "blog/:id", to: "public_blog#show", as: :public_blog_post
   get "blog.rss", to: "public_blog#rss", as: :public_blog_rss, defaults: { format: :xml }
 
+  # SEO Sitemap
+  get "sitemap.xml", to: "sitemap#index", as: :sitemap, defaults: { format: :xml }
+
   # Admin blog routes (authentication required)
   resources :blog_posts, path: "admin/blog" do
     post :autosave, on: :member

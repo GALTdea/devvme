@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+
+  <!-- Homepage -->
+  <url>
+    <loc><%= @base_url %></loc>
+    <lastmod><%= Date.current.iso8601 %></lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Public Blog Index -->
+  <url>
+    <loc><%= @base_url %>/blog</loc>
+    <lastmod><%= @blog_posts.first&.updated_at&.iso8601 || Date.current.iso8601 %></lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- User Profiles -->
+  <% @users.each do |user| %>
+  <url>
+    <loc><%= @base_url %>/<%= user.username %></loc>
+    <lastmod><%= [user.updated_at, user.projects.published.maximum(:updated_at), user.blog_posts.published.maximum(:updated_at)].compact.max.iso8601 %></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    
+    <% if user.avatar.attached? %>
+    <image:image>
+      <image:loc><%= @base_url %><%= rails_blob_path(user.avatar, only_path: true) %></image:loc>
+      <image:title><%= html_escape("#{user.display_name}'s Profile Picture") %></image:title>
+      <image:caption><%= html_escape("Profile picture of #{user.display_name}") %></image:caption>
+    </image:image>
+    <% end %>
+  </url>
+  <% end %>
+
+  <!-- Blog Posts -->
+  <% @blog_posts.each do |post| %>
+  <url>
+    <loc><%= @base_url %>/blog/<%= post.id %></loc>
+    <lastmod><%= post.updated_at.iso8601 %></lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    
+    <% if post.published_at %>
+    <news:news>
+      <news:publication>
+        <news:name>Devvme App</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date><%= post.published_at.iso8601 %></news:publication_date>
+      <news:title><%= html_escape(post.title) %></news:title>
+    </news:news>
+    <% end %>
+  </url>
+  <% end %>
+
+  <!-- User Blog Index Pages -->
+  <% @users.select { |u| u.blog_posts.published.any? }.each do |user| %>
+  <url>
+    <loc><%= @base_url %>/<%= user.username %>/blog</loc>
+    <lastmod><%= user.blog_posts.published.maximum(:updated_at).iso8601 %></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <% end %>
+
+</urlset>

@@ -24,6 +24,9 @@
     <%# Twitter Card Tags %>
     <%= content_for(:twitter_cards) if content_for?(:twitter_cards) %>
     
+    <%# Enhanced Social Meta Tags %>
+    <%= content_for(:social_meta) if content_for?(:social_meta) %>
+    
     <%# Structured Data %>
     <%= content_for(:structured_data) if content_for?(:structured_data) %>
     
@@ -48,6 +51,16 @@
     
     <%# Flowbite JavaScript %>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+    
+    <%# Performance Resource Hints %>
+    <%= performance_resource_hints %>
+    
+    <%# Google Analytics %>
+    <%= google_analytics_tag if google_analytics_enabled? %>
+    
+    <%# Performance Monitoring %>
+    <%= performance_monitoring_scripts %>
+    <%= track_performance_metrics %>
   </head>
 
   <body class="bg-secondary-50 dark:bg-secondary-900 min-h-screen flex flex-col">

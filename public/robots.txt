@@ -1,1 +1,16 @@
 # See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: /sitemap.xml
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /dashboard
+Disallow: /profile/edit
+Disallow: /users/sign_in
+Disallow: /users/sign_up
+Disallow: /users/password
+Disallow: /rails/

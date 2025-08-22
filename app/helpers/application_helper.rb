@@ -204,4 +204,160 @@ module ApplicationHelper
       public_profile_path(username: username)
     end
   end
+
+  # Enhanced Open Graph tags for better social sharing
+  def enhanced_open_graph_tags(options = {})
+    tags = []
+
+    # Basic Open Graph tags
+    tags << tag.meta(property: "og:type", content: options[:type] || "website")
+    tags << tag.meta(property: "og:site_name", content: "Devvme App")
+    tags << tag.meta(property: "og:locale", content: "en_US")
+
+    # Title
+    if options[:title]
+      tags << tag.meta(property: "og:title", content: options[:title])
+    end
+
+    # Description
+    if options[:description]
+      tags << tag.meta(property: "og:description", content: options[:description])
+    end
+
+    # URL
+    if options[:url]
+      tags << tag.meta(property: "og:url", content: options[:url])
+    end
+
+    # Image with enhanced properties
+    if options[:image]
+      tags << tag.meta(property: "og:image", content: options[:image])
+      tags << tag.meta(property: "og:image:type", content: "image/jpeg")
+      tags << tag.meta(property: "og:image:width", content: "1200")
+      tags << tag.meta(property: "og:image:height", content: "630")
+      tags << tag.meta(property: "og:image:alt", content: options[:image_alt] || options[:title] || "Devvme App")
+    end
+
+    # Twitter Card specific tags
+    tags << tag.meta(name: "twitter:card", content: "summary_large_image")
+    tags << tag.meta(name: "twitter:site", content: "@devvme_app")
+    tags << tag.meta(name: "twitter:creator", content: options[:twitter_creator] || "@devvme_app")
+
+    if options[:title]
+      tags << tag.meta(name: "twitter:title", content: options[:title])
+    end
+
+    if options[:description]
+      tags << tag.meta(name: "twitter:description", content: options[:description])
+    end
+
+    if options[:image]
+      tags << tag.meta(name: "twitter:image", content: options[:image])
+      tags << tag.meta(name: "twitter:image:alt", content: options[:image_alt] || options[:title] || "Devvme App")
+    end
+
+    # LinkedIn specific tags
+    if options[:title]
+      tags << tag.meta(property: "linkedin:title", content: options[:title])
+    end
+
+    if options[:description]
+      tags << tag.meta(property: "linkedin:description", content: options[:description])
+    end
+
+    # Facebook specific tags for better rendering
+    tags << tag.meta(property: "fb:app_id", content: Rails.application.credentials.dig(:facebook, :app_id) || ENV["FACEBOOK_APP_ID"]) if Rails.application.credentials.dig(:facebook, :app_id) || ENV["FACEBOOK_APP_ID"]
+
+    content_for :social_meta, safe_join(tags, "\n")
+  end
+
+  # Generate social sharing URLs
+  def social_sharing_url(platform, url, text = "", hashtags = "")
+    encoded_url = CGI.escape(url)
+    encoded_text = CGI.escape(text)
+    encoded_hashtags = CGI.escape(hashtags)
+
+    case platform.to_sym
+    when :facebook
+      "https://www.facebook.com/sharer/sharer.php?u=#{encoded_url}"
+    when :twitter
+      base_url = "https://twitter.com/intent/tweet?url=#{encoded_url}"
+      base_url += "&text=#{encoded_text}" if text.present?
+      base_url += "&hashtags=#{encoded_hashtags}" if hashtags.present?
+      base_url
+    when :linkedin
+      "https://www.linkedin.com/sharing/share-offsite/?url=#{encoded_url}"
+    when :reddit
+      base_url = "https://reddit.com/submit?url=#{encoded_url}"
+      base_url += "&title=#{encoded_text}" if text.present?
+      base_url
+    when :whatsapp
+      "https://wa.me/?text=#{encoded_text}%20#{encoded_url}"
+    when :telegram
+      base_url = "https://t.me/share/url?url=#{encoded_url}"
+      base_url += "&text=#{encoded_text}" if text.present?
+      base_url
+    when :email
+      subject = "Check out this profile: #{text}"
+      body = "I thought you might be interested in this developer profile:\n\n#{text}\n#{url}"
+      "mailto:?subject=#{CGI.escape(subject)}&body=#{CGI.escape(body)}"
+    else
+      url
+    end
+  end
+
+  # Add structured data for profiles
+  def profile_structured_data(user)
+    schema = {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": user.display_name,
+      "alternateName": "@#{user.username}",
+      "url": request.original_url,
+      "jobTitle": user.job_title,
+      "worksFor": {
+        "@type": "Organization",
+        "name": "Devvme App"
+      }
+    }
+
+    # Add image if avatar exists
+    if user.avatar.attached?
+      schema[:image] = {
+        "@type": "ImageObject",
+        "url": rails_blob_url(user.avatar),
+        "width": "400",
+        "height": "400"
+      }
+    end
+
+    # Add description
+    schema[:description] = user.bio.presence || "Developer on Devvme App"
+
+    # Add location
+    schema[:address] = user.location if user.location.present?
+
+    # Add social links
+    same_as = []
+    same_as << user.github_url if user.github_url.present?
+    same_as << user.linkedin_url if user.linkedin_url.present?
+    same_as << user.website_url if user.website_url.present?
+    same_as << user.twitter_url if user.twitter_url.present?
+    schema[:sameAs] = same_as if same_as.any?
+
+    # Add works/projects
+    if user.projects.published.any?
+      schema[:hasCreatedWork] = user.projects.published.limit(5).map do |project|
+        {
+          "@type": "CreativeWork",
+          "name": project.title,
+          "description": project.description,
+          "url": project.demo_url,
+          "dateCreated": project.created_at.iso8601
+        }
+      end
+    end
+
+    content_tag :script, schema.to_json.html_safe, type: "application/ld+json"
+  end
 end

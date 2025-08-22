@@ -30,6 +30,9 @@ class User < ApplicationRecord
   # Blog post association
   has_many :blog_posts, dependent: :destroy
 
+  # Profile views association for analytics
+  has_many :profile_views, dependent: :destroy
+
   # Validations
   validates :username, presence: true,
                       uniqueness: { case_sensitive: false },
@@ -147,6 +150,45 @@ class User < ApplicationRecord
   # Generate shareable profile path
   def public_profile_path
     "/#{friendly_id}"
+  end
+
+  # Profile analytics methods
+  def total_profile_views
+    profile_views.count
+  end
+
+  def unique_profile_visitors
+    profile_views.distinct.count(:visitor_ip)
+  end
+
+  def profile_views_today
+    profile_views.today.count
+  end
+
+  def profile_views_this_week
+    profile_views.this_week.count
+  end
+
+  def profile_views_this_month
+    profile_views.this_month.count
+  end
+
+  def profile_views_by_date(days = 30)
+    profile_views
+      .where(visited_at: days.days.ago..Time.current)
+      .group("DATE(visited_at)")
+      .order("DATE(visited_at)")
+      .count
+  end
+
+  def top_referrers(limit = 5)
+    profile_views
+      .where.not(referrer: [nil, ""])
+      .joins("LEFT JOIN profile_views pv2 ON profile_views.referrer = pv2.referrer")
+      .group(:referrer)
+      .order("COUNT(*) DESC")
+      .limit(limit)
+      .count
   end
 
   private

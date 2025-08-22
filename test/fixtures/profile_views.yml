@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  visitor_ip: MyString
+  user_agent: MyString
+  referrer: MyString
+  visited_at: 2025-08-22 12:34:40
+
+two:
+  user: two
+  visitor_ip: MyString
+  user_agent: MyString
+  referrer: MyString
+  visited_at: 2025-08-22 12:34:40

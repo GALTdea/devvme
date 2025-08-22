@@ -20,6 +20,8 @@ export default class extends Controller {
                     title: title,
                     url: url
                 })
+                // Track successful share
+                this.trackShare('native_share')
             } catch (error) {
                 console.log('Error sharing:', error)
                 this.fallbackShare(url)
@@ -33,10 +35,23 @@ export default class extends Controller {
         // Copy to clipboard as fallback
         navigator.clipboard.writeText(url).then(() => {
             this.showNotification('Profile URL copied to clipboard!')
+            // Track clipboard copy
+            this.trackShare('clipboard_copy')
         }).catch((err) => {
             console.error('Could not copy text: ', err)
             this.showNotification('Failed to copy URL', 'error')
         })
+    }
+
+    trackShare(method) {
+        // Track share event with Google Analytics if available
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'share', {
+                event_category: 'social',
+                event_label: method,
+                value: this.urlValue
+            })
+        }
     }
 
     showNotification(message, type = 'success') {

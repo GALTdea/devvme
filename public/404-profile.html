@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Profile Not Found - Devvme App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen flex items-center justify-center px-4">
+    <div class="max-w-lg mx-auto text-center">
+        <!-- Error Icon -->
+        <div class="mb-8">
+            <div
+                class="w-32 h-32 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <svg class="w-16 h-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Profile Not Found</h1>
+            <p class="text-xl text-gray-600 mb-2">
+                The profile you're looking for doesn't exist or has been removed.
+            </p>
+            <p class="text-gray-500">
+                The developer might have changed their username or deleted their account.
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-4">
+            <a href="/"
+                class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
+                <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Go to Homepage
+            </a>
+
+            <div class="text-center">
+                <a href="/blog"
+                    class="inline-flex items-center px-4 py-2 text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                    <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    Browse Blog Posts
+                </a>
+            </div>
+        </div>
+
+        <!-- Suggestions -->
+        <div class="mt-12 p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">What you can do:</h3>
+            <ul class="text-left space-y-2 text-gray-600">
+                <li class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Check if you typed the username correctly
+                </li>
+                <li class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Browse our community blog for interesting content
+                </li>
+                <li class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Create your own developer profile
+                </li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-sm text-gray-500">
+            <p>Error 404 - Profile Not Found</p>
+        </div>
+    </div>
+
+    <!-- Analytics -->
+    <script>
+        // Track 404 errors for analytics
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'page_view', {
+                page_title: 'Profile Not Found',
+                page_location: window.location.href,
+                send_to: 'GA_MEASUREMENT_ID'
+            });
+        }
+    </script>
+</body>
+
+</html>

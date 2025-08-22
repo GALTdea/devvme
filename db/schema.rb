@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_22_190510) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_22_193440) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -75,6 +75,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_190510) do
     t.index ["sluggable_type", "sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_type_and_sluggable_id"
   end
 
+  create_table "profile_views", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "visitor_ip"
+    t.string "user_agent", limit: 500
+    t.string "referrer", limit: 500
+    t.datetime "visited_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "visited_at"], name: "index_profile_views_on_user_id_and_visited_at"
+    t.index ["user_id"], name: "index_profile_views_on_user_id"
+    t.index ["visited_at"], name: "index_profile_views_on_visited_at"
+    t.index ["visitor_ip", "user_id", "visited_at"], name: "index_profile_views_on_visitor_ip_and_user_id_and_visited_at"
+  end
+
   create_table "projects", force: :cascade do |t|
     t.string "title"
     t.text "description"
@@ -128,5 +142,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_190510) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "blog_posts", "users"
+  add_foreign_key "profile_views", "users"
   add_foreign_key "projects", "users"
 end

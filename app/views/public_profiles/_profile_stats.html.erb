@@ -1,0 +1,65 @@
+<!-- Profile Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <!-- Total Projects -->
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 p-6 group">
+      <div class="flex items-center">
+      <div class="flex-shrink-0 p-3 bg-blue-100 dark:bg-blue-900/50 rounded-xl group-hover:bg-blue-200 dark:group-hover:bg-blue-900/70 transition-colors">
+        <svg class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+              Published Projects
+            </dt>
+          <dd class="text-2xl font-bold text-gray-900 dark:text-white">
+              <%= user.published_projects_count %>
+            </dd>
+          </dl>
+        </div>
+    </div>
+  </div>
+
+  <!-- Blog Posts Count -->
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 p-6 group">
+    <div class="flex items-center">
+      <div class="flex-shrink-0 p-3 bg-green-100 dark:bg-green-900/50 rounded-xl group-hover:bg-green-200 dark:group-hover:bg-green-900/70 transition-colors">
+        <svg class="h-8 w-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
+      </div>
+      <div class="ml-5 w-0 flex-1">
+        <dl>
+          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+            Blog Posts
+          </dt>
+          <dd class="text-2xl font-bold text-gray-900 dark:text-white">
+            <%= user.blog_posts.published.count %>
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member Since -->
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 p-6 group">
+      <div class="flex items-center">
+      <div class="flex-shrink-0 p-3 bg-purple-100 dark:bg-purple-900/50 rounded-xl group-hover:bg-purple-200 dark:group-hover:bg-purple-900/70 transition-colors">
+        <svg class="h-8 w-8 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0h6m-6 0l-2 2m8-2l2 2m-2-2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2h8a2 2 0 012 2z" />
+          </svg>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+              Member Since
+            </dt>
+          <dd class="text-2xl font-bold text-gray-900 dark:text-white">
+              <%= user.created_at.strftime("%B %Y") %>
+            </dd>
+          </dl>
+      </div>
+    </div>
+  </div>
+</div>
