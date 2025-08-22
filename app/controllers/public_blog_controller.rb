@@ -1,4 +1,8 @@
 class PublicBlogController < ApplicationController
+  include ApplicationHelper
+  include ActionView::Helpers::TagHelper
+  include ActionView::Helpers::UrlHelper
+
   # Public blog - no authentication required
   before_action :set_blog_post, only: [:show]
 
@@ -30,6 +34,9 @@ class PublicBlogController < ApplicationController
       return
     end
 
+    # Track view count (use a job to avoid blocking the request) [[memory:3928236]]
+    TrackBlogPostViewJob.perform_later(@blog_post)
+
     # Get next and previous posts for navigation
     @next_post = BlogPost.published_posts
                         .where("published_at > ?", @blog_post.published_at)
@@ -43,6 +50,19 @@ class PublicBlogController < ApplicationController
 
     # Generate table of contents if post is long enough
     @toc = markdown_toc(@blog_post.content) if @blog_post.content.length > 2000
+  end
+
+  # GET /blog.rss
+  def rss
+    @blog_posts = BlogPost.published_posts.includes(:user).limit(20)
+
+    respond_to do |format|
+      format.xml {
+        render template: "public_blog/rss",
+               layout: false,
+               content_type: "application/rss+xml"
+      }
+    end
   end
 
   private

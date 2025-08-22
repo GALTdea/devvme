@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    
+    <%# SEO Meta Tags %>
+    <% if content_for?(:meta_description) %>
+      <meta name="description" content="<%= content_for(:meta_description) %>">
+    <% end %>
+    
+    <% if content_for?(:meta_keywords) %>
+      <meta name="keywords" content="<%= content_for(:meta_keywords) %>">
+    <% end %>
+    
+    <%# Canonical URL %>
+    <%= content_for(:canonical) if content_for?(:canonical) %>
+    
+    <%# Open Graph Tags %>
+    <%= content_for(:open_graph) if content_for?(:open_graph) %>
+    
+    <%# Twitter Card Tags %>
+    <%= content_for(:twitter_cards) if content_for?(:twitter_cards) %>
+    
+    <%# Structured Data %>
+    <%= content_for(:structured_data) if content_for?(:structured_data) %>
+    
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -16,6 +38,9 @@
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
+    
+    <%# RSS Feed %>
+    <link rel="alternate" type="application/rss+xml" title="Devvme App Blog" href="<%= public_blog_rss_url %>" />
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>

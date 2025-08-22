@@ -6,10 +6,13 @@ Rails.application.routes.draw do
   # Public blog routes (no authentication required)
   get "blog", to: "public_blog#index", as: :public_blog_index
   get "blog/:id", to: "public_blog#show", as: :public_blog_post
+  get "blog.rss", to: "public_blog#rss", as: :public_blog_rss, defaults: { format: :xml }
 
   # Admin blog routes (authentication required)
   resources :blog_posts, path: "admin/blog" do
     post :autosave, on: :member
+    patch :archive, on: :member
+    patch :unarchive, on: :member
   end
 
   # Dashboard routes

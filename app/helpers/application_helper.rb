@@ -7,6 +7,8 @@ module ApplicationHelper
   # Markdown renderer with syntax highlighting
   class CustomHTMLRenderer < Redcarpet::Render::HTML
     include Rouge::Plugins::Redcarpet
+    include ActionView::Helpers::TagHelper
+    include ActionView::Helpers::UrlHelper
 
     def initialize(options = {})
       super(options.merge(
@@ -14,7 +16,7 @@ module ApplicationHelper
         no_images: false,
         no_links: false,
         no_styles: true,
-        escape_html: false,
+        escape_html: true,
         hard_wrap: true,
         link_attributes: { target: "_blank", rel: "noopener noreferrer" }
       ))
@@ -73,22 +75,13 @@ module ApplicationHelper
   def markdown_plain(text)
     return "" if text.blank?
 
-    renderer = Redcarpet::Render::HTML.new(
-      filter_html: true,
-      no_images: true,
-      no_links: true,
-      no_styles: true,
-      escape_html: true
-    )
+    # Strip markdown syntax first
+    plain_text = text.gsub(/[#*`_\[\]()!]/, "")
+                    .gsub(/\n+/, " ")
+                    .strip
 
-    markdown_processor = Redcarpet::Markdown.new(renderer,
-      autolink: false,
-      tables: false,
-      fenced_code_blocks: false,
-      strikethrough: false
-    )
-
-    markdown_processor.render(text).html_safe
+    # Return plain text without HTML
+    plain_text
   end
 
   # Extract reading time from markdown content
@@ -125,5 +118,81 @@ module ApplicationHelper
         end.join.html_safe
       end
     end
+  end
+
+  # SEO and Meta Tag Helpers
+  def page_title(title = nil)
+    base_title = "Devvme App"
+    if title.present?
+      content_for :title, "#{title} | #{base_title}"
+      title
+    else
+      base_title
+    end
+  end
+
+  def meta_description(description)
+    content_for :meta_description, truncate(strip_tags(description), length: 160)
+  end
+
+  def meta_keywords(keywords)
+    content_for :meta_keywords, keywords.is_a?(Array) ? keywords.join(", ") : keywords
+  end
+
+  def open_graph_tags(title: nil, description: nil, image: nil, url: nil, type: "website")
+    content_for :open_graph do
+      tags = []
+      tags << tag.meta(property: "og:title", content: title) if title
+      tags << tag.meta(property: "og:description", content: description) if description
+      tags << tag.meta(property: "og:image", content: image) if image
+      tags << tag.meta(property: "og:url", content: url) if url
+      tags << tag.meta(property: "og:type", content: type)
+      tags << tag.meta(property: "og:site_name", content: "Devvme App")
+      tags.join.html_safe
+    end
+  end
+
+  def twitter_card_tags(title: nil, description: nil, image: nil)
+    content_for :twitter_cards do
+      tags = []
+      tags << tag.meta(name: "twitter:card", content: "summary_large_image")
+      tags << tag.meta(name: "twitter:title", content: title) if title
+      tags << tag.meta(name: "twitter:description", content: description) if description
+      tags << tag.meta(name: "twitter:image", content: image) if image
+      tags.join.html_safe
+    end
+  end
+
+  def blog_post_schema(blog_post)
+    content_for :structured_data do
+      schema = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": blog_post.title,
+        "description": blog_post.excerpt,
+        "author": {
+          "@type": "Person",
+          "name": blog_post.user.email # You might want to add a display_name to User model
+        },
+        "datePublished": blog_post.published_at&.iso8601,
+        "dateModified": blog_post.updated_at.iso8601,
+        "wordCount": blog_post.word_count,
+        "url": public_blog_post_url(blog_post),
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": public_blog_post_url(blog_post)
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Devvme App"
+        }
+      }
+
+      content_tag :script, schema.to_json.html_safe, type: "application/ld+json"
+    end
+  end
+
+  def canonical_url(url)
+    content_for :canonical, tag.link(rel: "canonical", href: url)
   end
 end

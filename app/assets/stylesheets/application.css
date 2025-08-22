@@ -443,6 +443,21 @@
     color: #f97316;
 }
 
+/* Simple syntax highlighting for JavaScript client-side */
+span.keyword {
+    color: #8b5cf6;
+    font-weight: 600;
+}
+
+span.string {
+    color: #10b981;
+}
+
+span.comment {
+    color: #6b7280;
+    font-style: italic;
+}
+
 /* String.Escape */
 
 /* Header anchor links */

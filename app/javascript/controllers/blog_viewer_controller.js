@@ -1,18 +1,42 @@
 import { Controller } from "@hotwired/stimulus"
 import { marked } from "marked"
-import hljs from "highlight.js"
 
-// Configure marked with syntax highlighting for better fallback support
+// Simple function for basic syntax highlighting without external dependencies
+function simpleSyntaxHighlight(code, language) {
+    // Basic highlighting for common languages
+    const patterns = {
+        javascript: [
+            { pattern: /(function|const|let|var|if|else|for|while|return|class|import|export)\b/g, class: 'keyword' },
+            { pattern: /(["'])((?:\\.|(?!\1)[^\\])*?)\1/g, class: 'string' },
+            { pattern: /\/\*[\s\S]*?\*\/|\/\/.*$/gm, class: 'comment' }
+        ],
+        ruby: [
+            { pattern: /(def|class|module|if|else|elsif|end|return|require|include)\b/g, class: 'keyword' },
+            { pattern: /(["'])((?:\\.|(?!\1)[^\\])*?)\1/g, class: 'string' },
+            { pattern: /#.*$/gm, class: 'comment' }
+        ],
+        python: [
+            { pattern: /(def|class|if|else|elif|for|while|return|import|from|as)\b/g, class: 'keyword' },
+            { pattern: /(["'])((?:\\.|(?!\1)[^\\])*?)\1/g, class: 'string' },
+            { pattern: /#.*$/gm, class: 'comment' }
+        ]
+    }
+
+    if (patterns[language]) {
+        let highlighted = code
+        patterns[language].forEach(({ pattern, class: className }) => {
+            highlighted = highlighted.replace(pattern, `<span class="${className}">$&</span>`)
+        })
+        return highlighted
+    }
+
+    return code
+}
+
+// Configure marked with simple syntax highlighting for better fallback support
 marked.setOptions({
     highlight: function (code, language) {
-        if (language && hljs.getLanguage(language)) {
-            try {
-                return hljs.highlight(code, { language: language }).value;
-            } catch (e) {
-                console.error('Syntax highlighting error:', e);
-            }
-        }
-        return hljs.highlightAuto(code).value;
+        return simpleSyntaxHighlight(code, language)
     },
     breaks: true,
     gfm: true
@@ -44,7 +68,9 @@ export default class extends Controller {
 
             // Apply syntax highlighting to any remaining code blocks
             this.element.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block)
+                // Since we're using marked's built-in highlighting, this is already done
+                // Just ensure proper styling is applied
+                block.parentElement.classList.add('highlight')
             })
         }
     }

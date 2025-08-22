@@ -1,4 +1,28 @@
-<% content_for :title, "Blog" %>
+<%# SEO Meta Tags %>
+<% page_title("Blog") %>
+<% meta_description("Insights, tutorials, and thoughts on software development, technology, and building things. #{@total_posts} posts published.") %>
+<% meta_keywords("blog, programming, development, software, tutorials, technology, devvme") %>
+
+<%# Open Graph and Twitter Card Tags %>
+<% 
+  blog_url = public_blog_index_url
+  description = "Insights, tutorials, and thoughts on software development, technology, and building things."
+%>
+
+<% open_graph_tags(
+  title: "Blog - Devvme App",
+  description: description,
+  url: blog_url,
+  type: "website"
+) %>
+
+<% twitter_card_tags(
+  title: "Blog - Devvme App",
+  description: description
+) %>
+
+<%# Canonical URL %>
+<% canonical_url(blog_url) %>
 
 <div class="container mx-auto px-4 py-8 max-w-7xl">
   <!-- Hero Section -->

@@ -12,15 +12,19 @@ class BlogPost < ApplicationRecord
   validate :published_at_presence_when_published
 
   # Scopes
-  scope :published, -> { where(published: true) }
-  scope :draft, -> { where(published: false) }
+  scope :published, -> { where(published: true, archived: false) }
+  scope :draft, -> { where(published: false, archived: false) }
+  scope :archived, -> { where(archived: true) }
+  scope :active, -> { where(archived: false) }
   scope :recent, -> { order(created_at: :desc) }
   scope :by_publication_date, -> { order(published_at: :desc) }
+  scope :by_popularity, -> { order(views_count: :desc) }
   scope :published_before, ->(date) { published.where("published_at <= ?", date) }
   scope :published_after, ->(date) { published.where("published_at >= ?", date) }
+  scope :most_viewed, ->(limit = 5) { published.by_popularity.limit(limit) }
 
   # Callbacks
-  before_save :set_published_at, if: :published_changed?
+  before_validation :set_published_at, if: :published_changed?
   before_save :generate_excerpt_if_blank
 
   # Class methods
@@ -55,10 +59,36 @@ class BlogPost < ApplicationRecord
     slug
   end
 
+  # Analytics methods
+  def increment_views!
+    increment!(:views_count)
+  end
+
+  def popular?
+    views_count > 100
+  end
+
+  # Archiving methods
+  def archive!
+    update!(archived: true)
+  end
+
+  def unarchive!
+    update!(archived: false)
+  end
+
+  def archived?
+    archived
+  end
+
+  def active?
+    !archived?
+  end
+
   private
 
   def set_published_at
-    if published?
+    if published
       self.published_at ||= Time.current
     else
       self.published_at = nil
@@ -82,7 +112,7 @@ class BlogPost < ApplicationRecord
   end
 
   def published_at_presence_when_published
-    if published? && published_at.blank?
+    if published && published_at.blank?
       errors.add(:published_at, "can't be blank when post is published")
     end
   end

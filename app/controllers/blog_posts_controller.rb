@@ -1,7 +1,7 @@
 class BlogPostsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_blog_post, only: [:show, :edit, :update, :destroy, :autosave]
-  before_action :ensure_owner, only: [:show, :edit, :update, :destroy, :autosave]
+  before_action :set_blog_post, only: [:show, :edit, :update, :destroy, :autosave, :archive, :unarchive]
+  before_action :ensure_owner, only: [:show, :edit, :update, :destroy, :autosave, :archive, :unarchive]
 
   # GET /admin/blog
   def index
@@ -13,6 +13,10 @@ class BlogPostsController < ApplicationController
       @blog_posts = @blog_posts.published
     when 'draft'
       @blog_posts = @blog_posts.draft
+    when 'archived'
+      @blog_posts = @blog_posts.archived
+    else
+      @blog_posts = @blog_posts.active
     end
 
     # Search functionality
@@ -32,6 +36,7 @@ class BlogPostsController < ApplicationController
     # Stats for status tabs
     @published_count = current_user.blog_posts.published.count
     @draft_count = current_user.blog_posts.draft.count
+    @archived_count = current_user.blog_posts.archived.count
     @total_count = current_user.blog_posts.count
   end
 
@@ -122,6 +127,18 @@ class BlogPostsController < ApplicationController
         errors: @blog_post.errors.full_messages
       }
     end
+  end
+
+  # PATCH /blog/:id/archive
+  def archive
+    @blog_post.archive!
+    redirect_to blog_posts_path, notice: 'Blog post was archived successfully.'
+  end
+
+  # PATCH /blog/:id/unarchive
+  def unarchive
+    @blog_post.unarchive!
+    redirect_to blog_posts_path, notice: 'Blog post was unarchived successfully.'
   end
 
   private

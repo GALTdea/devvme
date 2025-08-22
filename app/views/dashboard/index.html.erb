@@ -99,6 +99,102 @@
       </div>
     </div>
 
+    <!-- Blog Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <!-- Total Blog Posts -->
+      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                  Blog Posts
+                </dt>
+                <dd class="text-lg font-medium text-gray-900 dark:text-white">
+                  <%= @blog_posts_count %>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Published Blog Posts -->
+      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                  Published
+                </dt>
+                <dd class="text-lg font-medium text-gray-900 dark:text-white">
+                  <%= @published_blog_posts_count %>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Draft Blog Posts -->
+      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                  Drafts
+                </dt>
+                <dd class="text-lg font-medium text-gray-900 dark:text-white">
+                  <%= @draft_blog_posts_count %>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Blog Views -->
+      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                  Total Views
+                </dt>
+                <dd class="text-lg font-medium text-gray-900 dark:text-white">
+                  <%= number_with_delimiter(@total_blog_views) %>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Quick Actions -->
     <div class="mb-8">
       <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Quick Actions</h2>
@@ -154,9 +250,34 @@
           </span>
         <% end %>
 
+        <!-- Create New Blog Post -->
+        <%= link_to new_blog_post_path, class: "group relative bg-white dark:bg-gray-800 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg shadow hover:shadow-md transition-shadow" do %>
+          <div>
+            <span class="rounded-lg inline-flex p-3 bg-orange-50 text-orange-700 ring-4 ring-white dark:bg-orange-900 dark:text-orange-200">
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            </span>
+          </div>
+          <div class="mt-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+              <span class="absolute inset-0" aria-hidden="true"></span>
+              Write Blog Post
+            </h3>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Share your knowledge and insights
+            </p>
+          </div>
+          <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400" aria-hidden="true">
+            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"/>
+            </svg>
+          </span>
+        <% end %>
+
         <!-- View Public Profile -->
         <%= link_to profile_path, class: "group relative bg-white dark:bg-gray-800 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg shadow hover:shadow-md transition-shadow" do %>
-<div>
+          <div>
             <span class="rounded-lg inline-flex p-3 bg-purple-50 text-purple-700 ring-4 ring-white dark:bg-purple-900 dark:text-purple-200">
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -269,6 +390,92 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               Create your first project
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Recent Blog Posts Section -->
+    <div class="mb-8">
+      <div class="sm:flex sm:items-center sm:justify-between mb-6">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Recent Blog Posts</h2>
+        <% if @recent_blog_posts.any? %>
+          <%= link_to blog_posts_path, class: "mt-3 sm:mt-0 text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300" do %>
+            Manage all posts
+            <span aria-hidden="true"> →</span>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if @recent_blog_posts.any? %>
+        <!-- Blog Posts List -->
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
+          <% @recent_blog_posts.each do |blog_post| %>
+            <div class="p-6">
+              <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      <%= link_to blog_post.title, blog_post_path(blog_post), class: "hover:text-blue-600 dark:hover:text-blue-400" %>
+                    </h3>
+                    <div class="flex items-center space-x-2 ml-4">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= blog_post.published? ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' %>">
+                        <%= blog_post.published? ? 'Published' : 'Draft' %>
+                      </span>
+                      <% if blog_post.published? %>
+                        <span class="inline-flex items-center text-xs text-gray-500 dark:text-gray-400">
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <%= blog_post.views_count %>
+                        </span>
+                      <% end %>
+                    </div>
+                  </div>
+                  <% if blog_post.excerpt.present? %>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                      <%= truncate(blog_post.excerpt, length: 100) %>
+                    </p>
+                  <% end %>
+                  <div class="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
+                    <time>
+                      <%= blog_post.published? ? "Published #{time_ago_in_words(blog_post.published_at)} ago" : "Updated #{time_ago_in_words(blog_post.updated_at)} ago" %>
+                    </time>
+                    <span class="mx-2">•</span>
+                    <span><%= pluralize(blog_post.word_count, 'word') %></span>
+                    <span class="mx-2">•</span>
+                    <span><%= blog_post.reading_time %> min read</span>
+                  </div>
+                </div>
+                <div class="ml-4 flex-shrink-0">
+                  <%= link_to edit_blog_post_path(blog_post), class: "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" do %>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <!-- Empty State -->
+        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No blog posts yet</h3>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Start sharing your knowledge and experiences through blog posts.
+          </p>
+          <div class="mt-6">
+            <%= link_to new_blog_post_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Write your first post
             <% end %>
           </div>
         </div>

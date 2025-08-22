@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Devvme App Blog</title>
+    <link><%= public_blog_index_url %></link>
+    <description>Insights, tutorials, and thoughts on software development, technology, and building things.</description>
+    <language>en-us</language>
+    <managingEditor>noreply@devvme.app (Devvme Team)</managingEditor>
+    <webMaster>noreply@devvme.app (Devvme Team)</webMaster>
+    <lastBuildDate><%= @blog_posts.first&.published_at&.rfc2822 || Time.current.rfc2822 %></lastBuildDate>
+    <pubDate><%= @blog_posts.first&.published_at&.rfc2822 || Time.current.rfc2822 %></pubDate>
+    <ttl>60</ttl>
+    <atom:link href="<%= public_blog_rss_url %>" rel="self" type="application/rss+xml" />
+    
+    <% @blog_posts.each do |blog_post| %>
+      <item>
+        <title><![CDATA[<%= blog_post.title %>]]></title>
+        <link><%= public_blog_post_url(blog_post) %></link>
+        <description><![CDATA[<%= blog_post.excerpt || truncate(strip_tags(blog_post.content), length: 250) %>]]></description>
+        <content:encoded><![CDATA[<%= markdown(blog_post.content) %>]]></content:encoded>
+        <pubDate><%= blog_post.published_at.rfc2822 %></pubDate>
+        <guid isPermaLink="true"><%= public_blog_post_url(blog_post) %></guid>
+        <author>noreply@devvme.app (<%= blog_post.user.email %>)</author>
+        <category><![CDATA[Programming]]></category>
+        <category><![CDATA[Development]]></category>
+        <category><![CDATA[Technology]]></category>
+      </item>
+    <% end %>
+  </channel>
+</rss>

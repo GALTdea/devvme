@@ -26,6 +26,8 @@ published_post:
   published_at: <%= 1.week.ago %>
   slug: "getting-started-with-ruby-on-rails"
   user: one
+  archived: false
+  views_count: 0
 
 draft_post:
   title: "Advanced Rails Techniques"
@@ -47,6 +49,8 @@ draft_post:
   published_at: 
   slug: "advanced-rails-techniques"
   user: one
+  archived: false
+  views_count: 0
 
 another_published_post:
   title: "JavaScript and Rails Integration"
@@ -74,3 +78,5 @@ another_published_post:
   published_at: <%= 3.days.ago %>
   slug: "javascript-and-rails-integration"
   user: two
+  archived: false
+  views_count: 0
