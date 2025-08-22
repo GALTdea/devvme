@@ -569,3 +569,219 @@ span.comment {
     border-left: 4px solid #3b82f6;
     border-radius: 0.25rem;
 }
+
+/* Public Profile Enhancements */
+
+/* Improved gradient animations */
+.gradient-bg {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Enhanced card hover effects */
+.card-hover {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.card-hover:hover::before {
+    left: 100%;
+}
+
+/* Floating animation for avatar */
+.floating {
+    animation: floating 6s ease-in-out infinite;
+}
+
+@keyframes floating {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Pulse animation for status indicators */
+.pulse-green {
+    animation: pulseGreen 2s infinite;
+}
+
+@keyframes pulseGreen {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Enhanced focus states for accessibility */
+.focus-enhanced:focus {
+    outline: 2px solid #3B82F6;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Enhanced button interactions */
+.btn-enhanced {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-enhanced::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-enhanced:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* Improved text selection */
+::selection {
+    background-color: #3B82F6;
+    color: white;
+}
+
+.dark ::selection {
+    background-color: #60A5FA;
+    color: #1e293b;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .card-hover {
+        border: 2px solid currentColor;
+    }
+
+    .btn-enhanced {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Mobile-specific enhancements */
+@media (max-width: 768px) {
+    .mobile-stack {
+        flex-direction: column;
+    }
+
+    .mobile-full-width {
+        width: 100%;
+    }
+
+    .mobile-center {
+        text-align: center;
+    }
+}
+
+/* Loading state animations */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.dark .skeleton {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200% 100%;
+}

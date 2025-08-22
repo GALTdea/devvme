@@ -19,7 +19,7 @@
     </button>
 
     <!-- Navigation menu -->
-    <div class="hidden w-full md:block md:w-auto" id="navbar-default">
+    <div class="hidden w-full md:block md:w-auto" id="navbar-default" data-controller="dark-mode">
       <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-secondary-100 rounded-lg bg-secondary-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-secondary-800 md:dark:bg-secondary-900 dark:border-secondary-700">
         <% if user_signed_in? %>
           <!-- Authenticated user menu -->
@@ -117,6 +117,18 @@
             <% end %>
           </li>
         <% end %>
+        
+        <!-- Dark Mode Toggle -->
+        <li class="flex items-center">
+          <button data-action="click->dark-mode#toggle" 
+                  data-dark-mode-target="toggle"
+                  class="p-2 text-secondary-500 rounded-lg hover:bg-secondary-100 dark:text-secondary-400 dark:hover:bg-secondary-700 transition-colors"
+                  title="Toggle dark mode">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          </button>
+        </li>
       </ul>
     </div>
   </div>

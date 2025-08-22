@@ -14,6 +14,9 @@ class PublicProfilesController < ApplicationController
     # Only show published projects to public visitors
     @recent_projects = @user.projects.published.recent.limit(6)
 
+    # Only show published blog posts to public visitors
+    @recent_blog_posts = @user.blog_posts.published.recent.limit(3)
+
     # Prepare SEO data for the view
     prepare_seo_data
   end

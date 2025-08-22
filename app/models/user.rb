@@ -9,8 +9,9 @@ class User < ApplicationRecord
   # FriendlyId configuration
   friendly_id :username, use: :slugged
 
-  # Active Storage association for avatar
+  # Active Storage associations
   has_one_attached :avatar
+  has_one_attached :resume
 
   # Avatar image variants for different display sizes
   # Used in navigation and small UI components
@@ -39,13 +40,22 @@ class User < ApplicationRecord
   validates :full_name, length: { maximum: 100 }
   validates :bio, length: { maximum: 500 }
 
-  validates :github_url, :linkedin_url, :website_url,
+  validates :github_url, :linkedin_url, :website_url, :twitter_url,
             format: { with: /\A(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\z/i,
                      message: "must be a valid URL" },
             allow_blank: true
 
-  # Avatar validations - ensures uploaded images meet requirements
+  validates :job_title, length: { maximum: 100 }
+  validates :location, length: { maximum: 100 }
+  validates :headline, length: { maximum: 200 }
+  validates :contact_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
+  validates :phone, length: { maximum: 20 }
+  validates :resume_url, format: { with: /\A(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\z/i,
+                                   message: "must be a valid URL" }, allow_blank: true
+
+  # File validations - ensures uploaded files meet requirements
   validate :avatar_format
+  validate :resume_format
 
   def avatar_format
     return unless avatar.attached?
@@ -58,6 +68,20 @@ class User < ApplicationRecord
     # Check file size - limit to 5MB to prevent large uploads
     if avatar.byte_size > 5.megabytes
       errors.add(:avatar, "must be less than 5MB")
+    end
+  end
+
+  def resume_format
+    return unless resume.attached?
+
+    # Check file type - allow PDF and common document formats
+    unless resume.content_type.in?(%w[application/pdf application/msword application/vnd.openxmlformats-officedocument.wordprocessingml.document])
+      errors.add(:resume, "must be a PDF or Word document")
+    end
+
+    # Check file size - limit to 10MB
+    if resume.byte_size > 10.megabytes
+      errors.add(:resume, "must be less than 10MB")
     end
   end
 
@@ -81,7 +105,7 @@ class User < ApplicationRecord
   # Calculates profile completion percentage based on filled fields
   # Used to encourage users to complete their profiles
   def profile_completion_percentage
-    total_fields = 7
+    total_fields = 12
     completed_fields = 0
 
     # Count each completed profile field
@@ -92,6 +116,11 @@ class User < ApplicationRecord
     completed_fields += 1 if github_url.present?
     completed_fields += 1 if linkedin_url.present?
     completed_fields += 1 if website_url.present?
+    completed_fields += 1 if job_title.present?
+    completed_fields += 1 if location.present?
+    completed_fields += 1 if headline.present?
+    completed_fields += 1 if contact_email.present?
+    completed_fields += 1 if skills.present? && skills.any?
 
     # Return percentage rounded to nearest integer
     (completed_fields.to_f / total_fields * 100).round
@@ -128,6 +157,8 @@ class User < ApplicationRecord
     normalize_url(:github_url)
     normalize_url(:linkedin_url)
     normalize_url(:website_url)
+    normalize_url(:twitter_url)
+    normalize_url(:resume_url)
   end
 
   def normalize_url(field)
