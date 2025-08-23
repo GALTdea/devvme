@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_22_193440) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_22_195629) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_193440) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "admin_activities", force: :cascade do |t|
+    t.bigint "admin_id", null: false
+    t.string "action", null: false
+    t.string "target_type"
+    t.bigint "target_id"
+    t.json "details", default: {}
+    t.string "ip_address"
+    t.string "user_agent", limit: 500
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["action"], name: "index_admin_activities_on_action"
+    t.index ["admin_id", "created_at"], name: "index_admin_activities_on_admin_id_and_created_at"
+    t.index ["admin_id"], name: "index_admin_activities_on_admin_id"
+    t.index ["created_at"], name: "index_admin_activities_on_created_at"
+    t.index ["target_type", "target_id"], name: "index_admin_activities_on_target_type_and_target_id"
   end
 
   create_table "blog_posts", force: :cascade do |t|
@@ -133,14 +150,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_193440) do
     t.string "phone"
     t.text "headline"
     t.json "skills"
+    t.integer "role", default: 0, null: false
+    t.datetime "suspended_at"
+    t.text "suspension_reason"
+    t.datetime "last_login_at"
+    t.text "admin_notes"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["last_login_at"], name: "index_users_on_last_login_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["role"], name: "index_users_on_role"
     t.index ["slug"], name: "index_users_on_slug", unique: true
+    t.index ["suspended_at"], name: "index_users_on_suspended_at"
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "admin_activities", "users", column: "admin_id"
   add_foreign_key "blog_posts", "users"
   add_foreign_key "profile_views", "users"
   add_foreign_key "projects", "users"

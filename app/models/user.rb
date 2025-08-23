@@ -9,6 +9,9 @@ class User < ApplicationRecord
   # FriendlyId configuration
   friendly_id :username, use: :slugged
 
+  # Role system
+  enum :role,{ user: 0, admin: 1, super_admin: 2 }
+
   # Active Storage associations
   has_one_attached :avatar
   has_one_attached :resume
@@ -32,6 +35,9 @@ class User < ApplicationRecord
 
   # Profile views association for analytics
   has_many :profile_views, dependent: :destroy
+
+  # Admin activity associations
+  has_many :admin_activities, foreign_key: :admin_id, dependent: :destroy
 
   # Validations
   validates :username, presence: true,
@@ -191,6 +197,71 @@ class User < ApplicationRecord
       .count
   end
 
+  # Admin and user management methods
+  def suspended?
+    suspended_at.present?
+  end
+
+  def suspend!(reason: nil, admin: nil)
+    update!(
+      suspended_at: Time.current,
+      suspension_reason: reason
+    )
+    log_admin_activity(admin, 'suspend_user', { reason: reason }) if admin
+  end
+
+  def unsuspend!(admin: nil)
+    update!(
+      suspended_at: nil,
+      suspension_reason: nil
+    )
+    log_admin_activity(admin, 'unsuspend_user') if admin
+  end
+
+  def can_access_admin?
+    admin? || super_admin?
+  end
+
+  def can_manage_users?
+    super_admin?
+  end
+
+  def update_last_login!
+    update_column(:last_login_at, Time.current)
+  end
+
+  # Admin statistics methods
+  def self.total_users
+    count
+  end
+
+  def self.active_users(days = 30)
+    where('last_login_at > ?', days.days.ago).count
+  end
+
+  def self.suspended_users
+    where.not(suspended_at: nil).count
+  end
+
+  def self.new_users_this_week
+    where('created_at > ?', 1.week.ago).count
+  end
+
+  def self.new_users_this_month
+    where('created_at > ?', 1.month.ago).count
+  end
+
+  def self.users_by_role
+    group(:role).count
+  end
+
+  def self.registration_stats(days = 30)
+    where('created_at > ?', days.days.ago)
+      .group("DATE(created_at)")
+      .order("DATE(created_at)")
+      .count
+  end
+
   private
 
   # Normalize URLs by adding https:// prefix if missing
@@ -211,5 +282,20 @@ class User < ApplicationRecord
     unless url.start_with?("http://", "https://")
       self[field] = "https://#{url}"
     end
+  end
+
+  def log_admin_activity(admin, action, details = {})
+    return unless admin&.can_access_admin?
+
+    AdminActivity.create!(
+      admin: admin,
+      action: action,
+      target_type: self.class.name,
+      target_id: id,
+      details: details.merge(
+        target_username: username,
+        target_email: email
+      )
+    )
   end
 end

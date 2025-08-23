@@ -1,0 +1,244 @@
+<% content_for :title, "Admin Dashboard" %>
+
+<div class="min-h-screen bg-secondary-50 dark:bg-secondary-900">
+  <!-- Admin Header -->
+  <div class="bg-white dark:bg-secondary-800 shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="py-6">
+        <div class="flex items-center justify-between">
+<div>
+            <h1 class="text-2xl font-bold text-secondary-900 dark:text-white">Admin Dashboard</h1>
+            <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
+              Manage users, content, and monitor platform activity
+            </p>
+          </div>
+          <div class="flex items-center space-x-4">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+              <%= current_user.role.humanize %> Access
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Navigation -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <nav class="flex space-x-4" aria-label="Admin Navigation">
+      <%= link_to admin_root_path, 
+          class: "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-200 px-3 py-2 rounded-md text-sm font-medium" do %>
+        Dashboard
+      <% end %>
+      <%= link_to admin_users_path, 
+          class: "text-secondary-600 hover:text-secondary-900 dark:text-secondary-300 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary-100 dark:hover:bg-secondary-700" do %>
+        Users
+      <% end %>
+      <%= link_to admin_content_moderation_index_path, 
+          class: "text-secondary-600 hover:text-secondary-900 dark:text-secondary-300 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary-100 dark:hover:bg-secondary-700" do %>
+        Content Moderation
+      <% end %>
+      <%= link_to admin_activities_path, 
+          class: "text-secondary-600 hover:text-secondary-900 dark:text-secondary-300 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary-100 dark:hover:bg-secondary-700" do %>
+        Activity Log
+      <% end %>
+    </nav>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- User Stats -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Total Users</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @user_stats[:total_users] %></dd>
+              </dl>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
+            <span class="text-green-600"><%= @user_stats[:active_users] %></span> active this month
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Stats -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Blog Posts</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @content_stats[:total_blog_posts] %></dd>
+              </dl>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
+            <span class="text-green-600"><%= @content_stats[:published_blog_posts] %></span> published
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects Stats -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Projects</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @content_stats[:total_projects] %></dd>
+              </dl>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
+            <span class="text-green-600"><%= @content_stats[:published_projects] %></span> published
+          </div>
+        </div>
+      </div>
+
+      <!-- New Users This Week -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">New This Week</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @user_stats[:new_users_this_week] %></dd>
+              </dl>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
+            <span class="text-blue-600"><%= @user_stats[:new_users_this_month] %></span> this month
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Recent Users -->
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white">Recent Users</h3>
+          <div class="mt-5">
+            <div class="flow-root">
+              <ul class="-my-5 divide-y divide-secondary-200 dark:divide-secondary-700">
+                <% @recent_users.each do |user| %>
+                  <li class="py-4">
+                    <div class="flex items-center space-x-4">
+                      <div class="flex-shrink-0">
+                        <% if user.avatar.attached? %>
+                          <%= image_tag user.avatar_thumbnail, class: "h-8 w-8 rounded-full" %>
+                        <% else %>
+                          <div class="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
+                            <span class="text-white text-sm font-medium"><%= user.username.first.upcase %></span>
+                          </div>
+                        <% end %>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-secondary-900 dark:text-white truncate">
+                          <%= link_to user.display_name, admin_user_path(user), class: "hover:text-primary-600" %>
+                        </p>
+                        <p class="text-sm text-secondary-500 dark:text-secondary-400 truncate">@<%= user.username %></p>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                               <%= user.suspended? ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' %>">
+                          <%= user.suspended? ? 'Suspended' : 'Active' %>
+                        </span>
+                      </div>
+                    </div>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+            <div class="mt-6">
+              <%= link_to admin_users_path, class: "w-full flex justify-center items-center px-4 py-2 border border-secondary-300 shadow-sm text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 dark:bg-secondary-700 dark:border-secondary-600 dark:text-secondary-200 dark:hover:bg-secondary-600" do %>
+                View all users
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Admin Activities -->
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white">Recent Admin Activities</h3>
+          <div class="mt-5">
+            <div class="flow-root">
+              <ul class="-my-5 divide-y divide-secondary-200 dark:divide-secondary-700">
+                <% @recent_activities.each do |activity| %>
+                  <li class="py-4">
+                    <div class="flex space-x-3">
+                      <div class="flex-shrink-0">
+                        <div class="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
+                          <span class="text-white text-sm font-medium"><%= activity.admin.username.first.upcase %></span>
+                        </div>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-secondary-900 dark:text-white">
+                          <%= activity.admin.username %>
+                        </p>
+                        <p class="text-sm text-secondary-500 dark:text-secondary-400">
+                          <%= activity.action_description %> • <%= activity.target_description %>
+                        </p>
+                        <p class="text-xs text-secondary-400 dark:text-secondary-500">
+                          <%= time_ago_in_words(activity.created_at) %> ago
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+            <div class="mt-6">
+              <%= link_to admin_activities_path, class: "w-full flex justify-center items-center px-4 py-2 border border-secondary-300 shadow-sm text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 dark:bg-secondary-700 dark:border-secondary-600 dark:text-secondary-200 dark:hover:bg-secondary-600" do %>
+                View all activities
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role Distribution -->
+    <div class="mt-8">
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">User Role Distribution</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <% @user_stats[:users_by_role].each do |role, count| %>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-secondary-900 dark:text-white"><%= count %></div>
+                <div class="text-sm text-secondary-500 dark:text-secondary-400"><%= role.humanize.pluralize %></div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

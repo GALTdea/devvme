@@ -1,4 +1,35 @@
 Rails.application.routes.draw do
+  namespace :admin do
+    root "dashboard#index"
+
+    resources :users do
+      member do
+        patch :suspend
+        patch :unsuspend
+        patch :promote
+        patch :demote
+        delete :destroy
+      end
+      collection do
+        post :bulk_suspend
+        post :bulk_delete
+        post :bulk_promote
+        post :bulk_demote
+      end
+    end
+
+    resources :activities, only: [:index, :show]
+
+    namespace :content_moderation do
+      get :index
+      get :blog_posts
+      get :projects
+      patch 'blog_posts/:id/moderate', to: 'content_moderation#moderate_blog_post', as: :moderate_blog_post
+      patch 'projects/:id/moderate', to: 'content_moderation#moderate_project', as: :moderate_project
+    end
+
+    get "dashboard", to: "dashboard#index"
+  end
   resources :projects do
     patch :reorder, on: :collection
   end
