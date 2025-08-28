@@ -156,7 +156,7 @@ class BlogPostsController < ApplicationController
   end
 
   def blog_post_params
-    params.require(:blog_post).permit(:title, :content, :excerpt, :published, :published_at)
+    params.require(:blog_post).permit(:title, :content, :excerpt, :published, :published_at, :featured)
   end
 
   def autosave_params

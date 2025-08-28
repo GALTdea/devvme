@@ -43,7 +43,7 @@
       </div>
 
       <!-- Publishing Options -->
-      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Published Toggle -->
         <div class="flex items-start">
           <div class="flex items-center h-5">
@@ -57,6 +57,18 @@
           <div class="ml-3 text-sm">
             <%= form.label :published, "Publish immediately", class: "font-medium text-gray-700 dark:text-gray-300" %>
             <p class="text-gray-500 dark:text-gray-400">Make this post visible to the public</p>
+          </div>
+        </div>
+
+        <!-- Featured Toggle -->
+        <div class="flex items-start">
+          <div class="flex items-center h-5">
+            <%= form.check_box :featured, 
+                class: "w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 dark:focus:ring-yellow-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" %>
+          </div>
+          <div class="ml-3 text-sm">
+            <%= form.label :featured, "Mark as featured", class: "font-medium text-gray-700 dark:text-gray-300" %>
+            <p class="text-gray-500 dark:text-gray-400">Showcase this post on your profile</p>
           </div>
         </div>
 

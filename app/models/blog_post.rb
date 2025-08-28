@@ -22,6 +22,7 @@ class BlogPost < ApplicationRecord
   scope :published_before, ->(date) { published.where("published_at <= ?", date) }
   scope :published_after, ->(date) { published.where("published_at >= ?", date) }
   scope :most_viewed, ->(limit = 5) { published.by_popularity.limit(limit) }
+  scope :featured, -> { where(featured: true) }
 
   # Callbacks
   before_validation :set_published_at, if: :published_changed?
