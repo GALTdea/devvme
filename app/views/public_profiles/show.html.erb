@@ -42,15 +42,15 @@
       background: #fff !important;
     }
     
-    .bg-white, .bg-gray-50, .bg-gray-100 {
+    .bg-white, .bg-charcoal-50, .bg-primary-100 {
       background: #fff !important;
     }
     
-    .text-gray-900, .text-gray-800, .text-gray-700 {
+    .text-charcoal-900, .text-charcoal-800, .text-charcoal-700 {
       color: #000 !important;
     }
     
-    .text-gray-600, .text-gray-500 {
+    .text-charcoal-600, .text-charcoal-500 {
       color: #333 !important;
     }
     
@@ -80,20 +80,9 @@
   </style>
 <% end %>
 
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300" 
-     data-controller="dark-mode">
+<div class="min-h-screen bg-gradient-to-br from-cream-50 via-primary-50 to-secondary-50 dark:from-charcoal-900 dark:via-charcoal-800 dark:to-secondary-900 transition-all duration-300">
   
-  <!-- Dark Mode Toggle - Fixed Position -->
-  <div class="fixed top-4 right-4 z-50 no-print">
-    <button data-action="click->dark-mode#toggle" 
-            data-dark-mode-target="toggle"
-            class="group p-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700">
-      <svg class="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" 
-           fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-      </svg>
-    </button>
-  </div>
+
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     
@@ -120,23 +109,23 @@
     <!-- Empty States -->
     <% if @recent_projects.empty? && @recent_blog_posts.empty? %>
       <div class="text-center py-16">
-        <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
-          <svg class="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="mx-auto w-24 h-24 bg-primary-100 dark:bg-charcoal-800 rounded-full flex items-center justify-center mb-6">
+          <svg class="w-12 h-12 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
         </div>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Content Yet</h3>
-        <p class="text-xl text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+        <h3 class="text-2xl font-bold text-charcoal-900 dark:text-cream-50 mb-2">No Content Yet</h3>
+        <p class="text-xl text-charcoal-500 dark:text-charcoal-400 max-w-md mx-auto">
           <%= @user.display_name %> hasn't published any projects or blog posts yet. Check back soon!
         </p>
       </div>
     <% elsif @recent_projects.empty? %>
-      <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
-        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="text-center py-12 bg-white dark:bg-charcoal-800 rounded-2xl shadow-lg border border-primary-100 dark:border-charcoal-700">
+        <svg class="mx-auto h-12 w-12 text-charcoal-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Projects Yet</h3>
-        <p class="text-gray-500 dark:text-gray-400">
+        <h3 class="text-lg font-medium text-charcoal-900 dark:text-cream-50 mb-2">No Projects Yet</h3>
+        <p class="text-charcoal-500 dark:text-charcoal-400">
             <%= @user.display_name %> hasn't published any projects yet.
           </p>
         </div>
