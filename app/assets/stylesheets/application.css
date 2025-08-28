@@ -208,7 +208,7 @@
 /* Blog and Markdown Styles */
 .markdown-content {
     line-height: 1.7;
-    color: #374151;
+    color: #334155;
 }
 
 .markdown-content h1,
@@ -258,12 +258,12 @@
 }
 
 .markdown-content blockquote {
-    border-left: 4px solid #3b82f6;
-    background-color: #f8fafc;
+    border-left: 4px solid #10b981;
+    background-color: #f0fdf4;
     margin: 1.5rem 0;
     padding: 1rem 1.5rem;
     font-style: italic;
-    color: #64748b;
+    color: #334155;
 }
 
 .markdown-content table {
@@ -352,8 +352,8 @@
 
 /* Inline code */
 .markdown-content code {
-    background-color: #f3f4f6;
-    color: #dc2626;
+    background-color: #f0fdf4;
+    color: #5b21b6;
     padding: 0.125rem 0.25rem;
     border-radius: 0.25rem;
     font-size: 0.875em;
