@@ -12,10 +12,10 @@ class DashboardController < ApplicationController
 
     # Blog statistics
     @blog_posts_count = @user.blog_posts.count
-    @published_blog_posts_count = @user.blog_posts.published.count
+    @published_blog_posts_count = @user.blog_posts.published_posts.count
     @draft_blog_posts_count = @user.blog_posts.draft.count
     @total_blog_views = @user.blog_posts.sum(:views_count)
-    @most_viewed_post = @user.blog_posts.published.by_popularity.first
+    @most_viewed_post = @user.blog_posts.published_posts.by_popularity.first
 
     # Get recent published projects for quick access (limit to 3)
     @recent_projects = @user.recent_projects(3)

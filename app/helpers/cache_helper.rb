@@ -36,7 +36,7 @@ module CacheHelper
       user.id,
       user.updated_at.to_i,
       user.projects.published.count,
-      user.blog_posts.published.count,
+      user.blog_posts.published_posts.count,
       user.created_at.to_i
     ]
     "user-stats-#{key_parts.join('-')}"

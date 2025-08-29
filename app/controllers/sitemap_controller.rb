@@ -13,9 +13,8 @@ class SitemapController < ApplicationController
                  .order(:username)
 
     # Get published blog posts for sitemap
-    @blog_posts = BlogPost.published
+    @blog_posts = BlogPost.published_posts
                           .includes(:user)
-                          .order(published_at: :desc)
 
     respond_to do |format|
       format.xml { render layout: false }

@@ -23,8 +23,7 @@ class PublicProfilesController < ApplicationController
 
     # Only show published blog posts to public visitors
     @recent_blog_posts = @user.blog_posts
-                             .published
-                             .recent
+                             .published_posts
                              .limit(3)
 
     # Prepare SEO data for the view

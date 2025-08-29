@@ -8,7 +8,7 @@ class ProfilesController < ApplicationController
     @public_profile_url = public_profile_url(@user.friendly_id)
 
     # Get recent blog posts for the user (mirroring public profile structure)
-    @recent_blog_posts = @user.blog_posts.published.order(published_at: :desc).limit(6)
+    @recent_blog_posts = @user.blog_posts.published_posts.limit(6)
 
     # Get recent projects for the user
     @recent_projects = @user.projects.published.order(created_at: :desc).limit(6)

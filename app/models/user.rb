@@ -140,15 +140,15 @@ class User < ApplicationRecord
   end
 
   def featured_blog_posts(limit = 3)
-    blog_posts.published.featured.by_publication_date.limit(limit)
+    blog_posts.published_posts.featured.limit(limit)
   end
 
   def recent_blog_posts(limit = 3)
-    blog_posts.published.by_publication_date.limit(limit)
+    blog_posts.published_posts.limit(limit)
   end
 
   def published_blog_posts_count
-    blog_posts.published.count
+    blog_posts.published_posts.count
   end
 
   def display_name

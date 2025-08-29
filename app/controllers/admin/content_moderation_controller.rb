@@ -12,7 +12,7 @@ class Admin::ContentModerationController < ApplicationController
 
     @content_stats = {
       total_blog_posts: BlogPost.count,
-      published_blog_posts: BlogPost.published.count,
+      published_blog_posts: BlogPost.published_posts.count,
       archived_blog_posts: BlogPost.archived.count,
       total_projects: Project.count,
       published_projects: Project.published.count

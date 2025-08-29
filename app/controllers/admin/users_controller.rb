@@ -37,7 +37,7 @@ class Admin::UsersController < ApplicationController
       projects_count: @user.projects.count,
       published_projects_count: @user.projects.published.count,
       blog_posts_count: @user.blog_posts.count,
-      published_blog_posts_count: @user.blog_posts.published.count,
+      published_blog_posts_count: @user.blog_posts.published_posts.count,
       profile_views: @user.total_profile_views,
       unique_visitors: @user.unique_profile_visitors
     }
