@@ -1,13 +1,13 @@
 <% content_for :title, "#{@user.display_name} - Profile" %>
 
-<div class="min-h-screen bg-gradient-to-br from-cream-50 via-primary-50 to-secondary-50 dark:from-charcoal-900 dark:via-charcoal-800 dark:to-secondary-900 transition-all duration-300 py-8">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-br from-cream-50 via-primary-50 to-secondary-50 dark:from-charcoal-900 dark:via-charcoal-800 dark:to-secondary-900 transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     
     <!-- Profile Header -->
     <div class="relative overflow-hidden bg-white dark:bg-charcoal-800 rounded-2xl shadow-xl mb-8 border border-primary-200 dark:border-charcoal-700 transition-all duration-300 hover:shadow-2xl">
       <!-- Background Pattern -->
       <div class="absolute inset-0 bg-gradient-to-r from-primary-600/5 to-secondary-600/5 dark:from-primary-400/5 dark:to-secondary-400/5"></div>
-      <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%2310b981" fill-opacity="0.03"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%2310b981" fill-opacity="0.03"%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
       
       <div class="relative px-8 py-12">
         <div class="flex flex-col lg:flex-row lg:items-start lg:space-x-8">
@@ -138,8 +138,10 @@
               <% end %>
               
               <% if @user.linkedin_url.present? %>
-                <%= link_to @user.linkedin_url, target: "_blank", rel: "noopener noreferrer",
-                    class: "inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" do %>
+                <%= link_to(@user.linkedin_url, 
+                    target: "_blank", 
+                    rel: "noopener noreferrer",
+                    class: "inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500") do %>
                   <svg class="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
                   </svg>
@@ -148,9 +150,11 @@
               <% end %>
               
               <% if @user.website_url.present? %>
-                <%= link_to @user.website_url, target: "_blank", rel: "noopener noreferrer",
-                    class: "inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" do %>
-                  <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <%= link_to(@user.website_url, 
+                    target: "_blank", 
+                    rel: "noopener noreferrer",
+                    class: "inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500") do %>
+                  <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0 9a9 9 0 009-9M3 12a9 9 0 019-9" />
                   </svg>
                   Website
@@ -239,85 +243,106 @@
       </div>
     </div>
 
-    <!-- Featured Blog Posts Section -->
-    <% featured_blog_posts = @user.featured_blog_posts(3) %>
-    <% if featured_blog_posts.any? %>
+    <!-- Blog Posts Section -->
+    <% if @recent_blog_posts.any? %>
       <div class="mb-8">
-        <div class="sm:flex sm:items-center sm:justify-between mb-6">
-          <h2 class="text-lg font-medium text-gray-900 dark:text-white">Featured Blog Posts</h2>
-          <%= link_to public_blog_index_path, class: "mt-3 sm:mt-0 text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300" do %>
-            View all posts
-            <span aria-hidden="true"> →</span>
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+            <svg class="w-8 h-8 mr-3 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            Latest Blog Posts
+          </h2>
+          <% if @user.blog_posts.published.count > 6 %>
+            <%= link_to public_blog_index_path, 
+                class: "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors no-print" do %>
+              View All →
+            <% end %>
           <% end %>
         </div>
 
-        <!-- Blog Posts Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <% featured_blog_posts.each do |blog_post| %>
-            <article class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow">
-              <!-- Blog Post Header -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <% @recent_blog_posts.each_with_index do |post, index| %>
+            <article class="blog-post-card bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 dark:border-gray-700 group overflow-hidden transform hover:-translate-y-2" 
+                     style="animation-delay: <%= index * 150 %>ms">
               <div class="p-6">
-                <div class="flex items-center justify-between mb-3">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                    <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    Featured
-                  </span>
-                  <time class="text-xs text-gray-500 dark:text-gray-400">
-                    <%= time_ago_in_words(blog_post.published_at) %> ago
+                <div class="flex items-center justify-between mb-4">
+                  <time class="text-sm text-gray-500 dark:text-gray-400">
+                    <%= post.published_at.strftime("%B %d, %Y") %>
                   </time>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    <%= pluralize(post.views_count, 'view') %>
+                  </span>
                 </div>
                 
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                  <%= link_to blog_post.title, public_blog_post_path(blog_post), 
-                      class: "hover:text-primary-600 dark:hover:text-primary-400 transition-colors" %>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  <%= link_to post.title, public_blog_post_path(@user.username, post), class: "hover:underline" %>
                 </h3>
                 
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
-                  <%= blog_post.excerpt || truncate(strip_tags(blog_post.content), length: 120) %>
-                </p>
+                <% if post.excerpt.present? %>
+                  <p class="text-gray-600 dark:text-gray-400 line-clamp-3 leading-relaxed mb-4">
+                    <%= truncate(post.excerpt, length: 150) %>
+                  </p>
+                <% end %>
                 
-                <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                  <div class="flex items-center">
-                    <svg class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    <%= pluralize(blog_post.views_count, 'view') %>
-                  </div>
-                  <div class="flex items-center">
-                    <svg class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <%= pluralize(blog_post.reading_time, 'min') %> read
-                  </div>
-                </div>
+                <%= link_to public_blog_post_path(@user.username, post), 
+                    class: "inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors group-hover:underline" do %>
+                  Read More
+                  <svg class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                <% end %>
               </div>
             </article>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <!-- Empty State for Blog Posts -->
+      <div class="text-center py-16">
+        <div class="mx-auto w-24 h-24 bg-primary-100 dark:bg-charcoal-800 rounded-full flex items-center justify-center mb-6">
+          <svg class="w-12 h-12 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-charcoal-900 dark:text-cream-50 mb-2">No Blog Posts Yet</h3>
+        <p class="text-xl text-charcoal-500 dark:text-charcoal-400 max-w-md mx-auto">
+          You haven't published any blog posts yet. Start writing to share your knowledge!
+        </p>
+        <div class="mt-6">
+          <%= link_to new_blog_post_path, 
+              class: "inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5" do %>
+            <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Write Your First Post
           <% end %>
         </div>
       </div>
     <% end %>
 
     <!-- Recent Projects Section -->
-    <% recent_projects = @user.recent_projects(6) %>
-    <div class="mb-8">
-      <div class="sm:flex sm:items-center sm:justify-between mb-6">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Recent Projects</h2>
-        <% if recent_projects.any? %>
-          <%= link_to "#", class: "mt-3 sm:mt-0 text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300" do %>
-            View all projects
-            <span aria-hidden="true"> →</span>
+    <% if @recent_projects.any? %>
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+            <svg class="w-8 h-8 mr-3 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            Recent Projects
+          </h2>
+          <% if @user.projects.published.count > 6 %>
+            <%= link_to projects_path, 
+                class: "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors no-print" do %>
+              View All →
+            <% end %>
           <% end %>
-        <% end %>
-      </div>
+        </div>
 
-      <% if recent_projects.any? %>
-        <!-- Projects Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <% recent_projects.each do |project| %>
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <% @recent_projects.each_with_index do |project, index| %>
+            <div class="project-card bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 dark:border-gray-700 group overflow-hidden transform hover:-translate-y-2" 
+                 style="animation-delay: <%= index * 150 %>ms">
               <!-- Project Thumbnail -->
               <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700">
                 <% if project.thumbnail.attached? %>
@@ -329,20 +354,20 @@
                     </svg>
                   </div>
                 <% end %>
-</div>
+              </div>
 
               <!-- Project Content -->
               <div class="p-6">
                 <div class="flex items-center justify-between mb-2">
-                  <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate">
-                    <%= project.title %>
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <%= link_to project.title, project_path(project), class: "hover:underline" %>
                   </h3>
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                     Published
                   </span>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                  <%= truncate(project.description, length: 100) %>
+                <p class="text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed mb-4">
+                  <%= truncate(project.description, length: 120) %>
                 </p>
                 <div class="flex items-center justify-between">
                   <div class="flex space-x-2">
@@ -371,19 +396,26 @@
             </div>
           <% end %>
         </div>
-      <% else %>
-        <!-- Empty State -->
-        <div class="text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </div>
+    <% else %>
+      <!-- Empty State for Projects -->
+      <div class="text-center py-12 bg-white dark:bg-charcoal-800 rounded-2xl shadow-lg border border-primary-100 dark:border-charcoal-700 mb-8">
+        <svg class="mx-auto h-12 w-12 text-charcoal-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+        <h3 class="text-lg font-medium text-charcoal-900 dark:text-cream-50 mb-2">No Projects Yet</h3>
+        <p class="text-charcoal-500 dark:text-charcoal-400 mb-4">
+          You haven't published any projects yet. Start building to showcase your skills!
+        </p>
+        <%= link_to new_project_path, 
+            class: "inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No projects yet</h3>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Your published projects will appear here.
-          </p>
-        </div>
-      <% end %>
-    </div>
+          Create Your First Project
+        <% end %>
+      </div>
+    <% end %>
 
     <!-- Profile Completion Prompt -->
     <% if @user.profile_completion_percentage < 100 %>
