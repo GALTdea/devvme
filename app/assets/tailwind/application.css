@@ -80,14 +80,20 @@
     --color-pink-900: #831843;
     --color-pink-950: #500724;
 
-    /* Backgrounds: Soft cream and rich charcoal */
+    /* Cream: Warm background colors */
     --color-cream-50: #fffbeb;
     --color-cream-100: #fef3c7;
     --color-cream-200: #fde68a;
     --color-cream-300: #fcd34d;
     --color-cream-400: #fbbf24;
     --color-cream-500: #f59e0b;
+    --color-cream-600: #d97706;
+    --color-cream-700: #b45309;
+    --color-cream-800: #92400e;
+    --color-cream-900: #78350f;
+    --color-cream-950: #451a03;
 
+    /* Charcoal: Rich dark colors */
     --color-charcoal-50: #f8fafc;
     --color-charcoal-100: #f1f5f9;
     --color-charcoal-200: #e2e8f0;

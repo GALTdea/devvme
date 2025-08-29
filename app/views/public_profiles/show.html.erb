@@ -131,7 +131,5 @@
   </div>
 </div>
 
-<!-- CSS animations are now loaded from public_profiles.css stylesheet -->
-
 <%# Google Analytics tracking for profile view %>
 <%= track_profile_view(@user.username, @user.id) if google_analytics_enabled? %>
