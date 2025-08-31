@@ -8,7 +8,7 @@ export default class extends Controller {
         // Check for saved theme preference or default to 'light'
         const savedTheme = localStorage.getItem('theme')
         const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        console.log("Dark mode controller connected ")
+        // console.log("Dark mode controller connected ")
 
         if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
             this.enableDarkMode()
@@ -30,16 +30,16 @@ export default class extends Controller {
 
     toggle() {
         const currentMode = document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-        console.log(`Dark mode toggle clicked. Current mode: ${currentMode}`)
+        // console.log(`Dark mode toggle clicked. Current mode: ${currentMode}`)
 
         if (document.documentElement.classList.contains('dark')) {
             this.disableDarkMode()
             localStorage.setItem('theme', 'light')
-            console.log('Switching to light mode')
+            // console.log('Switching to light mode')
         } else {
             this.enableDarkMode()
             localStorage.setItem('theme', 'dark')
-            console.log('Switching to dark mode')
+            // console.log('Switching to dark mode')
         }
     }
 
