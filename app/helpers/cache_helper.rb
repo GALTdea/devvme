@@ -1,7 +1,7 @@
 module CacheHelper
   # Generate cache key for user profile sections
   def profile_cache_key(user, section = nil)
-    timestamp = [user.updated_at, user.avatar.attached? ? user.avatar.blob.updated_at : nil].compact.max
+    timestamp = [user.updated_at, user.avatar.attached? ? user.avatar.blob.created_at : nil].compact.max
     key = "user-#{user.id}-#{timestamp.to_i}"
     key += "-#{section}" if section.present?
     key
@@ -14,7 +14,7 @@ module CacheHelper
     timestamps = [user.updated_at]
     projects.each do |project|
       timestamps << project.updated_at
-      timestamps << project.thumbnail.blob.updated_at if project.thumbnail.attached?
+      timestamps << project.thumbnail.blob.created_at if project.thumbnail.attached?
     end
 
     max_timestamp = timestamps.compact.max
