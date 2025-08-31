@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+/* Dark mode configuration */
+:root {
+    --dark-mode: class;
+}
+
+/* Custom dark mode classes for class-based dark mode */
+.dark .dark\:bg-secondary-900 {
+    background-color: var(--color-secondary-900);
+}
+
+.dark .dark\:text-white {
+    color: var(--color-white);
+}
+
+.dark .dark\:bg-charcoal-900 {
+    background-color: var(--color-charcoal-900);
+}
+
+.dark .dark\:text-charcoal-300 {
+    color: var(--color-charcoal-300);
+}
+
+.dark .dark\:border-charcoal-700 {
+    border-color: var(--color-charcoal-700);
+}
+
 /* Code Garden Color Palette - Developer Playground Theme */
 @theme {
     /* Primary: Fresh Green - Growth, creativity, "go" */
