@@ -5,14 +5,8 @@ class PublicProfilesController < ApplicationController
   # Display public user profile page that can be shared with visitors
   # Accessible at /:username (e.g., /gustavo)
   def show
-    # If current user is viewing their own profile, redirect to authenticated profile
-    if user_signed_in? && @user == current_user
-      redirect_to profile_path
-      return
-    end
-
-    # Track profile visit asynchronously (only for external visitors)
-    track_profile_visit
+    # Track profile visit asynchronously (only for external visitors, not self-visits)
+    track_profile_visit unless user_signed_in? && @user == current_user
 
     # Only show published projects to public visitors with optimized queries
     @recent_projects = @user.projects
