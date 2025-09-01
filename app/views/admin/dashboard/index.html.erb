@@ -6,13 +6,44 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="py-6">
         <div class="flex items-center justify-between">
-<div>
+          <div>
             <h1 class="text-2xl font-bold text-secondary-900 dark:text-white">Admin Dashboard</h1>
             <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
               Manage users, content, and monitor platform activity
             </p>
           </div>
           <div class="flex items-center space-x-4">
+            <!-- Time Range Selector -->
+            <div class="flex items-center space-x-2">
+              <label for="time-range" class="text-sm font-medium text-secondary-700 dark:text-secondary-300">Time Range:</label>
+              <%= form_with url: admin_root_path, method: :get, local: true, class: "inline-flex" do |form| %>
+                <%= form.select :time_range, 
+                    options_for_select([
+                      ['Last 7 days', '7_days'],
+                      ['Last 30 days', '30_days'],
+                      ['Last 90 days', '90_days'],
+                      ['Last year', '1_year']
+                    ], @time_range),
+                    { include_blank: false },
+                    { 
+                      id: "time-range",
+                      class: "block w-full rounded-md border-secondary-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm dark:bg-secondary-700 dark:border-secondary-600 dark:text-white",
+                      onchange: "this.form.submit()"
+                    } %>
+              <% end %>
+            </div>
+            
+            <!-- Export Button -->
+            <div class="flex items-center space-x-2">
+              <%= link_to admin_dashboard_export_path(format: :csv, time_range: @time_range), 
+                  class: "inline-flex items-center px-3 py-2 border border-secondary-300 shadow-sm text-sm leading-4 font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-secondary-700 dark:border-secondary-600 dark:text-secondary-200 dark:hover:bg-secondary-600" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export CSV
+              <% end %>
+            </div>
+            
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
               <%= current_user.role.humanize %> Access
             </span>
@@ -46,8 +77,8 @@
 
   <!-- Stats Overview -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <!-- User Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+      <!-- Total Users -->
       <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
         <div class="p-5">
           <div class="flex items-center">
@@ -64,7 +95,51 @@
             </div>
           </div>
           <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
-            <span class="text-green-600"><%= @user_stats[:active_users] %></span> active this month
+            <span class="text-green-600"><%= @user_stats[:active_users] %></span> active in <%= @days %> days
+          </div>
+        </div>
+      </div>
+
+      <!-- Online Users (Real-time) -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Online Now</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white" id="online-users"><%= @user_stats[:online_users] %></dd>
+              </dl>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
+            <span class="text-blue-600"><%= @user_stats[:active_users_today] %></span> active today
+          </div>
+        </div>
+      </div>
+
+      <!-- New Users in Period -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">New Users</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @user_stats[:new_users_in_period] %></dd>
+              </dl>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
+            in last <%= @days %> days
           </div>
         </div>
       </div>
@@ -80,57 +155,70 @@
             </div>
             <div class="ml-5 w-0 flex-1">
               <dl>
-                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Blog Posts</dt>
-                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @content_stats[:total_blog_posts] %></dd>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Total Views</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @content_stats[:total_views_in_period] %></dd>
               </dl>
             </div>
           </div>
           <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
-            <span class="text-green-600"><%= @content_stats[:published_blog_posts] %></span> published
+            in last <%= @days %> days
           </div>
         </div>
       </div>
 
-      <!-- Projects Stats -->
+      <!-- Suspended Users -->
       <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
         <div class="p-5">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
             <div class="ml-5 w-0 flex-1">
               <dl>
-                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Projects</dt>
-                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @content_stats[:total_projects] %></dd>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Suspended</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @user_stats[:suspended_users] %></dd>
               </dl>
             </div>
           </div>
           <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
-            <span class="text-green-600"><%= @content_stats[:published_projects] %></span> published
+            <span class="text-red-600">Requires attention</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <!-- Registration Chart -->
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">User Registrations</h3>
+          <div class="h-64">
+            <canvas id="registrationChart"></canvas>
           </div>
         </div>
       </div>
 
-      <!-- New Users This Week -->
-      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
-        <div class="p-5">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-            </div>
-            <div class="ml-5 w-0 flex-1">
-              <dl>
-                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">New This Week</dt>
-                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @user_stats[:new_users_this_week] %></dd>
-              </dl>
-            </div>
+      <!-- Activity Chart -->
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Admin Activity</h3>
+          <div class="h-64">
+            <canvas id="activityChart"></canvas>
           </div>
-          <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
-            <span class="text-blue-600"><%= @user_stats[:new_users_this_month] %></span> this month
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Creation Chart -->
+    <div class="mb-8">
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Content Creation</h3>
+          <div class="h-64">
+            <canvas id="contentChart"></canvas>
           </div>
         </div>
       </div>
@@ -242,3 +330,125 @@
     </div>
   </div>
 </div>
+
+<!-- Chart.js and Real-time Updates -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Chart data from Rails
+  const registrationData = <%= raw @registration_chart_data.to_json %>;
+  const activityData = <%= raw @activity_chart_data.to_json %>;
+  const contentData = <%= raw @content_creation_chart_data.to_json %>;
+
+  // Chart.js configuration
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: {
+          color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
+        },
+        grid: {
+          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+        }
+      },
+      y: {
+        ticks: {
+          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
+        },
+        grid: {
+          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+        }
+      }
+    }
+  };
+
+  // Registration Chart
+  const registrationCtx = document.getElementById('registrationChart').getContext('2d');
+  new Chart(registrationCtx, {
+    type: 'line',
+    data: {
+      labels: Object.keys(registrationData).map(date => new Date(date).toLocaleDateString()),
+      datasets: [{
+        label: 'New Registrations',
+        data: Object.values(registrationData),
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4
+      }]
+    },
+    options: chartOptions
+  });
+
+  // Activity Chart
+  const activityCtx = document.getElementById('activityChart').getContext('2d');
+  new Chart(activityCtx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(activityData).map(date => new Date(date).toLocaleDateString()),
+      datasets: [{
+        label: 'Admin Actions',
+        data: Object.values(activityData),
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderColor: 'rgb(16, 185, 129)',
+        borderWidth: 1
+      }]
+    },
+    options: chartOptions
+  });
+
+  // Content Creation Chart
+  const contentCtx = document.getElementById('contentChart').getContext('2d');
+  new Chart(contentCtx, {
+    type: 'bar',
+    data: {
+      labels: contentData.map(item => new Date(item.date).toLocaleDateString()),
+      datasets: [
+        {
+          label: 'Blog Posts',
+          data: contentData.map(item => item.blog_posts),
+          backgroundColor: 'rgba(99, 102, 241, 0.8)',
+          borderColor: 'rgb(99, 102, 241)',
+          borderWidth: 1
+        },
+        {
+          label: 'Projects',
+          data: contentData.map(item => item.projects),
+          backgroundColor: 'rgba(168, 85, 247, 0.8)',
+          borderColor: 'rgb(168, 85, 247)',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: chartOptions
+  });
+
+  // Real-time updates for online users
+  function updateOnlineUsers() {
+    fetch('/admin/dashboard/online_users', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('online-users').textContent = data.count;
+    })
+    .catch(error => console.log('Error updating online users:', error));
+  }
+
+  // Update online users every 30 seconds
+  setInterval(updateOnlineUsers, 30000);
+
+  // Initial update
+  updateOnlineUsers();
+</script>

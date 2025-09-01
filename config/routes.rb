@@ -2,6 +2,9 @@ Rails.application.routes.draw do
   namespace :admin do
     root "dashboard#index"
 
+    get "dashboard/export", to: "dashboard#export", as: :dashboard_export
+    get "dashboard/online_users", to: "dashboard#online_users", as: :dashboard_online_users
+
     resources :users do
       member do
         patch :suspend

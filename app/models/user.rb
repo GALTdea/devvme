@@ -274,6 +274,19 @@ class User < ApplicationRecord
       .count
   end
 
+  def self.new_users_in_period(days)
+    where('created_at > ?', days.days.ago).count
+  end
+
+  def self.active_users_today
+    where('last_login_at > ?', 1.day.ago).count
+  end
+
+  def self.online_users
+    # Users who have been active in the last 15 minutes
+    where('last_login_at > ?', 15.minutes.ago).count
+  end
+
   private
 
   # Normalize URLs by adding https:// prefix if missing
