@@ -15,3 +15,12 @@ two:
   bio: I am user two
   slug: user2
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
+
+admin:
+  email: admin@example.com
+  username: admin
+  full_name: Admin User
+  bio: I am an admin user
+  slug: admin
+  role: admin
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
