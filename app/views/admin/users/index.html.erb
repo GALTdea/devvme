@@ -24,7 +24,7 @@
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
       <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
         <div class="p-5">
           <div class="flex items-center">
@@ -52,6 +52,22 @@
             <div class="ml-4">
               <p class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Active</p>
               <p class="text-lg font-semibold text-secondary-900 dark:text-white"><%= @active_users %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-yellow-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Pending</p>
+              <p class="text-lg font-semibold text-secondary-900 dark:text-white"><%= @pending_activation_users %></p>
             </div>
           </div>
         </div>
@@ -104,7 +120,13 @@
                 {}, { class: "block px-3 py-2 border border-secondary-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-secondary-700 dark:border-secondary-600 dark:text-white" } %>
           </div>
           <div>
-            <%= form.select :status, options_for_select([['All Status', ''], ['Active', 'active'], ['Suspended', 'suspended']], params[:status]), 
+            <%= form.select :status, options_for_select([
+              ['All Status', ''], 
+              ['Active', 'active'], 
+              ['Pending Activation', 'pending_activation'],
+              ['Suspended', 'suspended'],
+              ['Deactivated', 'deactivated']
+            ], params[:status]), 
                 {}, { class: "block px-3 py-2 border border-secondary-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-secondary-700 dark:border-secondary-600 dark:text-white" } %>
           </div>
           <div>
@@ -175,8 +197,17 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                         <%= user.suspended? ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' %>">
-                    <%= user.suspended? ? 'Suspended' : 'Active' %>
+                         <%= case user.account_status
+                             when 'pending_activation'
+                               'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                             when 'active'
+                               'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                             when 'suspended'
+                               'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                             when 'deactivated'
+                               'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                             end %>">
+                    <%= user.account_status.humanize %>
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary-500 dark:text-secondary-400">
@@ -197,16 +228,35 @@
                     <%= link_to "View", admin_user_path(user), 
                         class: "text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300" %>
                     <% if current_user.can_manage_users? && user != current_user %>
+                      <!-- Account Status Actions -->
+                      <% if user.pending_activation? %>
+                        <%= button_to "Activate", activate_admin_user_path(user), 
+                            method: :patch,
+                            data: { confirm: "Are you sure you want to activate this user's account?" },
+                            class: "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 bg-transparent border-0 p-0 cursor-pointer underline" %>
+                      <% elsif user.active? %>
+                        <%= button_to "Deactivate", deactivate_admin_user_path(user), 
+                            method: :patch,
+                            data: { confirm: "Are you sure you want to deactivate this user's account?" },
+                            class: "text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 bg-transparent border-0 p-0 cursor-pointer underline" %>
+                      <% elsif user.deactivated? %>
+                        <%= button_to "Activate", activate_admin_user_path(user), 
+                            method: :patch,
+                            data: { confirm: "Are you sure you want to reactivate this user's account?" },
+                            class: "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 bg-transparent border-0 p-0 cursor-pointer underline" %>
+                      <% end %>
+                      
+                      <!-- Suspension Actions -->
                       <% if user.suspended? %>
-                        <%= link_to "Unsuspend", unsuspend_admin_user_path(user), 
+                        <%= button_to "Unsuspend", unsuspend_admin_user_path(user), 
                             method: :patch,
                             data: { confirm: "Are you sure you want to unsuspend this user?" },
-                            class: "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300" %>
-                      <% else %>
-                        <%= link_to "Suspend", suspend_admin_user_path(user), 
+                            class: "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 bg-transparent border-0 p-0 cursor-pointer underline" %>
+                      <% elsif user.active? %>
+                        <%= button_to "Suspend", suspend_admin_user_path(user), 
                             method: :patch,
                             data: { confirm: "Are you sure you want to suspend this user?" },
-                            class: "text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" %>
+                            class: "text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 bg-transparent border-0 p-0 cursor-pointer underline" %>
                       <% end %>
                     <% end %>
                   </div>

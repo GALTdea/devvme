@@ -14,6 +14,8 @@ Rails.application.routes.draw do
       member do
         patch :suspend
         patch :unsuspend
+        patch :activate
+        patch :deactivate
         patch :promote
         patch :demote
         delete :destroy

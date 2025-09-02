@@ -1,6 +1,6 @@
 class Admin::UsersController < ApplicationController
   before_action :require_admin
-  before_action :set_user, only: [:show, :edit, :update, :destroy, :suspend, :unsuspend, :promote, :demote]
+  before_action :set_user, only: [:show, :edit, :update, :destroy, :suspend, :unsuspend, :activate, :deactivate, :promote, :demote]
   before_action :require_super_admin, only: [:destroy, :bulk_delete, :promote, :demote, :bulk_promote, :bulk_demote]
 
   include Pagy::Backend
@@ -14,8 +14,18 @@ class Admin::UsersController < ApplicationController
 
     # Apply filters
     @users = @users.where(role: params[:role]) if params[:role].present?
-    @users = @users.where.not(suspended_at: nil) if params[:status] == 'suspended'
-    @users = @users.where(suspended_at: nil) if params[:status] == 'active'
+
+    # Filter by account status
+    case params[:status]
+    when 'pending_activation'
+      @users = @users.where(account_status: :pending_activation)
+    when 'active'
+      @users = @users.where(account_status: :active)
+    when 'suspended'
+      @users = @users.where(account_status: :suspended)
+    when 'deactivated'
+      @users = @users.where(account_status: :deactivated)
+    end
 
     if params[:search].present?
       search_term = "%#{params[:search]}%"
@@ -26,8 +36,10 @@ class Admin::UsersController < ApplicationController
     end
 
     @total_users = User.count
-    @active_users = User.where(suspended_at: nil).count
-    @suspended_users = User.where.not(suspended_at: nil).count
+    @active_users = User.where(account_status: :active).count
+    @pending_activation_users = User.where(account_status: :pending_activation).count
+    @suspended_users = User.where(account_status: :suspended).count
+    @deactivated_users = User.where(account_status: :deactivated).count
     @admin_users = User.where(role: [:admin, :super_admin]).count
   end
 
@@ -74,6 +86,17 @@ class Admin::UsersController < ApplicationController
   def unsuspend
     @user.unsuspend!(admin: current_user)
     redirect_to admin_user_path(@user), notice: 'User has been unsuspended.'
+  end
+
+  def activate
+    @user.activate_account!(admin: current_user)
+    redirect_to admin_user_path(@user), notice: 'User account has been activated.'
+  end
+
+  def deactivate
+    reason = params[:reason] || 'Account deactivated by admin'
+    @user.deactivate_account!(reason: reason, admin: current_user)
+    redirect_to admin_user_path(@user), notice: 'User account has been deactivated.'
   end
 
   def promote
