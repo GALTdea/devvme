@@ -1,4 +1,6 @@
 class Visitor < ApplicationRecord
+  include BlogAnalytics
+
   has_many :visitor_page_views, dependent: :destroy
   belongs_to :user, optional: true
 

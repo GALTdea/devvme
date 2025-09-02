@@ -1,4 +1,6 @@
 class VisitorPageView < ApplicationRecord
+  include BlogPageViewAnalytics
+
   belongs_to :visitor
 
   validates :page_path, presence: true
