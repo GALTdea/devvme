@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
   namespace :admin do
+    get "analytics/index"
+    get "analytics/registration_trends"
+    get "analytics/user_engagement"
     root "dashboard#index"
 
     get "dashboard/export", to: "dashboard#export", as: :dashboard_export

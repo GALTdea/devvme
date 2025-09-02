@@ -1,0 +1,322 @@
+<% content_for :title, "Registration Trends" %>
+
+<div class="min-h-screen bg-secondary-50 dark:bg-secondary-900">
+  <!-- Header -->
+  <div class="bg-white dark:bg-secondary-800 shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="py-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-secondary-900 dark:text-white">Registration Trends</h1>
+            <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
+              Analyze user registration patterns and growth rates
+            </p>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Time Range Selector -->
+            <div class="flex items-center space-x-2">
+              <label for="time-range" class="text-sm font-medium text-secondary-700 dark:text-secondary-300">Time Range:</label>
+              <%= form_with url: admin_analytics_registration_trends_path, method: :get, local: true, class: "inline-flex" do |form| %>
+                <%= form.select :time_range, 
+                    options_for_select([
+                      ['Last 7 days', '7_days'],
+                      ['Last 30 days', '30_days'],
+                      ['Last 90 days', '90_days'],
+                      ['Last year', '1_year']
+                    ], @time_range),
+                    { include_blank: false },
+                    { 
+                      id: "time-range",
+                      class: "block w-full rounded-md border-secondary-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm dark:bg-secondary-700 dark:border-secondary-600 dark:text-white",
+                      onchange: "this.form.submit()"
+                    } %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <nav class="flex space-x-4" aria-label="Analytics Navigation">
+      <%= link_to admin_analytics_index_path, 
+          class: "text-secondary-600 hover:text-secondary-900 dark:text-secondary-300 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary-100 dark:hover:bg-secondary-700" do %>
+        Overview
+      <% end %>
+      <%= link_to admin_analytics_registration_trends_path, 
+          class: "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-200 px-3 py-2 rounded-md text-sm font-medium" do %>
+        Registration Trends
+      <% end %>
+      <%= link_to admin_analytics_user_engagement_path, 
+          class: "text-secondary-600 hover:text-secondary-900 dark:text-secondary-300 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary-100 dark:hover:bg-secondary-700" do %>
+        User Engagement
+      <% end %>
+    </nav>
+  </div>
+
+  <!-- Growth Rate Cards -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Daily Growth -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Daily Growth</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white">
+                  <span class="<%= @growth_rates[:daily_growth] >= 0 ? 'text-green-600' : 'text-red-600' %>">
+                    <%= @growth_rates[:daily_growth] %>%
+                  </span>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly Growth -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Weekly Growth</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white">
+                  <span class="<%= @growth_rates[:weekly_growth] >= 0 ? 'text-green-600' : 'text-red-600' %>">
+                    <%= @growth_rates[:weekly_growth] %>%
+                  </span>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Growth -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Monthly Growth</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white">
+                  <span class="<%= @growth_rates[:monthly_growth] >= 0 ? 'text-green-600' : 'text-red-600' %>">
+                    <%= @growth_rates[:monthly_growth] %>%
+                  </span>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Period over Period -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Period Growth</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white">
+                  <span class="<%= @growth_rates[:period_over_period] >= 0 ? 'text-green-600' : 'text-red-600' %>">
+                    <%= @growth_rates[:period_over_period] %>%
+                  </span>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registration Insights -->
+    <% if @registration_insights.any? %>
+      <div class="mb-8">
+        <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Key Insights</h3>
+            <div class="space-y-3">
+              <% @registration_insights.each do |insight| %>
+                <div class="flex items-start">
+                  <div class="flex-shrink-0">
+                    <% case insight[:type] %>
+                    <% when 'peak_day' %>
+                      <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                    <% when 'positive_growth' %>
+                      <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                    <% when 'negative_growth' %>
+                      <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                    <% else %>
+                      <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                      </svg>
+                    <% end %>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-secondary-700 dark:text-secondary-300"><%= insight[:message] %></p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Daily Registrations Chart -->
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Daily Registrations</h3>
+          <div class="h-64">
+            <canvas id="dailyRegistrationsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly Registrations Chart -->
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Weekly Registrations</h3>
+          <div class="h-64">
+            <canvas id="weeklyRegistrationsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Registrations Chart -->
+    <div class="mt-8">
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Monthly Registrations</h3>
+          <div class="h-64">
+            <canvas id="monthlyRegistrationsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Chart data from Rails
+  const dailyData = <%= raw @registration_data[:daily].to_json %>;
+  const weeklyData = <%= raw @registration_data[:weekly].to_json %>;
+  const monthlyData = <%= raw @registration_data[:monthly].to_json %>;
+
+  // Chart.js configuration
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: {
+          color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
+        },
+        grid: {
+          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+        }
+      },
+      y: {
+        ticks: {
+          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
+        },
+        grid: {
+          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+        }
+      }
+    }
+  };
+
+  // Daily Registrations Chart
+  const dailyCtx = document.getElementById('dailyRegistrationsChart').getContext('2d');
+  new Chart(dailyCtx, {
+    type: 'line',
+    data: {
+      labels: Object.keys(dailyData).map(date => new Date(date).toLocaleDateString()),
+      datasets: [{
+        label: 'Daily Registrations',
+        data: Object.values(dailyData),
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: chartOptions
+  });
+
+  // Weekly Registrations Chart
+  const weeklyCtx = document.getElementById('weeklyRegistrationsChart').getContext('2d');
+  new Chart(weeklyCtx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(weeklyData).map(date => new Date(date).toLocaleDateString()),
+      datasets: [{
+        label: 'Weekly Registrations',
+        data: Object.values(weeklyData),
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderColor: 'rgb(16, 185, 129)',
+        borderWidth: 1
+      }]
+    },
+    options: chartOptions
+  });
+
+  // Monthly Registrations Chart
+  const monthlyCtx = document.getElementById('monthlyRegistrationsChart').getContext('2d');
+  new Chart(monthlyCtx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(monthlyData).map(date => new Date(date).toLocaleDateString()),
+      datasets: [{
+        label: 'Monthly Registrations',
+        data: Object.values(monthlyData),
+        backgroundColor: 'rgba(168, 85, 247, 0.8)',
+        borderColor: 'rgb(168, 85, 247)',
+        borderWidth: 1
+      }]
+    },
+    options: chartOptions
+  });
+</script>

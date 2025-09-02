@@ -287,6 +287,27 @@ class User < ApplicationRecord
     where('last_login_at > ?', 15.minutes.ago).count
   end
 
+  def self.registration_stats_weekly(days)
+    where('created_at > ?', days.days.ago)
+      .group(Arel.sql("DATE_TRUNC('week', created_at)"))
+      .order(Arel.sql("DATE_TRUNC('week', created_at)"))
+      .count
+  end
+
+  def self.registration_stats_monthly(days)
+    where('created_at > ?', days.days.ago)
+      .group(Arel.sql("DATE_TRUNC('month', created_at)"))
+      .order(Arel.sql("DATE_TRUNC('month', created_at)"))
+      .count
+  end
+
+  def self.daily_active_users(days)
+    where('last_login_at > ?', days.days.ago)
+      .group("DATE(last_login_at)")
+      .order("DATE(last_login_at)")
+      .count
+  end
+
   private
 
   # Normalize URLs by adding https:// prefix if missing

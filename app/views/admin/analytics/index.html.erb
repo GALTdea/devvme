@@ -1,0 +1,196 @@
+<% content_for :title, "Analytics Dashboard" %>
+
+<div class="min-h-screen bg-secondary-50 dark:bg-secondary-900">
+  <!-- Analytics Header -->
+  <div class="bg-white dark:bg-secondary-800 shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="py-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-secondary-900 dark:text-white">Analytics Dashboard</h1>
+            <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
+              Comprehensive insights into user behavior and platform performance
+            </p>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Time Range Selector -->
+            <div class="flex items-center space-x-2">
+              <label for="time-range" class="text-sm font-medium text-secondary-700 dark:text-secondary-300">Time Range:</label>
+              <%= form_with url: admin_analytics_index_path, method: :get, local: true, class: "inline-flex" do |form| %>
+                <%= form.select :time_range, 
+                    options_for_select([
+                      ['Last 7 days', '7_days'],
+                      ['Last 30 days', '30_days'],
+                      ['Last 90 days', '90_days'],
+                      ['Last year', '1_year']
+                    ], @time_range),
+                    { include_blank: false },
+                    { 
+                      id: "time-range",
+                      class: "block w-full rounded-md border-secondary-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm dark:bg-secondary-700 dark:border-secondary-600 dark:text-white",
+                      onchange: "this.form.submit()"
+                    } %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Navigation -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <nav class="flex space-x-4" aria-label="Analytics Navigation">
+      <%= link_to admin_analytics_index_path, 
+          class: "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-200 px-3 py-2 rounded-md text-sm font-medium" do %>
+        Overview
+      <% end %>
+      <%= link_to admin_analytics_registration_trends_path, 
+          class: "text-secondary-600 hover:text-secondary-900 dark:text-secondary-300 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary-100 dark:hover:bg-secondary-700" do %>
+        Registration Trends
+      <% end %>
+      <%= link_to admin_analytics_user_engagement_path, 
+          class: "text-secondary-600 hover:text-secondary-900 dark:text-secondary-300 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary-100 dark:hover:bg-secondary-700" do %>
+        User Engagement
+      <% end %>
+    </nav>
+  </div>
+
+  <!-- Overview Stats -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+      <!-- Total Users -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Total Users</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @overview_stats[:total_users] %></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Users -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Active Users</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @overview_stats[:active_users] %></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Users -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">New Users</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @overview_stats[:new_users] %></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Views -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Total Views</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @overview_stats[:total_views] %></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Engagement Rate -->
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Engagement Rate</dt>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white"><%= @overview_stats[:engagement_rate] %>%</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Registration Trends Card -->
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Registration Trends</h3>
+          <p class="text-sm text-secondary-600 dark:text-secondary-400 mb-4">
+            Analyze user registration patterns and growth rates over time.
+          </p>
+          <%= link_to admin_analytics_registration_trends_path, 
+              class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" do %>
+            View Registration Trends
+            <svg class="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- User Engagement Card -->
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">User Engagement</h3>
+          <p class="text-sm text-secondary-600 dark:text-secondary-400 mb-4">
+            Track user activity, session duration, and feature usage patterns.
+          </p>
+          <%= link_to admin_analytics_user_engagement_path, 
+              class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" do %>
+            View User Engagement
+            <svg class="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
