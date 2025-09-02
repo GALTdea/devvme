@@ -12,6 +12,14 @@ class User < ApplicationRecord
   # Role system
   enum :role,{ user: 0, admin: 1, super_admin: 2 }
 
+  # Account status system - tracks user activation state
+  enum :account_status, {
+    pending_activation: 0,  # User signed up but hasn't activated their account
+    active: 1,             # User account is active and verified
+    suspended: 2,          # User account is suspended (uses existing suspension logic)
+    deactivated: 3         # User has deactivated their own account
+  }
+
   # Active Storage associations
   has_one_attached :avatar
   has_one_attached :resume
@@ -242,6 +250,54 @@ class User < ApplicationRecord
     update_column(:last_login_at, Time.current)
   end
 
+  # Account status methods
+  def activate_account!(admin: nil)
+    update!(account_status: :active)
+    log_admin_activity(admin, 'activate_user') if admin
+  end
+
+  def deactivate_account!(reason: nil, admin: nil)
+    update!(
+      account_status: :deactivated,
+      suspended_at: Time.current,
+      suspension_reason: reason
+    )
+    log_admin_activity(admin, 'deactivate_user', { reason: reason }) if admin
+  end
+
+  def can_access_application?
+    active? && !suspended?
+  end
+
+  def activation_required?
+    pending_activation?
+  end
+
+  # Override suspended? to also check account_status
+  def suspended?
+    suspended_at.present? || account_status == 'suspended'
+  end
+
+  # Update suspend! to also update account_status
+  def suspend!(reason: nil, admin: nil)
+    update!(
+      account_status: :suspended,
+      suspended_at: Time.current,
+      suspension_reason: reason
+    )
+    log_admin_activity(admin, 'suspend_user', { reason: reason }) if admin
+  end
+
+  # Update unsuspend! to reactivate account
+  def unsuspend!(admin: nil)
+    update!(
+      account_status: :active,
+      suspended_at: nil,
+      suspension_reason: nil
+    )
+    log_admin_activity(admin, 'unsuspend_user') if admin
+  end
+
   # Admin statistics methods
   def self.total_users
     count
@@ -253,6 +309,22 @@ class User < ApplicationRecord
 
   def self.suspended_users
     where.not(suspended_at: nil).count
+  end
+
+  def self.pending_activation_users
+    where(account_status: :pending_activation).count
+  end
+
+  def self.active_users_by_status
+    where(account_status: :active).count
+  end
+
+  def self.deactivated_users
+    where(account_status: :deactivated).count
+  end
+
+  def self.users_by_account_status
+    group(:account_status).count
   end
 
   def self.new_users_this_week
