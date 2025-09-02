@@ -61,7 +61,15 @@ Rails.application.routes.draw do
 
   # Dashboard routes
   get "dashboard", to: "dashboard#index"
-  devise_for :users
+
+  # Beta testing routes
+  get "beta/confirmation", to: "beta#confirmation", as: :beta_confirmation
+  get "beta/waiting", to: "beta#waiting", as: :beta_waiting
+
+  # Devise with custom registrations controller for beta flow
+  devise_for :users, controllers: {
+    registrations: 'users/registrations'
+  }
 
   # Redirect already authenticated users to dashboard instead of root
   authenticated :user do

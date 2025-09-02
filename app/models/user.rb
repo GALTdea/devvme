@@ -252,7 +252,14 @@ class User < ApplicationRecord
 
   # Account status methods
   def activate_account!(admin: nil)
+    was_pending = pending_activation?
     update!(account_status: :active)
+
+    # Send activation email if user was pending activation
+    if was_pending
+      UserActivationMailer.activation_notification(self).deliver_now
+    end
+
     log_admin_activity(admin, 'activate_user') if admin
   end
 

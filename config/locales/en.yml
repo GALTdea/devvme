@@ -29,3 +29,9 @@
 
 en:
   hello: "Hello world"
+  devise:
+    registrations:
+      signed_up_but_unconfirmed: "Welcome! You have signed up successfully for beta access. You will receive an email notification when your account is activated."
+  user_activation_mailer:
+    activation_notification:
+      subject: "🎉 Your DevV.me account is now active!"

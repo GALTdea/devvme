@@ -14,6 +14,9 @@ class ApplicationController < ActionController::Base
   # Check if user is suspended
   before_action :check_user_suspension, if: :user_signed_in?
 
+  # Check if user account needs activation (beta testing)
+  before_action :check_account_activation, if: :user_signed_in?
+
   # Track visitors (non-signed-up users)
   before_action :track_visitor, unless: :user_signed_in?
 
@@ -59,6 +62,17 @@ class ApplicationController < ActionController::Base
     if current_user.suspended?
       sign_out current_user
       redirect_to new_user_session_path, alert: "Your account has been suspended. Reason: #{current_user.suspension_reason}"
+    end
+  end
+
+  def check_account_activation
+    return if controller_name == "beta" # Allow access to beta controller
+    return if controller_name == "sessions" # Allow sign out
+    return if current_user.active? # User is already active
+    return if current_user.can_access_admin? # Admin users get full access regardless of status
+
+    if current_user.pending_activation?
+      redirect_to beta_waiting_path
     end
   end
 

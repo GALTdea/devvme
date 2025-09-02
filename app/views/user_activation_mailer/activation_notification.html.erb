@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your DevV.me Account is Active!</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f8fafc; }
+      .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+      .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
+      .header h1 { margin: 0; font-size: 28px; font-weight: 700; }
+      .content { padding: 40px 30px; }
+      .welcome-badge { display: inline-block; background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+      .cta-button { display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
+      .cta-button:hover { background: #2563eb; }
+      .features { background: #f1f5f9; padding: 20px; border-radius: 6px; margin: 20px 0; }
+      .features ul { margin: 0; padding-left: 20px; }
+      .features li { margin: 8px 0; }
+      .footer { background: #f8fafc; padding: 20px 30px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 14px; color: #64748b; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎉 Welcome to DevV.me!</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Your account is now active</p>
+      </div>
+      
+      <div class="content">
+        <div class="welcome-badge">✨ Beta Access Granted</div>
+        
+        <h2>Hi <%= @user.display_name %>!</h2>
+        
+        <p>Great news! Your DevV.me account has been activated and you now have full access to the platform.</p>
+        
+        <p>You can now:</p>
+        
+        <div class="features">
+          <ul>
+            <li><strong>Create and showcase your projects</strong> with rich descriptions and images</li>
+            <li><strong>Write and publish blog posts</strong> with our markdown editor</li>
+            <li><strong>Build your developer profile</strong> with your skills and experience</li>
+            <li><strong>Share your profile</strong> with the unique URL: <strong>devv.me/<%= @user.username %></strong></li>
+            <li><strong>Connect with other developers</strong> in our growing community</li>
+          </ul>
+        </div>
+        
+        <p style="text-align: center;">
+          <a href="<%= @login_url %>" class="cta-button">Sign In to Your Account</a>
+        </p>
+        
+        <p>As one of our beta users, your feedback is incredibly valuable to us. If you encounter any issues or have suggestions for improvement, please don't hesitate to reach out.</p>
+        
+        <p>Welcome to the community!</p>
+        
+        <p>Best regards,<br>The DevV.me Team</p>
+      </div>
+      
+      <div class="footer">
+        <p>You're receiving this email because your DevV.me account has been activated.</p>
+        <p>If you have any questions, contact us at <a href="mailto:support@devv.me" style="color: #3b82f6;">support@devv.me</a></p>
+      </div>
+    </div>
+  </body>
+</html>
