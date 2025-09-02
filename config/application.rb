@@ -26,5 +26,8 @@ module DevvmeApp
 
     # Add visitor tracking middleware
     config.autoload_paths += %W[#{config.root}/app/middleware]
+
+    # Note: Middleware is commented out for now due to Rails 8 frozen middleware stack
+    # Manual tracking is implemented in controllers instead
   end
 end

@@ -14,6 +14,9 @@ class ApplicationController < ActionController::Base
   # Check if user is suspended
   before_action :check_user_suspension, if: :user_signed_in?
 
+  # Track visitors (non-signed-up users)
+  before_action :track_visitor, unless: :user_signed_in?
+
   protected
 
   def configure_permitted_parameters
@@ -67,6 +70,42 @@ class ApplicationController < ActionController::Base
     rescue => e
       # Log error but don't break the registration process
       Rails.logger.error "Failed to track visitor conversion: #{e.message}"
+    end
+  end
+
+  def track_visitor
+    return if should_skip_visitor_tracking?
+
+    begin
+      page_title = extract_page_title
+      VisitorTrackingService.track_page_view(request, request.path, page_title: page_title)
+    rescue => e
+      # Log error but don't break the request
+      Rails.logger.error "Failed to track visitor: #{e.message}"
+    end
+  end
+
+  def should_skip_visitor_tracking?
+    # Skip tracking for admin paths, API paths, and static assets
+    return true if request.path.start_with?("/admin", "/api", "/rails")
+    return true if request.path.match?(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/)
+    return true if request.format.json? || request.format.xml?
+
+    false
+  end
+
+  def extract_page_title
+    case request.path
+    when "/"
+      "Home"
+    when "/blog"
+      "Blog"
+    when %r{^/blog/\d+}
+      "Blog Post"
+    when %r{^/[^/]+$}
+      "Profile"
+    else
+      request.path.split("/").last&.humanize || "Unknown"
     end
   end
 end
