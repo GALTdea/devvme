@@ -28,6 +28,8 @@ class ApplicationController < ActionController::Base
 
   # Override Devise's after_sign_up_path_for to redirect to dashboard
   def after_sign_up_path_for(resource)
+    # Track visitor conversion
+    track_visitor_conversion(resource)
     dashboard_path
   end
 
@@ -54,6 +56,17 @@ class ApplicationController < ActionController::Base
     if current_user.suspended?
       sign_out current_user
       redirect_to new_user_session_path, alert: "Your account has been suspended. Reason: #{current_user.suspension_reason}"
+    end
+  end
+
+  def track_visitor_conversion(user)
+    return unless user
+
+    begin
+      VisitorTrackingService.mark_conversion!(request, user)
+    rescue => e
+      # Log error but don't break the registration process
+      Rails.logger.error "Failed to track visitor conversion: #{e.message}"
     end
   end
 end

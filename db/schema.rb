@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_28_190949) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_02_171105) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -165,10 +165,51 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_190949) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  create_table "visitor_page_views", force: :cascade do |t|
+    t.bigint "visitor_id", null: false
+    t.string "page_path", null: false
+    t.string "page_title"
+    t.string "referrer", limit: 500
+    t.integer "time_on_page", default: 0
+    t.datetime "viewed_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["page_path", "viewed_at"], name: "index_visitor_page_views_on_page_path_and_viewed_at"
+    t.index ["viewed_at"], name: "index_visitor_page_views_on_viewed_at"
+    t.index ["visitor_id", "viewed_at"], name: "index_visitor_page_views_on_visitor_id_and_viewed_at"
+    t.index ["visitor_id"], name: "index_visitor_page_views_on_visitor_id"
+  end
+
+  create_table "visitors", force: :cascade do |t|
+    t.string "visitor_id", null: false
+    t.string "ip_address"
+    t.string "user_agent", limit: 500
+    t.string "referrer", limit: 500
+    t.string "country"
+    t.string "city"
+    t.datetime "first_visit_at", null: false
+    t.datetime "last_visit_at", null: false
+    t.integer "visit_count", default: 1
+    t.integer "page_views", default: 0
+    t.integer "total_time_on_site", default: 0
+    t.boolean "converted", default: false
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["converted"], name: "index_visitors_on_converted"
+    t.index ["first_visit_at"], name: "index_visitors_on_first_visit_at"
+    t.index ["last_visit_at"], name: "index_visitors_on_last_visit_at"
+    t.index ["user_id"], name: "index_visitors_on_user_id"
+    t.index ["visitor_id", "first_visit_at"], name: "index_visitors_on_visitor_id_and_first_visit_at"
+    t.index ["visitor_id"], name: "index_visitors_on_visitor_id", unique: true
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_activities", "users", column: "admin_id"
   add_foreign_key "blog_posts", "users"
   add_foreign_key "profile_views", "users"
   add_foreign_key "projects", "users"
+  add_foreign_key "visitor_page_views", "visitors"
+  add_foreign_key "visitors", "users"
 end
