@@ -60,8 +60,9 @@ class ApplicationController < ActionController::Base
 
   def check_user_suspension
     if current_user.suspended?
+      suspension_reason = current_user.suspension_reason
       sign_out current_user
-      redirect_to new_user_session_path, alert: "Your account has been suspended. Reason: #{current_user.suspension_reason}"
+      redirect_to new_user_session_path, alert: "Your account has been suspended. Reason: #{suspension_reason}"
     end
   end
 
