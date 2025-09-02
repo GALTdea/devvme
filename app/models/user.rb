@@ -243,7 +243,7 @@ class User < ApplicationRecord
   end
 
   def can_manage_users?
-    super_admin?
+    admin? || super_admin?
   end
 
   def update_last_login!
