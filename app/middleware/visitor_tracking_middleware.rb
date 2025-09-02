@@ -1,4 +1,35 @@
+# VisitorTrackingMiddleware
+#
+# Purpose:
+# This middleware tracks page views and visitor analytics across the application.
+# It captures visitor data for analytics purposes while maintaining performance
+# by processing tracking asynchronously.
+#
+# How it works:
+# 1. Intercepts all HTTP requests before they reach the application
+# 2. Allows the request to be processed normally by the Rails application
+# 3. After a successful response (200 status), evaluates if the request should be tracked
+# 4. For trackable requests, extracts visitor data and queues a background job
+# 5. The background job (VisitorTrackingJob) handles the actual database storage
+#
+# Tracking criteria:
+# - Only tracks successful HTML requests (status 200)
+# - Excludes admin paths, API endpoints, and static assets
+# - Respects the VISITOR_TRACKING_CONFIG settings
+#
+# Data collected:
+# - Page path and title
+# - IP address (with proxy support)
+# - User agent and referrer
+# - Session and visitor identifiers
+#
+# Performance considerations:
+# - Uses background jobs to avoid blocking the request/response cycle
+# - Includes error handling to prevent tracking failures from breaking requests
+# - Configurable exclusion patterns to avoid tracking unnecessary requests
+#
 class VisitorTrackingMiddleware
+
   def initialize(app)
     @app = app
   end
