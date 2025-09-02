@@ -114,16 +114,13 @@ class VisitorTrackingService
   end
 
   def update_location_info
-    # This would integrate with a geolocation service
-    # For now, we'll leave it as a placeholder
-    # You could integrate with MaxMind, IPinfo, etc.
+    return unless @visitor.country.blank? && @visitor.city.blank?
 
-    # Example implementation:
-    # location_data = GeoLocationService.lookup(get_ip_address)
-    # @visitor.update(
-    #   country: location_data[:country],
-    #   city: location_data[:city]
-    # )
+    ip_address = get_ip_address
+    return if ip_address.blank?
+
+    # Use background job for geolocation to avoid slowing down requests
+    GeolocationJob.perform_later(@visitor.id, ip_address)
   end
 
   def current_user_is_admin?

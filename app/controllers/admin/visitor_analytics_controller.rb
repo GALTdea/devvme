@@ -35,6 +35,18 @@ class Admin::VisitorAnalyticsController < ApplicationController
 
     @recent_visitors = Visitor.recent.limit(10)
     @conversion_insights = generate_conversion_insights
+
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          unique_visitors: @visitor_stats[:unique_visitors],
+          total_visitors: @visitor_stats[:total_visitors],
+          conversion_rate: @visitor_stats[:conversion_rate],
+          returning_visitors: @visitor_stats[:returning_visitors]
+        }
+      end
+    end
   end
 
   private
@@ -83,7 +95,7 @@ class Admin::VisitorAnalyticsController < ApplicationController
       # Get first page viewed by converted visitors
       first_pages = converting_visitors.joins(:visitor_page_views)
                                      .group('visitor_page_views.page_path')
-                                     .order('count(*) DESC')
+                                     .order(Arel.sql('count(*) DESC'))
                                      .limit(1)
                                      .count
 

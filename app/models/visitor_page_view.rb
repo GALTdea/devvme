@@ -24,7 +24,7 @@ class VisitorPageView < ApplicationRecord
   def self.top_pages(limit = 10, days = 30)
     where("viewed_at > ?", days.days.ago)
       .group(:page_path)
-      .order("count(*) DESC")
+      .order(Arel.sql("count(*) DESC"))
       .limit(limit)
       .count
   end
@@ -49,7 +49,7 @@ class VisitorPageView < ApplicationRecord
 
     joins("INNER JOIN (#{subquery.to_sql}) last_views ON visitor_page_views.visitor_id = last_views.visitor_id AND visitor_page_views.viewed_at = last_views.last_view")
       .group(:page_path)
-      .order("count(*) DESC")
+      .order(Arel.sql("count(*) DESC"))
       .limit(limit)
       .count
   end
@@ -62,7 +62,7 @@ class VisitorPageView < ApplicationRecord
 
     joins("INNER JOIN (#{subquery.to_sql}) first_views ON visitor_page_views.visitor_id = first_views.visitor_id AND visitor_page_views.viewed_at = first_views.first_view")
       .group(:page_path)
-      .order("count(*) DESC")
+      .order(Arel.sql("count(*) DESC"))
       .limit(limit)
       .count
   end

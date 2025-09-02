@@ -23,12 +23,14 @@ class VisitorTrackingMiddleware
 
   private
 
-  def should_track_request?(request, status)
+    def should_track_request?(request, status)
+    # Check if tracking is enabled
+    return false unless VISITOR_TRACKING_CONFIG[:enabled]
+
     # Only track successful HTML requests
     return false unless status == 200
     return false unless html_request?(request)
-    return false if admin_path?(request)
-    return false if api_path?(request)
+    return false if excluded_path?(request)
     return false if static_asset?(request)
 
     true
@@ -39,18 +41,14 @@ class VisitorTrackingMiddleware
     request.format.html? || request.headers['Accept']&.include?('text/html')
   end
 
-  def admin_path?(request)
-    request.path.start_with?('/admin')
-  end
-
-  def api_path?(request)
-    request.path.start_with?('/api')
+  def excluded_path?(request)
+    path = request.path
+    VISITOR_TRACKING_CONFIG[:exclude_paths].any? { |pattern| path.match?(pattern) }
   end
 
   def static_asset?(request)
     path = request.path
-    static_extensions = %w[.css .js .png .jpg .jpeg .gif .ico .svg .woff .woff2 .ttf .eot .map]
-    static_extensions.any? { |ext| path.end_with?(ext) }
+    VISITOR_TRACKING_CONFIG[:static_extensions].any? { |ext| path.end_with?(ext) }
   end
 
   def track_page_view_async(request)

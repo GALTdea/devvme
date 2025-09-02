@@ -1227,6 +1227,8 @@ if Rails.env.development?
   puts "Email: demo@example.com | Username: demouser | Password: password123"
   puts "\nYou can sign in with any of these accounts to explore the application!"
 
+  # Load visitor data
+  load Rails.root.join('db', 'seeds', 'visitor_data.rb')
 else
   puts "Skipping seeds - not in development environment"
 end

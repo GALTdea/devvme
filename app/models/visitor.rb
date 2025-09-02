@@ -57,7 +57,7 @@ class Visitor < ApplicationRecord
   def self.top_referrers(limit = 10, days = 30)
     where("first_visit_at > ? AND referrer IS NOT NULL AND referrer != ?", days.days.ago, "")
       .group(:referrer)
-      .order("count(*) DESC")
+      .order(Arel.sql("count(*) DESC"))
       .limit(limit)
       .count
   end
@@ -65,7 +65,7 @@ class Visitor < ApplicationRecord
   def self.visitors_by_country(limit = 10, days = 30)
     where("first_visit_at > ? AND country IS NOT NULL", days.days.ago)
       .group(:country)
-      .order("count(*) DESC")
+      .order(Arel.sql("count(*) DESC"))
       .limit(limit)
       .count
   end
