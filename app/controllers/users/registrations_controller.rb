@@ -12,12 +12,11 @@ class Users::RegistrationsController < Devise::RegistrationsController
     yield resource if block_given?
 
     if resource.persisted?
-      # Track visitor conversion
+            # Track visitor conversion
       track_visitor_conversion(resource)
 
       # Don't sign in the user, just redirect to beta confirmation
       set_flash_message! :notice, :signed_up_but_unconfirmed
-      expire_data_after_sign_up!
       redirect_to beta_confirmation_path
     else
       clean_up_passwords resource
