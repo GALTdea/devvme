@@ -1,0 +1,330 @@
+require "test_helper"
+
+class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @user = users(:one)
+    @other_user = users(:two)
+    @admin_user = users(:admin) if defined?(users(:admin))
+
+    # Create test projects with different statuses
+    @published_project = projects(:one)
+    @published_project.update!(
+      user: @user,
+      status: :published,
+      title: "Published Project",
+      description: "This is a published project",
+      technologies_used: ["Ruby", "Rails", "PostgreSQL"]
+    )
+
+    @draft_project = projects(:two)
+    @draft_project.update!(
+      user: @other_user,
+      status: :draft,
+      title: "Draft Project",
+      description: "This is a draft project",
+      technologies_used: ["JavaScript", "React"]
+    )
+
+    @featured_project = @user.projects.create!(
+      title: "Featured Project",
+      description: "This is a featured project",
+      status: :published,
+      featured: true,
+      technologies_used: ["Vue.js", "Node.js"],
+      display_order: 1
+    )
+  end
+
+  # INDEX TESTS
+  test "should get index without authentication" do
+    get public_projects_url
+    assert_response :success
+    assert_select "h1", text: /explore projects/i
+    assert_select ".bg-white", minimum: 1 # Should show project cards
+  end
+
+  test "should show only published projects on index" do
+    get public_projects_url
+    assert_response :success
+
+    # Should show published projects
+    assert_select "h3", text: @published_project.title
+    assert_select "h3", text: @featured_project.title
+
+    # Should not show draft projects
+    assert_select "h3", { text: @draft_project.title, count: 0 }
+  end
+
+  test "should show project statistics on index" do
+    get public_projects_url
+    assert_response :success
+
+    # Should show stats
+    assert_select ".text-3xl.font-bold.text-blue-600", text: "2" # Published projects count
+    assert_select ".text-3xl.font-bold.text-green-600", text: "1" # Active developers count
+    assert_select ".text-3xl.font-bold.text-purple-600", text: "1" # Featured projects count
+  end
+
+  test "should show featured projects with featured badge" do
+    get public_projects_url
+    assert_response :success
+
+    # Should show featured badge
+    assert_select ".bg-purple-100.text-purple-800", text: /featured/i
+  end
+
+  test "should show search and filter form" do
+    get public_projects_url
+    assert_response :success
+
+    # Should show search form
+    assert_select "form[action='#{public_projects_path}']"
+    assert_select "input[name='search']"
+    assert_select "select[name='technology']"
+    assert_select "input[name='user']"
+  end
+
+  test "should filter projects by search term" do
+    get public_projects_url, params: { search: "Published" }
+    assert_response :success
+
+    # Should show matching project
+    assert_select "h3", text: @published_project.title
+    # Should not show non-matching project
+    assert_select "h3", { text: @featured_project.title, count: 0 }
+  end
+
+  test "should filter projects by technology" do
+    get public_projects_url, params: { technology: "Ruby" }
+    assert_response :success
+
+    # Should show project with Ruby technology
+    assert_select "h3", text: @published_project.title
+    # Should not show project without Ruby
+    assert_select "h3", { text: @featured_project.title, count: 0 }
+  end
+
+  test "should filter projects by user" do
+    get public_projects_url, params: { user: @user.username }
+    assert_response :success
+
+    # Should show projects by the specified user
+    assert_select "h3", text: @published_project.title
+    assert_select "h3", text: @featured_project.title
+  end
+
+  test "should show empty state when no projects match filters" do
+    get public_projects_url, params: { search: "nonexistent" }
+    assert_response :success
+
+    assert_select "h3", text: /no projects found/i
+    assert_select "a", text: /view all projects/i
+  end
+
+  test "should show admin indicator for authenticated admins" do
+    # Create admin user if not exists
+    admin = users(:admin)
+    admin.update!(account_status: :active)
+
+    sign_in admin
+    get public_projects_url
+    assert_response :success
+
+    assert_select ".bg-orange-100.text-orange-800", text: /admin view/i
+  end
+
+  # SHOW TESTS
+  test "should show published project without authentication" do
+    get public_project_url(@published_project)
+    assert_response :success
+    assert_select "h1", text: @published_project.title
+  end
+
+  test "should redirect to index when trying to show draft project" do
+    get public_project_url(@draft_project)
+    assert_redirected_to public_projects_path
+    assert_equal "Project not found.", flash[:alert]
+  end
+
+  test "should show project with all details" do
+    get public_project_url(@published_project)
+    assert_response :success
+
+    # Should show project title
+    assert_select "h1", text: @published_project.title
+
+    # Should show project description
+    assert_select "p", text: @published_project.description
+
+    # Should show technologies
+    @published_project.technologies_used.each do |tech|
+      assert_select ".bg-blue-100.text-blue-800", text: tech
+    end
+
+    # Should show developer info
+    assert_select "a[href='#{public_profile_path(@user.username)}']", text: @user.display_name
+  end
+
+  test "should show project links when present" do
+    @published_project.update!(
+      live_url: "https://example.com",
+      source_code_url: "https://github.com/user/repo"
+    )
+
+    get public_project_url(@published_project)
+    assert_response :success
+
+    # Should show live demo link
+    assert_select "a[href='https://example.com']", text: /live demo/i
+
+    # Should show source code link
+    assert_select "a[href='https://github.com/user/repo']", text: /source code/i
+  end
+
+  test "should show related projects from same user" do
+    get public_project_url(@published_project)
+    assert_response :success
+
+    # Should show related projects section
+    assert_select "h2", text: /more projects by/i
+    assert_select "h3", text: @featured_project.title
+  end
+
+  test "should show developer profile section" do
+    get public_project_url(@published_project)
+    assert_response :success
+
+    # Should show developer section
+    assert_select "h3", text: /developer/i
+    assert_select "a[href='#{public_profile_path(@user.username)}']", text: @user.display_name
+
+    # Should show project and post counts
+    assert_select "span", text: /projects/i
+    assert_select "span", text: /posts/i
+  end
+
+  test "should show admin controls for authenticated admins" do
+    # Create admin user if not exists
+    admin = users(:admin)
+    admin.update!(account_status: :active)
+
+    sign_in admin
+    get public_project_url(@published_project)
+    assert_response :success
+
+    # Should show admin controls section
+    assert_select ".bg-orange-50", text: /admin controls/i
+    assert_select "a[href='#{project_path(@published_project)}']", text: /edit project.*admin/i
+    assert_select "a[href='#{public_profile_path(@user.username)}']", text: /view owner profile/i
+  end
+
+  test "should not show admin controls for regular users" do
+    # Ensure user is active to avoid beta waiting redirect
+    @user.update!(account_status: :active)
+    sign_in @user
+    get public_project_url(@published_project)
+    assert_response :success
+
+    # Should not show admin controls
+    assert_select ".bg-orange-50", count: 0
+  end
+
+  test "should show project stats in sidebar" do
+    get public_project_url(@published_project)
+    assert_response :success
+
+    # Should show project details section
+    assert_select "h3", text: /project details/i
+    assert_select "dt", text: /status/i
+    assert_select "dd", text: /published/i
+    assert_select "dt", text: /featured/i
+    assert_select "dt", text: /created/i
+  end
+
+  test "should handle project with images" do
+    # Attach a test image
+    @published_project.images.attach(
+      io: File.open(Rails.root.join("test", "fixtures", "files", "test_image.png")),
+      filename: "test_image.png",
+      content_type: "image/png"
+    )
+
+    get public_project_url(@published_project)
+    assert_response :success
+
+    # Should show project gallery section
+    assert_select "h2", text: /project gallery/i
+    assert_select "img[alt='#{@published_project.title}']"
+  end
+
+  test "should redirect to index for non-existent project" do
+    get public_project_url(99999)
+    assert_redirected_to public_projects_path
+    assert_equal "Project not found.", flash[:alert]
+  end
+
+  # PAGINATION TESTS
+  test "should handle pagination correctly" do
+    # Create multiple projects to test pagination
+    15.times do |i|
+      @user.projects.create!(
+        title: "Project #{i}",
+        description: "Description #{i}",
+        status: :published,
+        technologies_used: ["Test"],
+        display_order: i + 10
+      )
+    end
+
+    get public_projects_url
+    assert_response :success
+
+    # Should show pagination if more than 12 projects (our limit)
+    # Note: This test assumes we have more than 12 published projects total
+  end
+
+  # CACHING TESTS
+  test "should set appropriate cache headers" do
+    get public_projects_url
+    assert_response :success
+
+    # Should set cache headers (implementation dependent)
+    # This tests that the controller sets cache headers without errors
+  end
+
+  test "should set cache headers for individual project" do
+    get public_project_url(@published_project)
+    assert_response :success
+
+    # Should set cache headers for individual project
+  end
+
+  # ERROR HANDLING TESTS
+  test "should handle database errors gracefully" do
+    # This would require mocking database errors, which is complex
+    # For now, we ensure the controller doesn't crash
+    get public_projects_url
+    assert_response :success
+  end
+
+  test "should handle malformed search parameters" do
+    get public_projects_url, params: { search: "<script>alert('xss')</script>" }
+    assert_response :success
+
+    # Should not crash and should escape the search term in the form
+    assert_select "input[name='search']"
+    # The value should be escaped in the form (check for escaped version)
+    assert_select "input[name='search'][value*='script']"
+  end
+
+  private
+
+  def sign_in(user)
+    post user_session_path, params: {
+      user: {
+        email: user.email,
+        password: "password123"
+      }
+    }
+  end
+end

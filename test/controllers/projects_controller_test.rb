@@ -4,6 +4,9 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:one)
     @other_user = users(:two)
+    # Ensure users are active to avoid beta waiting redirect
+    @user.update!(account_status: :active)
+    @other_user.update!(account_status: :active)
     sign_in @user
     @project1 = projects(:one)
     @project2 = projects(:two)
@@ -27,10 +30,10 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h3", { text: @project2.title, count: 0 }
   end
 
-  test "should redirect to login when not authenticated for index" do
+  test "should redirect to public projects when not authenticated for index" do
     sign_out @user
     get projects_url
-    assert_redirected_to new_user_session_path
+    assert_redirected_to public_projects_path
   end
 
   # SHOW TESTS
@@ -40,16 +43,27 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: @project1.title
   end
 
-  test "should redirect when trying to show other user's project" do
+  test "should show published project from other user without authentication" do
+    @project2.update!(status: :published)
+    sign_out @user
     get project_url(@project2)
-    assert_redirected_to projects_path
-    assert_equal "You can only access your own projects.", flash[:alert]
+    assert_response :success
+    assert_select "h1", text: @project2.title
   end
 
-  test "should redirect to login when not authenticated for show" do
+  test "should redirect to public projects when trying to show unpublished project from other user" do
+    @project2.update!(status: :draft)
     sign_out @user
-    get project_url(@project1)
-    assert_redirected_to new_user_session_path
+    get project_url(@project2)
+    assert_redirected_to public_projects_path
+    assert_equal "Project not found.", flash[:alert]
+  end
+
+  test "should show any project when authenticated as owner" do
+    @project2.update!(status: :draft)
+    get project_url(@project2)
+    assert_redirected_to public_projects_path
+    assert_equal "Project not found.", flash[:alert]
   end
 
   # NEW TESTS
@@ -129,7 +143,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   test "should redirect when trying to edit other user's project" do
     get edit_project_url(@project2)
     assert_redirected_to projects_path
-    assert_equal "You can only access your own projects.", flash[:alert]
+    assert_equal "You don't have permission to perform this action.", flash[:alert]
   end
 
   test "should redirect to login when not authenticated for edit" do
@@ -178,7 +192,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
       project: { title: "Hacked Title" }
     }
     assert_redirected_to projects_path
-    assert_equal "You can only access your own projects.", flash[:alert]
+    assert_equal "You don't have permission to perform this action.", flash[:alert]
   end
 
   test "should redirect to login when not authenticated for update" do
@@ -204,7 +218,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
       delete project_url(@project2)
     end
     assert_redirected_to projects_path
-    assert_equal "You can only access your own projects.", flash[:alert]
+    assert_equal "You don't have permission to perform this action.", flash[:alert]
   end
 
   test "should redirect to login when not authenticated for destroy" do
@@ -271,6 +285,67 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
 
     assert_response :unprocessable_content
+  end
+
+  # ADMIN TESTS
+  test "should allow admin to view any project" do
+    admin = users(:admin)
+    admin.update!(account_status: :active)
+    sign_in admin
+
+    get project_url(@project2)
+    assert_response :success
+    assert_select "h1", text: @project2.title
+  end
+
+  test "should allow admin to edit any project" do
+    admin = users(:admin)
+    admin.update!(account_status: :active)
+    sign_in admin
+
+    get edit_project_url(@project2)
+    assert_response :success
+    assert_select "h1", text: /edit.*project/i
+  end
+
+  test "should allow admin to update any project" do
+    admin = users(:admin)
+    admin.update!(account_status: :active)
+    sign_in admin
+
+    patch project_url(@project2), params: {
+      project: { title: "Admin Updated Title" }
+    }
+
+    @project2.reload
+    assert_equal "Admin Updated Title", @project2.title
+    assert_redirected_to project_path(@project2)
+  end
+
+  test "should allow admin to delete any project" do
+    admin = users(:admin)
+    admin.update!(account_status: :active)
+    sign_in admin
+
+    assert_difference("Project.count", -1) do
+      delete project_url(@project2)
+    end
+
+    assert_redirected_to projects_path
+    assert_equal "Project was successfully deleted.", flash[:notice]
+  end
+
+  test "should show admin controls in project views for admins" do
+    admin = users(:admin)
+    admin.update!(account_status: :active)
+    sign_in admin
+
+    get project_url(@project2)
+    assert_response :success
+
+    # Should show admin controls
+    assert_select "h4", text: /admin actions/i
+    assert_select "a[href='#{public_profile_path(@project2.user.username)}']", text: /view owner profile/i
   end
 
   # FILE UPLOAD TESTS

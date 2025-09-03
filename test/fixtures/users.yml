@@ -18,9 +18,9 @@ two:
 
 admin:
   email: admin@example.com
-  username: admin
+  username: adminuser
   full_name: Admin User
   bio: I am an admin user
-  slug: admin
+  slug: adminuser
   role: admin
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
