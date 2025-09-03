@@ -43,8 +43,12 @@
           <!-- Technology Filter -->
           <div>
             <%= form.label :technology, "Filter by technology", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <% 
+              # Get all unique technologies from published projects
+              all_technologies = Project.published.pluck(:technologies_used).flatten.uniq.compact.sort
+            %>
             <%= form.select :technology, 
-                options_for_select([["All Technologies", ""]] + Project.published.joins("CROSS JOIN unnest(technologies_used) as tech").distinct.pluck("tech").sort.map { |tech| [tech, tech] }, params[:technology]),
+                options_for_select([["All Technologies", ""]] + all_technologies.map { |tech| [tech, tech] }, params[:technology]),
                 {},
                 { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
           </div>

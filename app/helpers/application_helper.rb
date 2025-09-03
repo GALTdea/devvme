@@ -360,4 +360,40 @@ module ApplicationHelper
 
     content_tag :script, schema.to_json.html_safe, type: "application/ld+json"
   end
+
+  # Project Permission Helpers
+  # These methods check if the current user can perform actions on projects
+
+  def can_edit_project?(project)
+    return false unless user_signed_in?
+    project.user == current_user || current_user.can_access_admin?
+  end
+
+  def can_delete_project?(project)
+    return false unless user_signed_in?
+    project.user == current_user || current_user.can_access_admin?
+  end
+
+  def can_view_project?(project)
+    # Anyone can view published projects, or owners/admins can view any project
+    project.published? || can_edit_project?(project)
+  end
+
+  def can_manage_project?(project)
+    # Alias for can_edit_project? for semantic clarity
+    can_edit_project?(project)
+  end
+
+  # Admin Permission Helpers
+  def is_admin?
+    user_signed_in? && current_user.can_access_admin?
+  end
+
+  def is_super_admin?
+    user_signed_in? && current_user.super_admin?
+  end
+
+  def can_manage_users?
+    user_signed_in? && current_user.can_manage_users?
+  end
 end

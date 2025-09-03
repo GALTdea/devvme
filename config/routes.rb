@@ -50,8 +50,8 @@ Rails.application.routes.draw do
   get "blog.rss", to: "public_blog#rss", as: :public_blog_rss, defaults: { format: :xml }
 
   # Public project routes (no authentication required)
-  get "projects", to: "public_projects#index", as: :public_projects
-  get "projects/:id", to: "public_projects#show", as: :public_project
+  get "explore", to: "public_projects#index", as: :public_projects
+  get "explore/:id", to: "public_projects#show", as: :public_project
 
   # SEO Sitemap
   get "sitemap.xml", to: "sitemap#index", as: :sitemap, defaults: { format: :xml }

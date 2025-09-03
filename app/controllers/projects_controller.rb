@@ -1,13 +1,24 @@
 class ProjectsController < ApplicationController
-  before_action :authenticate_user!
-  before_action :set_project, only: [ :show, :edit, :update, :destroy ]
-  before_action :ensure_owner, only: [ :show, :edit, :update, :destroy ]
+  # Authentication required for management actions only
+  before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy, :reorder]
+  before_action :set_project, only: [:show, :edit, :update, :destroy]
+  before_action :ensure_owner_or_admin, only: [:edit, :update, :destroy]
 
   def index
-    @projects = current_user.projects.by_display_order.includes(images_attachments: :blob)
+    # Show user's own projects if authenticated, otherwise redirect to public
+    if user_signed_in?
+      @projects = current_user.projects.by_display_order.includes(images_attachments: :blob)
+    else
+      redirect_to public_projects_path
+    end
   end
 
   def show
+    # Allow public access to published projects, or owner/admin access to any project
+    unless @project.published? || can_edit_project?(@project)
+      redirect_to public_projects_path, alert: 'Project not found.'
+      return
+    end
   end
 
   def new
@@ -56,9 +67,9 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
   end
 
-  def ensure_owner
-    unless @project.user == current_user
-      redirect_to projects_path, alert: "You can only access your own projects."
+  def ensure_owner_or_admin
+    unless can_edit_project?(@project)
+      redirect_to projects_path, alert: "You don't have permission to perform this action."
     end
   end
 
@@ -67,4 +78,18 @@ class ProjectsController < ApplicationController
                                    :featured, :status, :display_order, :technologies_display,
                                    :thumbnail, images: [])
   end
+
+  # Permission helper methods
+  def can_edit_project?(project)
+    return false unless user_signed_in?
+    project.user == current_user || current_user.can_access_admin?
+  end
+
+  def can_delete_project?(project)
+    return false unless user_signed_in?
+    project.user == current_user || current_user.can_access_admin?
+  end
+
+  # Make helper methods available to views
+  helper_method :can_edit_project?, :can_delete_project?
 end

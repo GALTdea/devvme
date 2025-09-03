@@ -1,7 +1,7 @@
 class PublicProjectsController < ApplicationController
   # Public project controller - no authentication required
   # Handles public viewing of published projects
-  
+
   before_action :set_project, only: [:show]
   before_action :set_cache_headers
 
@@ -23,7 +23,7 @@ class PublicProjectsController < ApplicationController
 
     # Filter by technology
     if params[:technology].present?
-      @projects = @projects.where("? = ANY(technologies_used)", params[:technology])
+      @projects = @projects.where("technologies_used::text ILIKE ?", "%\"#{params[:technology]}\"%")
     end
 
     # Filter by user
