@@ -7,6 +7,16 @@
         Discover amazing projects built by our community of developers. 
         From web applications to mobile apps, find inspiration for your next project.
       </p>
+      
+      <!-- Admin indicator -->
+      <% if user_signed_in? && is_admin? %>
+        <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Admin View - You can edit any project
+        </div>
+      <% end %>
     </div>
 
     <!-- Stats Section -->
