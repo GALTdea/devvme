@@ -257,7 +257,12 @@ class User < ApplicationRecord
 
     # Send activation email if user was pending activation
     if was_pending
-      UserActivationMailer.activation_notification(self).deliver_now
+      begin
+        UserActivationMailer.activation_notification(self).deliver_later
+      rescue => e
+        # Log the error but don't break the activation process
+        Rails.logger.error "Failed to send activation email to #{email}: #{e.message}"
+      end
     end
 
     log_admin_activity(admin, 'activate_user') if admin
