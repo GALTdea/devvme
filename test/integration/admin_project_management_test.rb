@@ -3,15 +3,15 @@ require "test_helper"
 class AdminProjectManagementTest < ActionDispatch::IntegrationTest
   setup do
     @admin = User.create!(
-      email: "test_admin@example.com",
+      email: "test_admin_int_#{SecureRandom.hex(3)}@example.com",
       password: "password123",
-      username: "test_admin",
+      username: "test_admin_int_#{SecureRandom.hex(3)}",
       role: :admin,
       account_status: :active
     )
 
-    @regular_user = users(:one)
-    @other_user = users(:two)
+    @regular_user = users(:test_user_one)
+    @other_user = users(:test_user_two)
 
     # Create projects for different users
     @admin_project = @admin.projects.create!(
