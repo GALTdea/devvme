@@ -1,14 +1,14 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  user: one
+test_profile_view_one:
+  user: test_user_one
   visitor_ip: MyString
   user_agent: MyString
   referrer: MyString
   visited_at: 2025-08-22 12:34:40
 
-two:
-  user: two
+test_profile_view_two:
+  user: test_user_two
   visitor_ip: MyString
   user_agent: MyString
   referrer: MyString

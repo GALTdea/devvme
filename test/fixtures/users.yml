@@ -1,26 +1,26 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  email: user1@example.com
-  username: user1
-  full_name: User One
-  bio: I am user one
-  slug: user1
+test_user_one:
+  email: test_user1@example.com
+  username: test_user1
+  full_name: Test User One
+  bio: I am test user one
+  slug: test_user1
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
   
-two:
-  email: user2@example.com
-  username: user2
-  full_name: User Two
-  bio: I am user two
-  slug: user2
+test_user_two:
+  email: test_user2@example.com
+  username: test_user2
+  full_name: Test User Two
+  bio: I am test user two
+  slug: test_user2
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
 
-admin:
-  email: admin@example.com
-  username: adminuser
-  full_name: Admin User
-  bio: I am an admin user
-  slug: adminuser
+test_admin:
+  email: test_admin@example.com
+  username: test_adminuser
+  full_name: Test Admin User
+  bio: I am a test admin user
+  slug: test_adminuser
   role: admin
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>

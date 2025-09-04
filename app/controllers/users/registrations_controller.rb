@@ -5,19 +5,18 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def create
     build_resource(sign_up_params)
 
-    # Set account status to pending_activation for beta testing
-    resource.account_status = :pending_activation
-
+    # Account status will be set to active automatically via User model callback
     resource.save
     yield resource if block_given?
 
     if resource.persisted?
-            # Track visitor conversion
+      # Track visitor conversion
       track_visitor_conversion(resource)
 
-      # Don't sign in the user, just redirect to beta confirmation
-      set_flash_message! :notice, :signed_up_but_unconfirmed
-      redirect_to beta_confirmation_path
+      # Sign in the user and redirect to dashboard
+      sign_in(resource)
+      set_flash_message! :notice, :signed_up
+      redirect_to dashboard_path
     else
       clean_up_passwords resource
       set_minimum_password_length
@@ -27,18 +26,14 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   protected
 
-  # Override after_sign_up_path to handle beta users
+  # Override after_sign_up_path to redirect to dashboard
   def after_sign_up_path_for(resource)
-    if resource.pending_activation?
-      beta_confirmation_path
-    else
-      super
-    end
+    dashboard_path
   end
 
-  # Override after_inactive_sign_up_path for beta users
+  # Override after_inactive_sign_up_path to redirect to dashboard
   def after_inactive_sign_up_path_for(resource)
-    beta_confirmation_path
+    dashboard_path
   end
 
   private

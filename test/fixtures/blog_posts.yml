@@ -25,7 +25,7 @@ published_post:
   published: true
   published_at: <%= 1.week.ago %>
   slug: "getting-started-with-ruby-on-rails"
-  user: one
+  user: test_user_one
   archived: false
   views_count: 0
 
@@ -48,7 +48,7 @@ draft_post:
   published: false
   published_at: 
   slug: "advanced-rails-techniques"
-  user: one
+  user: test_user_one
   archived: false
   views_count: 0
 
@@ -77,6 +77,6 @@ another_published_post:
   published: true
   published_at: <%= 3.days.ago %>
   slug: "javascript-and-rails-integration"
-  user: two
+  user: test_user_two
   archived: false
   views_count: 0

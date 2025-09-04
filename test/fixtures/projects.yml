@@ -1,23 +1,23 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
+test_project_one:
   title: Test Project One
   description: This is a test project description for project one
   technologies_used: ["Ruby on Rails", "PostgreSQL", "Tailwind CSS"]
-  source_code_url: https://github.com/user1/project-one
+  source_code_url: https://github.com/test_user1/project-one
   live_url: https://project-one.herokuapp.com
-  user: one
+  user: test_user_one
   status: published
   featured: false
   display_order: 1
 
-two:
+test_project_two:
   title: Test Project Two
   description: This is a test project description for project two
   technologies_used: ["React", "Node.js", "MongoDB"]
-  source_code_url: https://github.com/user2/project-two
+  source_code_url: https://github.com/test_user2/project-two
   live_url: https://project-two.netlify.app
-  user: two
+  user: test_user_two
   status: published
   featured: true
   display_order: 2

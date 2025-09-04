@@ -366,17 +366,20 @@ module ApplicationHelper
 
   def can_edit_project?(project)
     return false unless user_signed_in?
+    return false if project.nil?
     project.user == current_user || current_user.can_access_admin?
   end
 
   def can_delete_project?(project)
     return false unless user_signed_in?
+    return false if project.nil?
     project.user == current_user || current_user.can_access_admin?
   end
 
   def can_view_project?(project)
+    return false if project.nil?
     # Anyone can view published projects, or owners/admins can view any project
-    project.published? || can_edit_project?(project)
+    project.published? || (user_signed_in? && can_edit_project?(project))
   end
 
   def can_manage_project?(project)

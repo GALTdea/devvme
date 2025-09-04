@@ -2,14 +2,14 @@ require "test_helper"
 
 class ProjectsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:one)
-    @other_user = users(:two)
+    @user = users(:test_user_one)
+    @other_user = users(:test_user_two)
     # Ensure users are active to avoid beta waiting redirect
     @user.update!(account_status: :active)
     @other_user.update!(account_status: :active)
     sign_in @user
-    @project1 = projects(:one)
-    @project2 = projects(:two)
+    @project1 = projects(:test_project_one)
+    @project2 = projects(:test_project_two)
     # Make project1 belong to current user
     @project1.update!(user: @user)
   end
@@ -289,7 +289,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
 
   # ADMIN TESTS
   test "should allow admin to view any project" do
-    admin = users(:admin)
+    admin = users(:test_admin)
     admin.update!(account_status: :active)
     sign_in admin
 
@@ -299,7 +299,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should allow admin to edit any project" do
-    admin = users(:admin)
+    admin = users(:test_admin)
     admin.update!(account_status: :active)
     sign_in admin
 
@@ -309,7 +309,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should allow admin to update any project" do
-    admin = users(:admin)
+    admin = users(:test_admin)
     admin.update!(account_status: :active)
     sign_in admin
 
@@ -323,7 +323,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should allow admin to delete any project" do
-    admin = users(:admin)
+    admin = users(:test_admin)
     admin.update!(account_status: :active)
     sign_in admin
 
@@ -336,7 +336,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should show admin controls in project views for admins" do
-    admin = users(:admin)
+    admin = users(:test_admin)
     admin.update!(account_status: :active)
     sign_in admin
 

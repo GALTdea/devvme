@@ -2,16 +2,16 @@ require "test_helper"
 
 class ApplicationHelperTest < ActionView::TestCase
   setup do
-    @user = users(:one)
-    @other_user = users(:two)
+    @user = users(:test_user_one)
+    @other_user = users(:test_user_two)
     @admin_user = User.create!(
-      email: "admin@example.com",
+      email: "test_admin_#{SecureRandom.hex(4)}@example.com",
       password: "password123",
-      username: "admin",
+      username: "test_admin_#{SecureRandom.hex(4)}",
       role: :admin,
       account_status: :active
     )
-    
+
     @project = @user.projects.create!(
       title: "Test Project",
       description: "A test project",
@@ -27,11 +27,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert can_edit_project?(@project)
   end
 
@@ -40,11 +40,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @admin_user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert can_edit_project?(@project)
   end
 
@@ -53,11 +53,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @other_user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert_not can_edit_project?(@project)
   end
 
@@ -66,7 +66,7 @@ class ApplicationHelperTest < ActionView::TestCase
     def user_signed_in?
       false
     end
-    
+
     assert_not can_edit_project?(@project)
   end
 
@@ -75,11 +75,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert can_delete_project?(@project)
   end
 
@@ -88,11 +88,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @admin_user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert can_delete_project?(@project)
   end
 
@@ -101,63 +101,63 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @other_user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert_not can_delete_project?(@project)
   end
 
   test "can_view_project? returns true for published projects" do
     @project.update!(status: :published)
-    
+
     # Mock user_signed_in?
     def user_signed_in?
       false
     end
-    
+
     assert can_view_project?(@project)
   end
 
   test "can_view_project? returns false for draft projects when not signed in" do
     @project.update!(status: :draft)
-    
+
     # Mock user_signed_in?
     def user_signed_in?
       false
     end
-    
+
     assert_not can_view_project?(@project)
   end
 
   test "can_view_project? returns true for draft projects when owner" do
     @project.update!(status: :draft)
-    
+
     # Mock current_user
     def current_user
       @user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert can_view_project?(@project)
   end
 
   test "can_view_project? returns true for draft projects when admin" do
     @project.update!(status: :draft)
-    
+
     # Mock current_user
     def current_user
       @admin_user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert can_view_project?(@project)
   end
 
@@ -166,11 +166,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert_equal can_edit_project?(@project), can_manage_project?(@project)
   end
 
@@ -180,32 +180,32 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @admin_user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert is_admin?
   end
 
   test "is_admin? returns true for super admin user" do
-    super_admin = User.create!(
-      email: "superadmin@example.com",
+    @super_admin = User.create!(
+      email: "test_superadmin_#{SecureRandom.hex(4)}@example.com",
       password: "password123",
-      username: "superadmin",
+      username: "test_superadmin_#{SecureRandom.hex(4)}",
       role: :super_admin,
       account_status: :active
     )
-    
+
     # Mock current_user
     def current_user
-      super_admin
+      @super_admin
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert is_admin?
   end
 
@@ -214,11 +214,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert_not is_admin?
   end
 
@@ -227,28 +227,28 @@ class ApplicationHelperTest < ActionView::TestCase
     def user_signed_in?
       false
     end
-    
+
     assert_not is_admin?
   end
 
   test "is_super_admin? returns true for super admin user" do
-    super_admin = User.create!(
-      email: "superadmin@example.com",
+    @super_admin2 = User.create!(
+      email: "test_superadmin2_#{SecureRandom.hex(4)}@example.com",
       password: "password123",
-      username: "superadmin",
+      username: "test_superadmin2_#{SecureRandom.hex(4)}",
       role: :super_admin,
       account_status: :active
     )
-    
+
     # Mock current_user
     def current_user
-      super_admin
+      @super_admin2
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert is_super_admin?
   end
 
@@ -257,11 +257,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @admin_user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert_not is_super_admin?
   end
 
@@ -270,11 +270,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert_not is_super_admin?
   end
 
@@ -283,32 +283,32 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @admin_user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert can_manage_users?
   end
 
   test "can_manage_users? returns true for super admin" do
-    super_admin = User.create!(
-      email: "superadmin@example.com",
+    @super_admin3 = User.create!(
+      email: "test_superadmin3_#{SecureRandom.hex(4)}@example.com",
       password: "password123",
-      username: "superadmin",
+      username: "test_superadmin3_#{SecureRandom.hex(4)}",
       role: :super_admin,
       account_status: :active
     )
-    
+
     # Mock current_user
     def current_user
-      super_admin
+      @super_admin3
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert can_manage_users?
   end
 
@@ -317,11 +317,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     assert_not can_manage_users?
   end
 
@@ -330,7 +330,7 @@ class ApplicationHelperTest < ActionView::TestCase
     def user_signed_in?
       false
     end
-    
+
     assert_not can_manage_users?
   end
 
@@ -340,11 +340,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     # Should not crash with nil project
     assert_not can_edit_project?(nil)
     assert_not can_delete_project?(nil)
@@ -353,19 +353,28 @@ class ApplicationHelperTest < ActionView::TestCase
   end
 
   test "permission helpers handle nil current_user gracefully" do
+    # Create a draft project for this test
+    draft_project = @user.projects.create!(
+      title: "Draft Test Project",
+      description: "A draft test project",
+      status: :draft,
+      technologies_used: ["Ruby", "Rails"],
+      display_order: 2
+    )
+
     # Mock current_user
     def current_user
       nil
     end
-    
+
     def user_signed_in?
       false
     end
-    
+
     # Should not crash with nil current_user
     assert_not can_edit_project?(@project)
     assert_not can_delete_project?(@project)
-    assert_not can_view_project?(@project)
+    assert_not can_view_project?(draft_project)  # Draft projects should not be viewable when not signed in
     assert_not can_manage_project?(@project)
     assert_not is_admin?
     assert_not is_super_admin?
@@ -378,11 +387,11 @@ class ApplicationHelperTest < ActionView::TestCase
     def current_user
       @admin_user
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     # Test that helper methods work with user model methods
     assert @admin_user.can_access_admin?
     assert is_admin?
@@ -391,23 +400,23 @@ class ApplicationHelperTest < ActionView::TestCase
 
   test "permission helpers respect user account status" do
     # Create suspended admin
-    suspended_admin = User.create!(
-      email: "suspended@example.com",
+    @suspended_admin = User.create!(
+      email: "test_suspended_#{SecureRandom.hex(4)}@example.com",
       password: "password123",
-      username: "suspended",
+      username: "test_suspended_#{SecureRandom.hex(4)}",
       role: :admin,
       account_status: :suspended
     )
-    
+
     # Mock current_user
     def current_user
-      suspended_admin
+      @suspended_admin
     end
-    
+
     def user_signed_in?
       true
     end
-    
+
     # Suspended admin should still have admin permissions
     # (account status is separate from role permissions)
     assert is_admin?
