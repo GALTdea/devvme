@@ -108,15 +108,15 @@ module ApplicationHelper
         level = $1.length
         title = $2.strip
         anchor = title.downcase.gsub(/[^a-z0-9]+/, "-").gsub(/^-+|-+$/, "")
-        
+
         toc_html << '<li class="toc-level-' << level.to_s << '">'
-        toc_html << '<a href="#' << anchor << '" class="toc-link">' << ERB::Util.html_escape(title) << '</a>'
-        toc_html << '</li>'
+        toc_html << '<a href="#' << anchor << '" class="toc-link">' << ERB::Util.html_escape(title) << "</a>"
+        toc_html << "</li>"
       end
     end
 
-    toc_html << '</ul></nav>'
-    
+    toc_html << "</ul></nav>"
+
     # Return empty string if no headers found
     toc_html == '<nav class="table-of-contents"><h3 class="toc-title">Table of Contents</h3><ul class="toc-list"></ul></nav>' ? "" : toc_html.html_safe
   end
