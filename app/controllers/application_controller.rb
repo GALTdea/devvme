@@ -5,6 +5,12 @@ class ApplicationController < ActionController::Base
   # Include Pagy for pagination
   include Pagy::Backend
 
+  # Include Pundit for authorization
+  include Pundit::Authorization
+
+  # Pundit error handling
+  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+
   # Configure permitted parameters for Devise
   before_action :configure_permitted_parameters, if: :devise_controller?
 
@@ -52,6 +58,16 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  # Pundit configuration
+  def pundit_user
+    current_user
+  end
+
+  def user_not_authorized
+    flash[:alert] = "You are not authorized to perform this action."
+    redirect_to(request.referrer || root_path)
+  end
 
   def update_last_login
     current_user.update_last_login! if current_user.last_login_at.nil? || current_user.last_login_at < 1.hour.ago
