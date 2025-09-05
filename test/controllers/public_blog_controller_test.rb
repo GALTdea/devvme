@@ -130,7 +130,7 @@ class PublicBlogControllerTest < ActionDispatch::IntegrationTest
     long_post = BlogPost.create!(
       title: "Long Post with TOC",
       content: long_content,
-      user: users(:one),
+      user: users(:test_user_one),
       published: true,
       published_at: Time.current
     )
@@ -163,7 +163,7 @@ class PublicBlogControllerTest < ActionDispatch::IntegrationTest
     future_post = BlogPost.create!(
       title: "Future Post",
       content: "This post is from the future",
-      user: users(:one),
+      user: users(:test_user_one),
       published: true,
       published_at: 1.hour.from_now
     )

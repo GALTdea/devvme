@@ -2,7 +2,7 @@ require "application_system_test_case"
 
 class ShareButtonTest < ApplicationSystemTestCase
   setup do
-    @user = users(:one)
+    @user = users(:test_user_one)
   end
 
   test "share button appears on private profile page" do

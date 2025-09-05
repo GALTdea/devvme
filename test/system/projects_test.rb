@@ -2,10 +2,10 @@ require "application_system_test_case"
 
 class ProjectsTest < ApplicationSystemTestCase
   setup do
-    @user = users(:one)
-    @other_user = users(:two)
-    @project1 = projects(:one)
-    @project2 = projects(:two)
+    @user = users(:test_user_one)
+    @other_user = users(:test_user_two)
+    @project1 = projects(:test_project_one)
+    @project2 = projects(:test_project_two)
 
     # Make project1 belong to current user
     @project1.update!(user: @user)
@@ -47,6 +47,7 @@ class ProjectsTest < ApplicationSystemTestCase
     sign_in_as(@user)
 
     visit new_project_path
+    # new project path is /projects/new
 
     # Submit empty form
     click_on "Create Project"

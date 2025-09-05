@@ -2,7 +2,7 @@ require "test_helper"
 
 class BlogPerformanceTest < ActionDispatch::IntegrationTest
   def setup
-    @user = users(:one)
+    @user = users(:test_user_one)
 
     # Clean up any existing blog posts for this test
     @user.blog_posts.destroy_all

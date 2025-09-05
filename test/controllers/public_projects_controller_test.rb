@@ -2,12 +2,12 @@ require "test_helper"
 
 class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:one)
-    @other_user = users(:two)
-    @admin_user = users(:admin) if defined?(users(:admin))
+    @user = users(:test_user_one)
+    @other_user = users(:test_user_two)
+    @admin_user = users(:test_admin) if defined?(users(:test_admin))
 
     # Create test projects with different statuses
-    @published_project = projects(:one)
+    @published_project = projects(:test_project_one)
     @published_project.update!(
       user: @user,
       status: :published,
@@ -16,7 +16,7 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
       technologies_used: ["Ruby", "Rails", "PostgreSQL"]
     )
 
-    @draft_project = projects(:two)
+    @draft_project = projects(:test_project_two)
     @draft_project.update!(
       user: @other_user,
       status: :draft,
@@ -123,7 +123,7 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
 
   test "should show admin indicator for authenticated admins" do
     # Create admin user if not exists
-    admin = users(:admin)
+    admin = users(:test_admin)
     admin.update!(account_status: :active)
 
     sign_in admin
@@ -205,7 +205,7 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
 
   test "should show admin controls for authenticated admins" do
     # Create admin user if not exists
-    admin = users(:admin)
+    admin = users(:test_admin)
     admin.update!(account_status: :active)
 
     sign_in admin

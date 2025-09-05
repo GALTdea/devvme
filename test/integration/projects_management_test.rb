@@ -2,8 +2,8 @@ require "test_helper"
 
 class ProjectsManagementTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:one)
-    @other_user = users(:two)
+    @user = users(:test_user_one)
+    @other_user = users(:test_user_two)
     sign_in_as(@user)
   end
 

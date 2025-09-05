@@ -2,7 +2,7 @@ require "test_helper"
 
 class BlogPostTest < ActiveSupport::TestCase
   def setup
-    @user = users(:one)
+    @user = users(:test_user_one)
     @blog_post = blog_posts(:published_post)
     @draft_post = blog_posts(:draft_post)
   end

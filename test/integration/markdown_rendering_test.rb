@@ -6,7 +6,7 @@ class MarkdownRenderingTest < ActionDispatch::IntegrationTest
   include ActionView::Helpers::UrlHelper
 
   setup do
-    @user = users(:one)
+    @user = users(:test_user_one)
   end
 
   test "should render basic markdown elements" do

@@ -4,7 +4,7 @@ class BlogPostsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   setup do
-    @user = users(:one)
+    @user = users(:test_user_one)
     @blog_post = blog_posts(:published_post)
     sign_in @user
   end
@@ -110,7 +110,7 @@ class BlogPostsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should not allow access to other users blog posts" do
-    other_user = users(:two)
+    other_user = users(:test_user_two)
     other_blog_post = blog_posts(:another_published_post)
 
     get edit_blog_post_url(other_blog_post)

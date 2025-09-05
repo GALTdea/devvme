@@ -2,7 +2,7 @@ require "test_helper"
 
 class ProductionReadinessTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:one)
+    @user = users(:test_user_one)
     # Clear existing projects for clean test
     @user.projects.destroy_all
     sign_in_as(@user)
@@ -151,7 +151,7 @@ class ProductionReadinessTest < ActionDispatch::IntegrationTest
     assert_not Project.exists?(third_project.id)
 
     # Test 10: Verify security - user cannot access other user's projects
-    other_user = users(:two)
+    other_user = users(:test_user_two)
     other_project = other_user.projects.create!(
       title: "Other User Project",
       description: "Should not be accessible",

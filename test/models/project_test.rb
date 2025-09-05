@@ -358,7 +358,7 @@ class ProjectTest < ActiveSupport::TestCase
   end
 
   test "reorder_for_user should update display_order correctly" do
-    user = users(:one)
+    user = users(:test_user_one)
     project1 = Project.create!(
       title: "First Project",
       description: "First project description",
@@ -398,14 +398,14 @@ class ProjectTest < ActiveSupport::TestCase
   end
 
   test "reorder_for_user should reject invalid project ids" do
-    user = users(:one)
+    user = users(:test_user_one)
     result = Project.reorder_for_user(user, [999, 1000])
     assert_not result, "Reorder should fail with invalid IDs"
   end
 
   test "reorder_for_user should reject projects not owned by user" do
-    user1 = users(:one)
-    user2 = users(:two)
+    user1 = users(:test_user_one)
+    user2 = users(:test_user_two)
 
     project = Project.create!(
       title: "User 2 Project",

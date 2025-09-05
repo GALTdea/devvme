@@ -2,7 +2,7 @@ require "test_helper"
 
 class Admin::VisitorAnalyticsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @admin_user = users(:admin)
+    @admin_user = users(:test_admin)
     sign_in @admin_user
   end
 
@@ -25,7 +25,8 @@ class Admin::VisitorAnalyticsControllerTest < ActionDispatch::IntegrationTest
 
   test "should redirect non-admin users" do
     sign_out @admin_user
-    regular_user = users(:one)
+    regular_user = users(:test_user_one)
+
     sign_in regular_user
 
     get admin_visitor_analytics_index_url

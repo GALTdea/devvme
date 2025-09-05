@@ -2,7 +2,7 @@ require "test_helper"
 
 class PublicProfilesControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:one)
+    @user = users(:test_user_one)
   end
 
   test "should show public profile by username" do

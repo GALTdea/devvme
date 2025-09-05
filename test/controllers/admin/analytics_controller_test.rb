@@ -2,7 +2,7 @@ require "test_helper"
 
 class Admin::AnalyticsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @admin_user = users(:admin)
+    @admin_user = users(:test_admin)
     sign_in @admin_user
   end
 
