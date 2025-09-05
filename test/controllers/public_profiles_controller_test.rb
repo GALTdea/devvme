@@ -31,7 +31,7 @@ class PublicProfilesControllerTest < ActionDispatch::IntegrationTest
 
   test "should only show published projects to public visitors" do
     # Create a published project
-    published_project = projects(:one)
+    published_project = projects(:test_project_one)
     published_project.update!(status: :published, user: @user)
 
     # Create a draft project
@@ -59,7 +59,7 @@ class PublicProfilesControllerTest < ActionDispatch::IntegrationTest
 
     # Should have share button with Stimulus controller
     assert_select "div[data-controller='share-button']"
-    assert_select "button[data-action='click->share-button#share']", text: /Share Profile/
+    assert_select "button[data-action='click->share-button#share']", text: /share --profile/
 
     # Should have correct data attributes
     assert_select "div[data-share-button-title-value='#{@user.display_name}\\'s Profile']"
