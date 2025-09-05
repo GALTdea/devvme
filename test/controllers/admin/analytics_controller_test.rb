@@ -23,7 +23,7 @@ class Admin::AnalyticsControllerTest < ActionDispatch::IntegrationTest
 
   test "should redirect non-admin users" do
     sign_out @admin_user
-    @regular_user = users(:one)
+    @regular_user = users(:test_user_one)
     sign_in @regular_user
 
     get admin_analytics_index_url
