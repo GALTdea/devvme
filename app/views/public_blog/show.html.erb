@@ -1,12 +1,16 @@
 <%# SEO Meta Tags %>
 <% page_title(@blog_post.title) %>
-<% meta_description(@blog_post.excerpt || truncate(strip_tags(@blog_post.content), length: 160)) %>
+<% 
+  # Cache the processed content to avoid multiple processing
+  content_excerpt = @blog_post.excerpt.presence || truncate(strip_tags(@blog_post.content), length: 160)
+%>
+<% meta_description(content_excerpt) %>
 <% meta_keywords([@blog_post.title.split, "blog", "devvme", "programming", "development"].flatten.join(", ")) %>
 
 <%# Open Graph and Twitter Card Tags %>
 <% 
   post_url = public_blog_post_url(@blog_post)
-  description = @blog_post.excerpt || truncate(strip_tags(@blog_post.content), length: 160)
+  description = content_excerpt
 %>
 <% open_graph_tags(
   title: @blog_post.title,
@@ -207,7 +211,7 @@
       <!-- Article Content -->
       <article class="prose prose-lg dark:prose-invert max-w-none print:max-w-full" 
                data-controller="blog-viewer" 
-               data-blog-viewer-content-value="<%= html_escape(@blog_post.content) %>">
+               data-blog-viewer-content-value="<%= @blog_post.content.to_json %>">
         <!-- Markdown content will be rendered here -->
       </article>
     </main>

@@ -291,6 +291,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   test "should allow admin to view any project" do
     admin = users(:test_admin)
     admin.update!(account_status: :active)
+    sign_out @user
     sign_in admin
 
     get project_url(@project2)
@@ -301,6 +302,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   test "should allow admin to edit any project" do
     admin = users(:test_admin)
     admin.update!(account_status: :active)
+    sign_out @user
     sign_in admin
 
     get edit_project_url(@project2)
@@ -311,6 +313,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   test "should allow admin to update any project" do
     admin = users(:test_admin)
     admin.update!(account_status: :active)
+    sign_out @user
     sign_in admin
 
     patch project_url(@project2), params: {
@@ -325,7 +328,17 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   test "should allow admin to delete any project" do
     admin = users(:test_admin)
     admin.update!(account_status: :active)
+
+    # Sign out the current user and sign in admin
+    sign_out @user
     sign_in admin
+
+    # Ensure project2 exists and belongs to other user
+    @project2.reload
+    assert_equal @other_user, @project2.user, "Project2 should belong to other user"
+
+    # Verify we're signed in as admin
+    assert_equal admin, @controller.current_user, "Should be signed in as admin"
 
     assert_difference("Project.count", -1) do
       delete project_url(@project2)
@@ -338,6 +351,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   test "should show admin controls in project views for admins" do
     admin = users(:test_admin)
     admin.update!(account_status: :active)
+    sign_out @user
     sign_in admin
 
     get project_url(@project2)

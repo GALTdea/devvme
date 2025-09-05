@@ -96,28 +96,29 @@ module ApplicationHelper
   def markdown_toc(text)
     return "" if text.blank?
 
-    headers = []
-    text.scan(/^(\#{1,6})\s+(.+)$/) do |level, title|
-      anchor = title.downcase.gsub(/[^a-z0-9]+/, "-").gsub(/^-+|-+$/, "")
-      headers << {
-        level: level.length,
-        title: title.strip,
-        anchor: anchor
-      }
-    end
+    # Use a more memory-efficient approach
+    toc_html = String.new
+    toc_html << '<nav class="table-of-contents">'
+    toc_html << '<h3 class="toc-title">Table of Contents</h3>'
+    toc_html << '<ul class="toc-list">'
 
-    return "" if headers.empty?
-
-    content_tag :nav, class: "table-of-contents" do
-      content_tag(:h3, "Table of Contents", class: "toc-title") +
-      content_tag(:ul, class: "toc-list") do
-        headers.map do |header|
-          content_tag :li, class: "toc-level-#{header[:level]}" do
-            link_to header[:title], "##{header[:anchor]}", class: "toc-link"
-          end
-        end.join.html_safe
+    # Process headers line by line to avoid creating large intermediate arrays
+    text.each_line do |line|
+      if line.match(/^(\#{1,6})\s+(.+)$/)
+        level = $1.length
+        title = $2.strip
+        anchor = title.downcase.gsub(/[^a-z0-9]+/, "-").gsub(/^-+|-+$/, "")
+        
+        toc_html << '<li class="toc-level-' << level.to_s << '">'
+        toc_html << '<a href="#' << anchor << '" class="toc-link">' << ERB::Util.html_escape(title) << '</a>'
+        toc_html << '</li>'
       end
     end
+
+    toc_html << '</ul></nav>'
+    
+    # Return empty string if no headers found
+    toc_html == '<nav class="table-of-contents"><h3 class="toc-title">Table of Contents</h3><ul class="toc-list"></ul></nav>' ? "" : toc_html.html_safe
   end
 
   # SEO and Meta Tag Helpers
