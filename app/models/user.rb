@@ -105,8 +105,8 @@ class User < ApplicationRecord
   # Callbacks for URL normalization
   before_save :normalize_urls
 
-  # Automatically activate users after creation
-  after_create :activate_user_account
+  # Set new users to pending activation status
+  before_validation :set_pending_activation, on: :create
 
   # Override FriendlyId should_generate_new_friendly_id? to regenerate slug when username changes
   def should_generate_new_friendly_id?
@@ -397,9 +397,9 @@ class User < ApplicationRecord
 
   private
 
-  # Automatically activate user account after creation
-  def activate_user_account
-    update_column(:account_status, :active)
+  # Set new users to pending activation status
+  def set_pending_activation
+    self.account_status = :pending_activation if new_record?
   end
 
   # Normalize URLs by adding https:// prefix if missing
