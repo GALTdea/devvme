@@ -22,6 +22,10 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     # Should create a new user
     assert User.exists?(email: @user_attributes[:email])
 
+    # Update the newly created user's account status after creation
+    user = User.find_by(email: @user_attributes[:email])
+    user.update!(account_status: :active)
+
     # Should redirect to dashboard after successful sign up
     assert_redirected_to dashboard_path
     follow_redirect!
@@ -123,6 +127,8 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
   # Sign in tests
   test "user can sign in with valid credentials" do
     user = User.create!(@user_attributes)
+    # Update account status after creation to override the pending_activation callback
+    user.update!(account_status: :active)
 
     get new_user_session_path
     assert_response :success
@@ -186,6 +192,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
   # Sign out tests
   test "signed in user can sign out" do
     user = User.create!(@user_attributes)
+    user.update!(account_status: :active)
     sign_in user
 
     # Verify user is signed in
@@ -221,6 +228,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
 
   test "signed in user is redirected from auth pages" do
     user = User.create!(@user_attributes)
+    user.update!(account_status: :active)
     sign_in user
 
     # Try to access sign in page while signed in
@@ -235,7 +243,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
   # Remember me functionality
   test "user can sign in with remember me" do
     user = User.create!(@user_attributes)
-
+    user.update!(account_status: :active)
     post user_session_path, params: {
       user: {
         email: @user_attributes[:email],
