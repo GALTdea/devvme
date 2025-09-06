@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  get "limited_access/pending_activation"
+  get "limited_access/suspended"
+  get "limited_access/deactivated"
   namespace :admin do
     get "blog_analytics/index"
     get "analytics/index"
@@ -69,6 +72,11 @@ Rails.application.routes.draw do
   # Beta testing routes
   get "beta/confirmation", to: "beta#confirmation", as: :beta_confirmation
   get "beta/waiting", to: "beta#waiting", as: :beta_waiting
+
+  # Limited access routes - for users with restricted access
+  get "pending_activation", to: "limited_access#pending_activation", as: :pending_activation
+  get "suspended", to: "limited_access#suspended", as: :suspended
+  get "deactivated", to: "limited_access#deactivated", as: :deactivated
 
   # Devise with custom registrations controller for beta flow
   devise_for :users, controllers: {

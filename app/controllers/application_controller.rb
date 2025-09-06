@@ -20,7 +20,8 @@ class ApplicationController < ActionController::Base
   # Check if user is suspended
   before_action :check_user_suspension, if: :user_signed_in?
 
-  # Account activation check removed - users are now automatically active
+  # Check if user account is pending activation
+  before_action :check_pending_activation, if: :user_signed_in?
 
   # Track visitors (non-signed-up users)
   before_action :track_visitor, unless: :user_signed_in?
@@ -32,16 +33,25 @@ class ApplicationController < ActionController::Base
     devise_parameter_sanitizer.permit(:account_update, keys: [ :username, :full_name, :bio, :github_url, :linkedin_url, :website_url, :avatar ])
   end
 
-  # Override Devise's after_sign_in_path_for to redirect to dashboard
+  # Override Devise's after_sign_in_path_for to redirect based on account status
   def after_sign_in_path_for(resource)
-    dashboard_path
+    if resource.pending_activation?
+      pending_activation_path
+    else
+      dashboard_path
+    end
   end
 
-  # Override Devise's after_sign_up_path_for to redirect to dashboard
+  # Override Devise's after_sign_up_path_for to redirect based on account status
   def after_sign_up_path_for(resource)
     # Track visitor conversion
     track_visitor_conversion(resource)
-    dashboard_path
+
+    if resource.pending_activation?
+      pending_activation_path
+    else
+      dashboard_path
+    end
   end
 
   # Admin authorization methods
@@ -65,8 +75,13 @@ class ApplicationController < ActionController::Base
   end
 
   def user_not_authorized
-    flash[:alert] = "You are not authorized to perform this action."
-    redirect_to(request.referrer || root_path)
+    if current_user&.pending_activation?
+      flash[:warning] = "Your account is pending activation. Please wait for an administrator to activate your account."
+      redirect_to pending_activation_path
+    else
+      flash[:alert] = "You are not authorized to perform this action."
+      redirect_to(request.referrer || root_path)
+    end
   end
 
   def update_last_login
@@ -78,6 +93,65 @@ class ApplicationController < ActionController::Base
       suspension_reason = current_user.suspension_reason
       sign_out current_user
       redirect_to new_user_session_path, alert: "Your account has been suspended. Reason: #{suspension_reason}"
+    end
+  end
+
+  def check_pending_activation
+    # Skip check for certain paths that pending users should be able to access
+    return if should_skip_pending_check?
+
+    if current_user.pending_activation?
+      # Add flash message if not already present
+      unless flash[:warning]
+        flash[:warning] = "Your account is pending activation. You will receive an email notification once your account is activated by an administrator."
+      end
+
+      # Redirect to pending activation page unless already there
+      unless request.path == pending_activation_path
+        redirect_to pending_activation_path
+      end
+    end
+  end
+
+  # Enhanced method to check for any limited access status
+  def check_limited_access
+    return unless user_signed_in?
+
+    case current_user.account_status
+    when "pending_activation"
+      check_pending_activation
+    when "suspended"
+      check_suspended_access
+    when "deactivated"
+      check_deactivated_access
+    end
+  end
+
+  def check_suspended_access
+    return if should_skip_pending_check?
+
+    if current_user.suspended?
+      unless flash[:alert]
+        flash[:alert] = "Your account has been suspended. Reason: #{current_user.suspension_reason || 'No reason provided'}"
+      end
+
+      unless request.path == suspended_path
+        redirect_to suspended_path
+      end
+    end
+  end
+
+  def check_deactivated_access
+    return if should_skip_pending_check?
+
+    if current_user.account_status == "deactivated"
+      unless flash[:alert]
+        flash[:alert] = "Your account has been deactivated."
+      end
+
+      unless request.path == deactivated_path
+        redirect_to deactivated_path
+      end
     end
   end
 
@@ -110,6 +184,22 @@ class ApplicationController < ActionController::Base
     return true if request.path.start_with?("/admin", "/api", "/rails")
     return true if request.path.match?(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/)
     return true if request.format.json? || request.format.xml?
+
+    false
+  end
+
+  def should_skip_pending_check?
+    # Skip limited access check for certain paths
+    return true if request.path.start_with?("/admin", "/api", "/rails")
+    return true if request.path.match?(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/)
+    return true if request.format.json? || request.format.xml?
+    return true if request.path == pending_activation_path
+    return true if request.path == suspended_path
+    return true if request.path == deactivated_path
+    return true if request.path == new_user_session_path
+    return true if request.path == destroy_user_session_path
+    return true if request.path == root_path # Allow access to home page
+    return true if request.path.start_with?("/public") # Allow access to public pages
 
     false
   end

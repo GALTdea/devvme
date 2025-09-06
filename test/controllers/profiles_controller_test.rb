@@ -10,7 +10,8 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
       bio: "I'm a test user",
       github_url: "https://github.com/testuser",
       linkedin_url: "https://linkedin.com/in/testuser",
-      website_url: "https://testuser.com"
+      website_url: "https://testuser.com",
+      account_status: :active
     )
   end
 
@@ -232,6 +233,8 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
 
   test "should handle maximum length validations" do
     sign_in @user
+
+    debugger
 
     patch profile_path, params: {
       user: {

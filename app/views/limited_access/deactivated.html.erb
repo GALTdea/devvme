@@ -1,0 +1,104 @@
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="text-center">
+      <svg class="mx-auto h-16 w-16 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+      </svg>
+      <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+        Account Deactivated
+      </h2>
+      <p class="mt-2 text-sm text-gray-600">
+        Your account has been deactivated
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div class="text-center">
+        <div class="mb-6">
+          <div class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            Account Deactivated
+          </div>
+        </div>
+
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+          Account Access Disabled
+        </h3>
+        
+        <div class="space-y-4 text-sm text-gray-600">
+          <p>
+            Hi <strong><%= current_user.display_name %></strong>, your account has been deactivated and access to all features is currently disabled.
+          </p>
+          
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3 text-left">
+                <h4 class="text-sm font-medium text-gray-800">Account Details:</h4>
+                <div class="mt-2 text-sm text-gray-700">
+                  <ul class="list-disc pl-5 space-y-1">
+                    <li>Username: <strong><%= current_user.username %></strong></li>
+                    <li>Email: <strong><%= current_user.email %></strong></li>
+                    <li>Status: Deactivated</li>
+                    <li>Deactivated on: <strong><%= current_user.suspended_at&.strftime("%B %d, %Y at %I:%M %p") || 'Unknown' %></strong></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3 text-left">
+                <h4 class="text-sm font-medium text-blue-800">What this means:</h4>
+                <div class="mt-2 text-sm text-blue-700">
+                  <ul class="list-disc pl-5 space-y-1">
+                    <li>Your account is no longer active</li>
+                    <li>You cannot access any features or content</li>
+                    <li>Your profile and data may be preserved or removed</li>
+                    <li>You can browse public content (read-only access)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p>
+            If you would like to reactivate your account, please contact our support team.
+          </p>
+        </div>
+
+        <div class="mt-8 space-y-4">
+          <div class="border-t border-gray-200 pt-6">
+            <p class="text-xs text-gray-500">
+              Questions? Contact us at 
+              <a href="mailto:support@devv.me" class="text-blue-600 hover:text-blue-500">support@devv.me</a>
+            </p>
+          </div>
+          
+          <div class="flex justify-center space-x-3">
+            <%= link_to destroy_user_session_path, method: :delete, class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              Sign Out
+            <% end %>
+            <%= link_to root_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              Browse Public Content
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
