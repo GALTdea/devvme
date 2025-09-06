@@ -9,6 +9,8 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
       full_name: "Test User",
       bio: "I'm a test user"
     )
+    # Update account status after creation to override the pending_activation callback
+    @user.update!(account_status: :active)
   end
 
   test "should redirect to sign in when not authenticated" do
@@ -61,6 +63,8 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
       password: "password123",
       username: "newuser"
     )
+    # Update account status after creation to override the pending_activation callback
+    new_user.update!(account_status: :active)
 
     sign_in new_user
     get dashboard_path
