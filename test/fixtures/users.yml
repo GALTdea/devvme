@@ -24,3 +24,44 @@ test_admin:
   slug: test_adminuser
   role: admin
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
+
+# Limited access users for testing
+pending_user:
+  email: pending@example.com
+  username: pending_user
+  full_name: Pending User
+  bio: I am a pending user waiting for activation
+  slug: pending_user
+  account_status: pending_activation
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
+
+suspended_user:
+  email: suspended@example.com
+  username: suspended_user
+  full_name: Suspended User
+  bio: I am a suspended user
+  slug: suspended_user
+  account_status: suspended
+  suspended_at: <%= 1.day.ago %>
+  suspension_reason: Test suspension
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
+
+deactivated_user:
+  email: deactivated@example.com
+  username: deactivated_user
+  full_name: Deactivated User
+  bio: I am a deactivated user
+  slug: deactivated_user
+  account_status: deactivated
+  suspended_at: <%= 1.day.ago %>
+  suspension_reason: User requested deactivation
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
+
+active_user:
+  email: active@example.com
+  username: active_user
+  full_name: Active User
+  bio: I am an active user
+  slug: active_user
+  account_status: active
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>

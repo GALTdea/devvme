@@ -234,7 +234,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should handle maximum length validations" do
     sign_in @user
 
-    debugger
+    # debugger
 
     patch profile_path, params: {
       user: {
