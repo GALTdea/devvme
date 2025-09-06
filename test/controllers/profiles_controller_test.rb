@@ -10,9 +10,10 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
       bio: "I'm a test user",
       github_url: "https://github.com/testuser",
       linkedin_url: "https://linkedin.com/in/testuser",
-      website_url: "https://testuser.com",
-      account_status: :active
+      website_url: "https://testuser.com"
     )
+    # Update account status after creation to override the pending_activation callback
+    @user.update!(account_status: :active)
   end
 
   test "should redirect to sign in when not authenticated" do
