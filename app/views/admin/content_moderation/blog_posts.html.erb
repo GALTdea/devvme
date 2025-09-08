@@ -1,4 +1,271 @@
-<div>
-  <h1 class="font-bold text-4xl">Admin::ContentModeration#blog_posts</h1>
-  <p>Find me in app/views/admin/content_moderation/blog_posts.html.erb</p>
+<% content_for :title, "All Blogs - Admin" %>
+
+<div class="min-h-screen bg-secondary-50 dark:bg-secondary-900">
+  <!-- Header -->
+  <div class="bg-white dark:bg-secondary-800 shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="py-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-secondary-900 dark:text-white">All Blog Posts</h1>
+            <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
+              Manage and moderate all blog posts
+            </p>
+          </div>
+          <div class="flex items-center space-x-4">
+            <%= link_to admin_root_path, class: "inline-flex items-center px-4 py-2 border border-secondary-300 shadow-sm text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 dark:bg-secondary-700 dark:border-secondary-600 dark:text-secondary-200 dark:hover:bg-secondary-600" do %>
+              ← Back to Dashboard
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Total Posts</p>
+              <p class="text-lg font-semibold text-secondary-900 dark:text-white"><%= @pagy.count %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Published</p>
+              <p class="text-lg font-semibold text-secondary-900 dark:text-white"><%= BlogPost.where(published: true).count %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-yellow-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Drafts</p>
+              <p class="text-lg font-semibold text-secondary-900 dark:text-white"><%= BlogPost.where(published: false).count %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Archived</p>
+              <p class="text-lg font-semibold text-secondary-900 dark:text-white"><%= BlogPost.where(archived: true).count %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="bg-white dark:bg-secondary-800 shadow rounded-lg mb-6">
+      <div class="p-6">
+        <%= form_with url: admin_content_moderation_blog_posts_path, method: :get, class: "flex flex-wrap gap-4", local: true do |form| %>
+          <div class="flex-1 min-w-64">
+            <%= form.text_field :search, placeholder: "Search by title or content...", 
+                value: params[:search], 
+                class: "block w-full px-3 py-2 border border-secondary-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-secondary-700 dark:border-secondary-600 dark:text-white" %>
+          </div>
+          <div>
+            <%= form.select :status, options_for_select([
+              ['All Status', ''], 
+              ['Published', 'published'], 
+              ['Draft', 'draft'],
+              ['Archived', 'archived']
+            ], params[:status]), 
+                {}, { class: "block px-3 py-2 border border-secondary-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-secondary-700 dark:border-secondary-600 dark:text-white" } %>
+          </div>
+          <div>
+            <%= form.select :sort, options_for_select([
+              ['Newest First', 'created_at DESC'], 
+              ['Oldest First', 'created_at ASC'], 
+              ['Title A-Z', 'title ASC'],
+              ['Title Z-A', 'title DESC'],
+              ['Most Views', 'views_count DESC']
+            ], params[:sort] || 'created_at DESC'), 
+                {}, { class: "block px-3 py-2 border border-secondary-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-secondary-700 dark:border-secondary-600 dark:text-white" } %>
+          </div>
+          <div>
+            <%= form.submit "Filter", class: "px-4 py-2 bg-primary-600 border border-transparent rounded-md font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" %>
+          </div>
+          <% if params[:search].present? || params[:status].present? || params[:sort] != 'created_at DESC' %>
+            <div>
+              <%= link_to "Clear", admin_content_moderation_blog_posts_path, class: "px-4 py-2 bg-secondary-600 border border-transparent rounded-md font-medium text-white hover:bg-secondary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500" %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Blog Posts Table -->
+    <div class="bg-white dark:bg-secondary-800 shadow rounded-lg overflow-hidden">
+      <div class="px-6 py-4 border-b border-secondary-200 dark:border-secondary-700">
+        <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Blog Posts</h3>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-secondary-200 dark:divide-secondary-700">
+          <thead class="bg-secondary-50 dark:bg-secondary-700">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-300 uppercase tracking-wider">Post</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-300 uppercase tracking-wider">Author</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-300 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-300 uppercase tracking-wider">Created</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-300 uppercase tracking-wider">Views</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-secondary-500 dark:text-secondary-300 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-secondary-800 divide-y divide-secondary-200 dark:divide-secondary-700">
+            <% @blog_posts.each do |post| %>
+              <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-700">
+                <td class="px-6 py-4">
+                  <div class="flex items-start">
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-medium text-secondary-900 dark:text-white truncate">
+                        <%= link_to post.title, admin_content_moderation_moderate_blog_post_path(post), class: "hover:text-primary-600" %>
+                      </div>
+                      <div class="text-sm text-secondary-500 dark:text-secondary-400 mt-1 line-clamp-2">
+                        <%= truncate(strip_tags(post.content), length: 100) %>
+                      </div>
+                      <%# if post.tags.any? %>
+                        <div class="mt-2 flex flex-wrap gap-1">
+                          <%# post.tags.limit(3).each do |tag| %>
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                              #<%#= tag.name %>
+                            </span>
+                          <%# end %>
+                        </div>
+                      <%# end %>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-8 w-8">
+                      <% if post.user.avatar.attached? %>
+                        <%= image_tag post.user.avatar_thumbnail, class: "h-8 w-8 rounded-full" %>
+                      <% else %>
+                        <div class="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
+                          <span class="text-white text-sm font-medium"><%= post.user.username.first.upcase %></span>
+                        </div>
+                      <% end %>
+                    </div>
+                    <div class="ml-3">
+                      <div class="text-sm font-medium text-secondary-900 dark:text-white">
+                        <%= post.user.display_name %>
+                      </div>
+                      <div class="text-sm text-secondary-500 dark:text-secondary-400">@<%= post.user.username %></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex flex-col space-y-1">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                           <%= if post.archived?
+                                 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                               elsif post.published?
+                                 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                               else
+                                 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                               end %>">
+                      <%= if post.archived?
+                            'Archived'
+                          elsif post.published?
+                            'Published'
+                          else
+                            'Draft'
+                          end %>
+                    </span>
+                    <% if post.published_at.present? %>
+                      <span class="text-xs text-secondary-400 dark:text-secondary-500">
+                        Published <%= time_ago_in_words(post.published_at) %> ago
+                      </span>
+                    <% end %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary-500 dark:text-secondary-400">
+                  <%= post.created_at.strftime("%b %d, %Y") %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary-500 dark:text-secondary-400">
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-1 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <%= post.views_count || 0 %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex justify-end space-x-2">
+                    <%= link_to "View", admin_content_moderation_moderate_blog_post_path(post), 
+                        class: "text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300" %>
+                    <% if post.published? %>
+                      <%= link_to "Unpublish", admin_content_moderation_moderate_blog_post_path(post, moderation_action: 'unpublish'), 
+                          method: :patch,
+                          data: { confirm: "Are you sure you want to unpublish this blog post?" },
+                          class: "text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300" %>
+                    <% elsif post.archived? %>
+                      <%= link_to "Unarchive", admin_content_moderation_moderate_blog_post_path(post, moderation_action: 'unarchive'), 
+                          method: :patch,
+                          data: { confirm: "Are you sure you want to unarchive this blog post?" },
+                          class: "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300" %>
+                    <% else %>
+                      <%= link_to "Publish", admin_content_moderation_moderate_blog_post_path(post, moderation_action: 'publish'), 
+                          method: :patch,
+                          data: { confirm: "Are you sure you want to publish this blog post?" },
+                          class: "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300" %>
+                    <% end %>
+                    <%= link_to "Archive", admin_content_moderation_moderate_blog_post_path(post, moderation_action: 'archive'), 
+                        method: :patch,
+                        data: { confirm: "Are you sure you want to archive this blog post?" },
+                        class: "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <% if @pagy.pages > 1 %>
+        <div class="px-6 py-4 border-t border-secondary-200 dark:border-secondary-700">
+          <%== pagy_nav(@pagy) %>
+        </div>
+      <% end %>
+    </div>
+  </div>
 </div>
