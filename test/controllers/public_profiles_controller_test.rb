@@ -20,6 +20,7 @@ class PublicProfilesControllerTest < ActionDispatch::IntegrationTest
 
   test "should redirect authenticated user viewing their own public profile" do
     sign_in @user
+    @user.update!(account_status: :active)
     get public_profile_path(@user.username)
     assert_redirected_to profile_path
   end
