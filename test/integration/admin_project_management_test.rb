@@ -1,5 +1,31 @@
 require "test_helper"
 
+# AdminProjectManagementTest
+#
+# This integration test suite validates that admin users have proper permissions
+# to manage projects across the entire application, including:
+#
+# 1. **Cross-User Project Management**: Admins can view, edit, update, and delete
+#    projects belonging to any user (not just their own)
+#
+# 2. **Draft Project Access**: Admins can access and manage draft projects that
+#    regular users cannot see, enabling content moderation
+#
+# 3. **Public View Admin Controls**: Admins see special admin controls and
+#    information when viewing public project pages
+#
+# 4. **Authorization Enforcement**: Ensures regular users and unauthenticated
+#    visitors cannot access admin-only features
+#
+# 5. **Data Integrity**: Verifies that admin actions maintain proper project
+#    ownership and don't accidentally transfer projects between users
+#
+# 6. **Super Admin Support**: Tests that super_admin role has the same
+#    permissions as regular admin role
+#
+# This test is critical for ensuring the admin system works correctly and
+# maintains proper security boundaries between user roles.
+
 class AdminProjectManagementTest < ActionDispatch::IntegrationTest
   setup do
     @admin = User.create!(
@@ -9,6 +35,7 @@ class AdminProjectManagementTest < ActionDispatch::IntegrationTest
       role: :admin,
       account_status: :active
     )
+    @admin.update!(account_status: :active)
 
     @regular_user = users(:test_user_one)
     @other_user = users(:test_user_two)
@@ -183,7 +210,7 @@ class AdminProjectManagementTest < ActionDispatch::IntegrationTest
       role: :super_admin,
       account_status: :active
     )
-
+    super_admin.update!(account_status: :active)
     sign_in super_admin
 
     # Super admin should have same permissions as admin
@@ -201,6 +228,7 @@ class AdminProjectManagementTest < ActionDispatch::IntegrationTest
 
   test "regular users cannot access admin features" do
     sign_in @regular_user
+    @regular_user.update!(account_status: :active)
 
     # Cannot edit other user's projects
     get edit_project_path(@draft_project)
