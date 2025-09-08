@@ -122,7 +122,9 @@
       </div>
 
       <!-- Online Users (Real-time) -->
-      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg"
+           data-controller="admin-charts"
+           data-admin-charts-online-users-url-value="<%= admin_dashboard_online_users_path %>">
         <div class="p-5">
           <div class="flex items-center">
             <div class="flex-shrink-0">
@@ -133,7 +135,7 @@
             <div class="ml-5 w-0 flex-1">
               <dl>
                 <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 truncate">Online Now</dt>
-                <dd class="text-lg font-medium text-secondary-900 dark:text-white" id="online-users"><%= @user_stats[:online_users] %></dd>
+                <dd class="text-lg font-medium text-secondary-900 dark:text-white" data-admin-charts-target="onlineUsers"><%= @user_stats[:online_users] %></dd>
               </dl>
             </div>
           </div>
@@ -211,13 +213,18 @@
     </div>
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8" 
+         data-controller="admin-charts"
+         data-admin-charts-registration-data-value="<%= @registration_chart_data.to_json %>"
+         data-admin-charts-activity-data-value="<%= @activity_chart_data.to_json %>"
+         data-admin-charts-content-data-value="<%= @content_creation_chart_data.to_json %>"
+         data-admin-charts-online-users-url-value="<%= admin_dashboard_online_users_path %>">
       <!-- Registration Chart -->
       <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">User Registrations</h3>
           <div class="h-64">
-            <canvas id="registrationChart"></canvas>
+            <canvas data-admin-charts-target="registrationChart"></canvas>
           </div>
         </div>
       </div>
@@ -227,7 +234,7 @@
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Admin Activity</h3>
           <div class="h-64">
-            <canvas id="activityChart"></canvas>
+            <canvas data-admin-charts-target="activityChart"></canvas>
           </div>
         </div>
       </div>
@@ -239,7 +246,7 @@
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Content Creation</h3>
           <div class="h-64">
-            <canvas id="contentChart"></canvas>
+            <canvas data-admin-charts-target="contentChart"></canvas>
           </div>
         </div>
       </div>
@@ -352,124 +359,3 @@
   </div>
 </div>
 
-<!-- Chart.js and Real-time Updates -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  // Chart data from Rails
-  const registrationData = <%= raw @registration_chart_data.to_json %>;
-  const activityData = <%= raw @activity_chart_data.to_json %>;
-  const contentData = <%= raw @content_creation_chart_data.to_json %>;
-
-  // Chart.js configuration
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        labels: {
-          color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
-        }
-      }
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
-        },
-        grid: {
-          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
-        }
-      },
-      y: {
-        ticks: {
-          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
-        },
-        grid: {
-          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
-        }
-      }
-    }
-  };
-
-  // Registration Chart
-  const registrationCtx = document.getElementById('registrationChart').getContext('2d');
-  new Chart(registrationCtx, {
-    type: 'line',
-    data: {
-      labels: Object.keys(registrationData).map(date => new Date(date).toLocaleDateString()),
-      datasets: [{
-        label: 'New Registrations',
-        data: Object.values(registrationData),
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4
-      }]
-    },
-    options: chartOptions
-  });
-
-  // Activity Chart
-  const activityCtx = document.getElementById('activityChart').getContext('2d');
-  new Chart(activityCtx, {
-    type: 'bar',
-    data: {
-      labels: Object.keys(activityData).map(date => new Date(date).toLocaleDateString()),
-      datasets: [{
-        label: 'Admin Actions',
-        data: Object.values(activityData),
-        backgroundColor: 'rgba(16, 185, 129, 0.8)',
-        borderColor: 'rgb(16, 185, 129)',
-        borderWidth: 1
-      }]
-    },
-    options: chartOptions
-  });
-
-  // Content Creation Chart
-  const contentCtx = document.getElementById('contentChart').getContext('2d');
-  new Chart(contentCtx, {
-    type: 'bar',
-    data: {
-      labels: contentData.map(item => new Date(item.date).toLocaleDateString()),
-      datasets: [
-        {
-          label: 'Blog Posts',
-          data: contentData.map(item => item.blog_posts),
-          backgroundColor: 'rgba(99, 102, 241, 0.8)',
-          borderColor: 'rgb(99, 102, 241)',
-          borderWidth: 1
-        },
-        {
-          label: 'Projects',
-          data: contentData.map(item => item.projects),
-          backgroundColor: 'rgba(168, 85, 247, 0.8)',
-          borderColor: 'rgb(168, 85, 247)',
-          borderWidth: 1
-        }
-      ]
-    },
-    options: chartOptions
-  });
-
-  // Real-time updates for online users
-  function updateOnlineUsers() {
-    fetch('/admin/dashboard/online_users', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById('online-users').textContent = data.count;
-    })
-    .catch(error => console.log('Error updating online users:', error));
-  }
-
-  // Update online users every 30 seconds
-  setInterval(updateOnlineUsers, 30000);
-
-  // Initial update
-  updateOnlineUsers();
-</script>
