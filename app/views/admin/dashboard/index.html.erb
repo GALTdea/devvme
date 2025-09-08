@@ -19,6 +19,7 @@
               <%= form_with url: admin_root_path, method: :get, local: true, class: "inline-flex" do |form| %>
                 <%= form.select :time_range, 
                     options_for_select([
+                      ['Last 24 hours', '24_hours'],
                       ['Last 7 days', '7_days'],
                       ['Last 30 days', '30_days'],
                       ['Last 90 days', '90_days'],
@@ -107,7 +108,7 @@
             </div>
           </div>
           <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
-            <span class="text-green-600"><%= @user_stats[:active_users] %></span> active in <%= @days %> days
+            <span class="text-green-600"><%= @user_stats[:active_users] %></span> active in <%= @days == 1 ? '24 hours' : "#{@days} days" %>
           </div>
         </div>
       </div>
@@ -151,7 +152,7 @@
             </div>
           </div>
           <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
-            in last <%= @days %> days
+            in last <%= @days == 1 ? '24 hours' : "#{@days} days" %>
           </div>
         </div>
       </div>
@@ -173,7 +174,7 @@
             </div>
           </div>
           <div class="mt-3 text-sm text-secondary-600 dark:text-secondary-400">
-            in last <%= @days %> days
+            in last <%= @days == 1 ? '24 hours' : "#{@days} days" %>
           </div>
         </div>
       </div>

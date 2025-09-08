@@ -57,12 +57,13 @@ class Admin::DashboardController < ApplicationController
   def set_time_range
     @time_range = params[:time_range] || '30_days'
     @days = case @time_range
+            when '24_hours' then 1
             when '7_days' then 7
             when '30_days' then 30
             when '90_days' then 90
             when '1_year' then 365
             else 30
-            end
+    end
   end
 
   def log_admin_activity(action, details = {})
