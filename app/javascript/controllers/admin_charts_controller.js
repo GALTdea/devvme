@@ -11,9 +11,25 @@ export default class extends Controller {
     }
 
     connect() {
-        // Wait for DOM to be fully ready
-        this.initializeCharts()
+        // Load Chart.js dynamically, then initialize charts
+        this.loadChartJS().then(() => {
+            this.initializeCharts()
+        })
         this.startOnlineUsersUpdates()
+    }
+
+    async loadChartJS() {
+        if (window.Chart) {
+            return Promise.resolve()
+        }
+
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script')
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js'
+            script.onload = () => resolve()
+            script.onerror = () => reject(new Error('Failed to load Chart.js'))
+            document.head.appendChild(script)
+        })
     }
 
     disconnect() {
@@ -45,7 +61,7 @@ export default class extends Controller {
         const ctx = this.registrationChartTarget.getContext('2d')
         const data = this.registrationDataValue
 
-        new Chart(ctx, {
+        new window.Chart(ctx, {
             type: 'line',
             data: {
                 labels: Object.keys(data).map(date => new Date(date).toLocaleDateString()),
@@ -65,7 +81,7 @@ export default class extends Controller {
         const ctx = this.activityChartTarget.getContext('2d')
         const data = this.activityDataValue
 
-        new Chart(ctx, {
+        new window.Chart(ctx, {
             type: 'bar',
             data: {
                 labels: Object.keys(data).map(date => new Date(date).toLocaleDateString()),
@@ -85,7 +101,7 @@ export default class extends Controller {
         const ctx = this.contentChartTarget.getContext('2d')
         const data = this.contentDataValue
 
-        new Chart(ctx, {
+        new window.Chart(ctx, {
             type: 'bar',
             data: {
                 labels: data.map(item => new Date(item.date).toLocaleDateString()),
