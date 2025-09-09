@@ -89,7 +89,9 @@ Rails.application.routes.draw do
   end
 
   # Profile routes - authenticated user's own profile
-  resource :profile, only: [ :show, :edit, :update ]
+  resource :profile, only: [ :show, :edit, :update ] do
+    get :complete, on: :member
+  end
 
   # Public profile routes - for sharing and visitor access
   # Uses username with FriendlyId for clean URLs like /gustavo

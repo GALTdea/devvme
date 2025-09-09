@@ -1,0 +1,138 @@
+<% content_for :title, "Complete Your Profile" %>
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Complete Your Profile</h1>
+          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            Fill out the missing information to showcase your developer identity.
+          </p>
+        </div>
+        
+        <!-- Progress Circle -->
+        <div class="flex items-center space-x-4">
+          <div class="relative w-16 h-16">
+            <svg class="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+              <!-- Background circle -->
+              <path d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="text-gray-200 dark:text-gray-700"/>
+              <!-- Progress circle -->
+              <path d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-dasharray="<%= @completion_percentage %>, 100"
+                class="text-primary-600 dark:text-primary-400"/>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="text-sm font-bold text-gray-900 dark:text-white"><%= @completion_percentage %>%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completion Status -->
+    <div class="mb-8">
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white">Profile Completion</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              You've completed <%= @completion_percentage %>% of your profile
+            </p>
+          </div>
+          <div class="flex-1 max-w-xs ml-4">
+            <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+              <div class="bg-primary-600 h-2 rounded-full transition-all duration-300" style="width: <%= @completion_percentage %>%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Missing Fields Checklist -->
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Missing Information</h3>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          Complete these fields to improve your profile visibility and credibility.
+        </p>
+      </div>
+      
+      <div class="p-6">
+        <% if @missing_fields.any? %>
+          <div class="space-y-4">
+            <% @missing_fields.each_with_index do |field, index| %>
+              <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div class="flex items-center space-x-3">
+                  <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                      <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white"><%= field[:name] %></h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      This field is required for a complete profile
+                    </p>
+                  </div>
+                </div>
+                <div class="flex-shrink-0">
+                  <%= link_to field[:path], 
+                      class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors" do %>
+                    Complete
+                    <svg class="ml-2 -mr-0.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <!-- All fields completed -->
+          <div class="text-center py-12">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900">
+              <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Profile Complete!</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Congratulations! Your profile is 100% complete.
+            </p>
+            <div class="mt-6">
+              <%= link_to "View Profile", profile_path, 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mt-8 flex items-center justify-between">
+      <%= link_to "← Back to Dashboard", dashboard_path, 
+          class: "text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" %>
+      
+      <% if @missing_fields.any? %>
+        <%= link_to "Edit All Fields", edit_profile_path, 
+            class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" %>
+      <% end %>
+    </div>
+  </div>
+</div>

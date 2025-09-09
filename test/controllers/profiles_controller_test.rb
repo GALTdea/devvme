@@ -63,6 +63,36 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{edit_profile_path}']", text: /Edit Profile/
   end
 
+  # Complete profile tests
+  test "should show complete profile page when authenticated" do
+    sign_in @user
+    get complete_profile_path
+    assert_response :success
+
+    # Should display completion page
+    assert_select "h1", text: /Complete Your Profile/
+    assert_select "div", text: /Profile Completion/
+  end
+
+  test "should show missing fields on complete page" do
+    # Create user with incomplete profile
+    incomplete_user = User.create!(
+      email: "incomplete@example.com",
+      password: "password123",
+      username: "incomplete"
+    )
+    incomplete_user.update!(account_status: :active)
+
+    sign_in incomplete_user
+    get complete_profile_path
+    assert_response :success
+
+    # Should show missing fields
+    assert_select "h3", text: /Missing Information/
+    # Should have links to edit profile
+    assert_select "a[href='#{edit_profile_path}']", text: /Complete/
+  end
+
   test "should display share profile button with correct data attributes" do
     skip "Feature not yet implemented - would test share profile button functionality"
     # sign_in @user
