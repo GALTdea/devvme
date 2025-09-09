@@ -205,7 +205,11 @@
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Blog Views Trend</h3>
           <div class="h-64">
-            <canvas id="blogViewsChart"></canvas>
+            <canvas 
+              data-controller="chart"
+              data-chart-data-value="<%= raw @chart_data[:blog_views_by_date].to_json %>"
+              data-chart-type-value="line"
+              data-chart-target="canvas"></canvas>
           </div>
         </div>
       </div>
@@ -215,7 +219,11 @@
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Content Distribution</h3>
           <div class="h-64">
-            <canvas id="contentDistributionChart"></canvas>
+            <canvas 
+              data-controller="chart"
+              data-chart-data-value="<%= raw @chart_data[:blog_vs_other_pages].to_json %>"
+              data-chart-type-value="doughnut"
+              data-chart-target="canvas"></canvas>
           </div>
         </div>
       </div>
@@ -343,92 +351,3 @@
   </div>
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  // Chart data from Rails
-  const blogViewsData = <%= raw @chart_data[:blog_views_by_date].to_json %>;
-  const blogVsOtherData = <%= raw @chart_data[:blog_vs_other_pages].to_json %>;
-
-  // Chart.js configuration
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        labels: {
-          color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
-        }
-      }
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
-        },
-        grid: {
-          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
-        }
-      },
-      y: {
-        ticks: {
-          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
-        },
-        grid: {
-          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
-        }
-      }
-    }
-  };
-
-  // Blog Views Chart
-  const blogViewsCtx = document.getElementById('blogViewsChart').getContext('2d');
-  new Chart(blogViewsCtx, {
-    type: 'line',
-    data: {
-      labels: Object.keys(blogViewsData).map(date => new Date(date).toLocaleDateString()),
-      datasets: [{
-        label: 'Blog Views',
-        data: Object.values(blogViewsData),
-        borderColor: 'rgb(37, 99, 235)',
-        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-        tension: 0.4,
-        fill: true
-      }]
-    },
-    options: chartOptions
-  });
-
-  // Content Distribution Chart
-  const contentDistCtx = document.getElementById('contentDistributionChart').getContext('2d');
-  new Chart(contentDistCtx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Blog Content', 'Other Content'],
-      datasets: [{
-        data: [blogVsOtherData.blog_views, blogVsOtherData.other_views],
-        backgroundColor: [
-          'rgba(37, 99, 235, 0.8)',
-          'rgba(107, 114, 128, 0.8)'
-        ],
-        borderColor: [
-          'rgb(37, 99, 235)',
-          'rgb(107, 114, 128)'
-        ],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
-          }
-        }
-      }
-    }
-  });
-</script>

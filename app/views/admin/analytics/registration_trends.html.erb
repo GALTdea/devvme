@@ -199,7 +199,11 @@
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Daily Registrations</h3>
           <div class="h-64">
-            <canvas id="dailyRegistrationsChart"></canvas>
+            <canvas 
+              data-controller="chart"
+              data-chart-data-value="<%= raw @registration_data[:daily].to_json %>"
+              data-chart-type-value="line"
+              data-chart-target="canvas"></canvas>
           </div>
         </div>
       </div>
@@ -209,7 +213,11 @@
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Weekly Registrations</h3>
           <div class="h-64">
-            <canvas id="weeklyRegistrationsChart"></canvas>
+            <canvas 
+              data-controller="chart"
+              data-chart-data-value="<%= raw @registration_data[:weekly].to_json %>"
+              data-chart-type-value="bar"
+              data-chart-target="canvas"></canvas>
           </div>
         </div>
       </div>
@@ -221,102 +229,14 @@
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Monthly Registrations</h3>
           <div class="h-64">
-            <canvas id="monthlyRegistrationsChart"></canvas>
+            <canvas 
+              data-controller="chart"
+              data-chart-data-value="<%= raw @registration_data[:monthly].to_json %>"
+              data-chart-type-value="line"
+              data-chart-target="canvas"></canvas>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  // Chart data from Rails
-  const dailyData = <%= raw @registration_data[:daily].to_json %>;
-  const weeklyData = <%= raw @registration_data[:weekly].to_json %>;
-  const monthlyData = <%= raw @registration_data[:monthly].to_json %>;
-
-  // Chart.js configuration
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        labels: {
-          color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
-        }
-      }
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
-        },
-        grid: {
-          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
-        }
-      },
-      y: {
-        ticks: {
-          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
-        },
-        grid: {
-          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
-        }
-      }
-    }
-  };
-
-  // Daily Registrations Chart
-  const dailyCtx = document.getElementById('dailyRegistrationsChart').getContext('2d');
-  new Chart(dailyCtx, {
-    type: 'line',
-    data: {
-      labels: Object.keys(dailyData).map(date => new Date(date).toLocaleDateString()),
-      datasets: [{
-        label: 'Daily Registrations',
-        data: Object.values(dailyData),
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4,
-        fill: true
-      }]
-    },
-    options: chartOptions
-  });
-
-  // Weekly Registrations Chart
-  const weeklyCtx = document.getElementById('weeklyRegistrationsChart').getContext('2d');
-  new Chart(weeklyCtx, {
-    type: 'bar',
-    data: {
-      labels: Object.keys(weeklyData).map(date => new Date(date).toLocaleDateString()),
-      datasets: [{
-        label: 'Weekly Registrations',
-        data: Object.values(weeklyData),
-        backgroundColor: 'rgba(16, 185, 129, 0.8)',
-        borderColor: 'rgb(16, 185, 129)',
-        borderWidth: 1
-      }]
-    },
-    options: chartOptions
-  });
-
-  // Monthly Registrations Chart
-  const monthlyCtx = document.getElementById('monthlyRegistrationsChart').getContext('2d');
-  new Chart(monthlyCtx, {
-    type: 'bar',
-    data: {
-      labels: Object.keys(monthlyData).map(date => new Date(date).toLocaleDateString()),
-      datasets: [{
-        label: 'Monthly Registrations',
-        data: Object.values(monthlyData),
-        backgroundColor: 'rgba(168, 85, 247, 0.8)',
-        borderColor: 'rgb(168, 85, 247)',
-        borderWidth: 1
-      }]
-    },
-    options: chartOptions
-  });
-</script>

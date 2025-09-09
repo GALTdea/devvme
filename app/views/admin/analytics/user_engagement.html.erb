@@ -146,7 +146,11 @@
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Feature Usage</h3>
           <div class="h-64">
-            <canvas id="featureUsageChart"></canvas>
+            <canvas 
+              data-controller="chart"
+              data-chart-data-value="<%= raw @engagement_metrics[:feature_usage].to_json %>"
+              data-chart-type-value="doughnut"
+              data-chart-target="canvas"></canvas>
           </div>
         </div>
       </div>
@@ -216,7 +220,11 @@
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Daily Engagement</h3>
           <div class="h-64">
-            <canvas id="dailyEngagementChart"></canvas>
+            <canvas 
+              data-controller="chart"
+              data-chart-data-value="<%= raw @engagement_trends[:daily_engagement].to_json %>"
+              data-chart-type-value="line"
+              data-chart-target="canvas"></canvas>
           </div>
         </div>
       </div>
@@ -226,7 +234,11 @@
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Feature Adoption</h3>
           <div class="h-64">
-            <canvas id="featureAdoptionChart"></canvas>
+            <canvas 
+              data-controller="chart"
+              data-chart-data-value="<%= raw @engagement_trends[:feature_adoption].to_json %>"
+              data-chart-type-value="bar"
+              data-chart-target="canvas"></canvas>
           </div>
         </div>
       </div>
@@ -238,7 +250,11 @@
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">User Activity Patterns</h3>
           <div class="h-64">
-            <canvas id="activityPatternsChart"></canvas>
+            <canvas 
+              data-controller="chart"
+              data-chart-data-value="<%= raw @engagement_trends[:user_activity_patterns][:hourly_distribution].to_json %>"
+              data-chart-type-value="bar"
+              data-chart-target="canvas"></canvas>
           </div>
           <% if @engagement_trends[:user_activity_patterns][:peak_hour] %>
             <div class="mt-4 text-center">
@@ -252,147 +268,3 @@
     </div>
   </div>
 </div>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  // Chart data from Rails
-  const featureUsageData = <%= raw @engagement_metrics[:feature_usage].to_json %>;
-  const dailyEngagementData = <%= raw @engagement_trends[:daily_engagement].to_json %>;
-  const featureAdoptionData = <%= raw @engagement_trends[:feature_adoption].to_json %>;
-  const activityPatternsData = <%= raw @engagement_trends[:user_activity_patterns][:hourly_distribution].to_json %>;
-
-  // Chart.js configuration
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        labels: {
-          color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
-        }
-      }
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
-        },
-        grid: {
-          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
-        }
-      },
-      y: {
-        ticks: {
-          color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
-        },
-        grid: {
-          color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
-        }
-      }
-    }
-  };
-
-  // Feature Usage Chart
-  const featureUsageCtx = document.getElementById('featureUsageChart').getContext('2d');
-  new Chart(featureUsageCtx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Blog Posts', 'Projects', 'Profile Views'],
-      datasets: [{
-        data: [
-          featureUsageData.blog_posts_created,
-          featureUsageData.projects_created,
-          featureUsageData.profile_views
-        ],
-        backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(168, 85, 247, 0.8)',
-          'rgba(16, 185, 129, 0.8)'
-        ],
-        borderColor: [
-          'rgb(59, 130, 246)',
-          'rgb(168, 85, 247)',
-          'rgb(16, 185, 129)'
-        ],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          labels: {
-            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
-          }
-        }
-      }
-    }
-  });
-
-  // Daily Engagement Chart
-  const dailyEngagementCtx = document.getElementById('dailyEngagementChart').getContext('2d');
-  new Chart(dailyEngagementCtx, {
-    type: 'line',
-    data: {
-      labels: Object.keys(dailyEngagementData).map(date => new Date(date).toLocaleDateString()),
-      datasets: [{
-        label: 'Daily Active Users',
-        data: Object.values(dailyEngagementData),
-        borderColor: 'rgb(16, 185, 129)',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        tension: 0.4,
-        fill: true
-      }]
-    },
-    options: chartOptions
-  });
-
-  // Feature Adoption Chart
-  const featureAdoptionCtx = document.getElementById('featureAdoptionChart').getContext('2d');
-  new Chart(featureAdoptionCtx, {
-    type: 'bar',
-    data: {
-      labels: ['Blog Adoption', 'Project Adoption', 'Profile Completion'],
-      datasets: [{
-        label: 'Adoption Rate (%)',
-        data: [
-          featureAdoptionData.blog_adoption,
-          featureAdoptionData.project_adoption,
-          featureAdoptionData.profile_completion
-        ],
-        backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(168, 85, 247, 0.8)',
-          'rgba(16, 185, 129, 0.8)'
-        ],
-        borderColor: [
-          'rgb(59, 130, 246)',
-          'rgb(168, 85, 247)',
-          'rgb(16, 185, 129)'
-        ],
-        borderWidth: 1
-      }]
-    },
-    options: chartOptions
-  });
-
-  // Activity Patterns Chart
-  const activityPatternsCtx = document.getElementById('activityPatternsChart').getContext('2d');
-  new Chart(activityPatternsCtx, {
-    type: 'line',
-    data: {
-      labels: Array.from({length: 24}, (_, i) => i + ':00'),
-      datasets: [{
-        label: 'Activity Level',
-        data: Array.from({length: 24}, (_, i) => activityPatternsData[i] || 0),
-        borderColor: 'rgb(168, 85, 247)',
-        backgroundColor: 'rgba(168, 85, 247, 0.1)',
-        tension: 0.4,
-        fill: true
-      }]
-    },
-    options: chartOptions
-  });
-</script>
