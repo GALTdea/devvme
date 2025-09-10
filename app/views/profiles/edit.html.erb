@@ -123,6 +123,7 @@
             <%= form.label :email, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
             <%= form.email_field :email, 
                 readonly: true,
+                disabled: true,
                 class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-100 dark:text-gray-400 bg-gray-50 shadow-sm sm:text-sm cursor-not-allowed" %>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Email is managed through <%= link_to "account settings", edit_user_registration_path, class: "text-primary-600 dark:text-primary-400 hover:underline" %>
@@ -142,6 +143,91 @@
             <% else %>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Tell visitors about yourself and your expertise (max 500 characters)
+              </p>
+            <% end %>
+          </div>
+
+          <!-- Job Title and Location -->
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <!-- Job Title -->
+            <div>
+              <%= form.label :job_title, "Job Title", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+              <%= form.text_field :job_title, 
+                  class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm #{'border-red-300 focus:border-red-500 focus:ring-red-500' if @user.errors[:job_title].any?}" %>
+              <% if @user.errors[:job_title].any? %>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                  <%= @user.errors[:job_title].first %>
+                </div>
+              <% else %>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Your current job title or role
+                </p>
+              <% end %>
+            </div>
+
+            <!-- Location -->
+            <div>
+              <%= form.label :location, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+              <%= form.text_field :location, 
+                  class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm #{'border-red-300 focus:border-red-500 focus:ring-red-500' if @user.errors[:location].any?}" %>
+              <% if @user.errors[:location].any? %>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                  <%= @user.errors[:location].first %>
+                </div>
+              <% else %>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Your city, state, or country
+                </p>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Headline -->
+          <div>
+            <%= form.label :headline, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+            <%= form.text_field :headline, 
+                class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm #{'border-red-300 focus:border-red-500 focus:ring-red-500' if @user.errors[:headline].any?}" %>
+            <% if @user.errors[:headline].any? %>
+              <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                <%= @user.errors[:headline].first %>
+              </div>
+            <% else %>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                A short, compelling description of what you do
+              </p>
+            <% end %>
+          </div>
+
+          <!-- Contact Email -->
+          <div>
+            <%= form.label :contact_email, "Contact Email", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+            <%= form.email_field :contact_email, 
+                class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm #{'border-red-300 focus:border-red-500 focus:ring-red-500' if @user.errors[:contact_email].any?}" %>
+            <% if @user.errors[:contact_email].any? %>
+              <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                <%= @user.errors[:contact_email].first %>
+              </div>
+            <% else %>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Public contact email for professional inquiries
+              </p>
+            <% end %>
+          </div>
+
+          <!-- Skills -->
+          <div>
+            <%= form.label :skills_list, "Skills", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+            <%= form.text_area :skills_list, 
+                rows: 3,
+                placeholder: "Ruby, Rails, JavaScript, React, PostgreSQL, etc.",
+                class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm #{'border-red-300 focus:border-red-500 focus:ring-red-500' if @user.errors[:skills].any?}" %>
+            <% if @user.errors[:skills].any? %>
+              <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                <%= @user.errors[:skills].first %>
+              </div>
+            <% else %>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                List your technical skills, separated by commas
               </p>
             <% end %>
           </div>

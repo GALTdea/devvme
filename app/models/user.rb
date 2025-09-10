@@ -146,6 +146,21 @@ class User < ApplicationRecord
     (completed_fields.to_f / total_fields * 100).round
   end
 
+  # Skills handling - convert between JSON array and comma-separated string
+  def skills_list
+    return "" if skills.blank?
+    skills.is_a?(Array) ? skills.join(", ") : skills.to_s
+  end
+
+  def skills_list=(value)
+    if value.present?
+      # Split by comma, strip whitespace, and remove empty strings
+      self.skills = value.split(",").map(&:strip).reject(&:blank?)
+    else
+      self.skills = []
+    end
+  end
+
   def recent_projects(limit = 3)
     projects.published.recent.limit(limit)
   end

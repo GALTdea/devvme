@@ -308,6 +308,35 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "", @user.website_url
   end
 
+  test "should update additional profile fields" do
+    sign_in @user
+
+    new_attributes = {
+      job_title: "Senior Developer",
+      location: "San Francisco, CA",
+      headline: "Full-stack developer passionate about clean code",
+      contact_email: "contact@example.com",
+      skills_list: "Ruby, Rails, JavaScript, React, PostgreSQL"
+    }
+
+    patch profile_path, params: { user: new_attributes }
+
+    # Should redirect to profile page
+    assert_redirected_to profile_path
+    follow_redirect!
+
+    # Should show success message
+    assert_select "#alert-success", text: /Profile updated successfully/
+
+    # Should update user attributes
+    @user.reload
+    assert_equal new_attributes[:job_title], @user.job_title
+    assert_equal new_attributes[:location], @user.location
+    assert_equal new_attributes[:headline], @user.headline
+    assert_equal new_attributes[:contact_email], @user.contact_email
+    assert_equal ["Ruby", "Rails", "JavaScript", "React", "PostgreSQL"], @user.skills
+  end
+
   test "should not allow updating email through profile update" do
     sign_in @user
 

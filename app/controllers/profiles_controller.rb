@@ -44,7 +44,7 @@ class ProfilesController < ApplicationController
   # Strong parameters for profile updates
   # Only allows specific profile fields to be updated
   def profile_params
-    params.require(:user).permit(:username, :full_name, :bio, :github_url, :linkedin_url, :website_url, :avatar, :job_title, :location, :headline, :contact_email, :skills)
+    params.require(:user).permit(:username, :full_name, :bio, :github_url, :linkedin_url, :website_url, :avatar, :job_title, :location, :headline, :contact_email, :skills_list)
   end
 
   # Identify missing profile fields for completion page
