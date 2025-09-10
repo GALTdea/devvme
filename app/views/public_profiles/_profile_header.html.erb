@@ -131,35 +131,59 @@
           
           <!-- Action Buttons -->
           <div class="flex flex-wrap gap-3 no-print">
-            <div data-controller="share-button"
-                 data-share-button-url-value="<%= request.original_url %>"
-                 data-share-button-title-value="<%= user.display_name %>'s Profile">
-              <button data-action="click->share-button#share"
-                      class="inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-accent-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
-                <span class="text-accent-400 mr-2">$</span>
-                <span>share --profile</span>
-              </button>
+            <div data-tooltip-target="share-tooltip" data-tooltip-trigger="hover">
+              <div data-controller="share-button"
+                   data-share-button-url-value="<%= request.original_url %>"
+                   data-share-button-title-value="<%= user.display_name %>'s Profile">
+                <button data-action="click->share-button#share"
+                        class="inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-accent-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
+                  <span class="text-accent-400 mr-2">$</span>
+                  <span>share --profile</span>
+                </button>
+              </div>
+              <div id="share-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                Share this profile - Copy link to share with others
+                <div class="tooltip-arrow" data-popper-arrow></div>
+              </div>
             </div>
             
             <% if user.resume.attached? %>
-              <%= link_to user.resume, target: "_blank", rel: "noopener noreferrer",
-                  class: "inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-primary-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5" do %>
-                <span class="text-primary-400 mr-2">$</span>
-                <span>wget resume.pdf</span>
-              <% end %>
+              <div data-tooltip-target="resume-tooltip" data-tooltip-trigger="hover">
+                <%= link_to user.resume, target: "_blank", rel: "noopener noreferrer",
+                    class: "inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-primary-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5" do %>
+                  <span class="text-primary-400 mr-2">$</span>
+                  <span>wget resume.pdf</span>
+                <% end %>
+                <div id="resume-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                  Download my resume - View my professional experience and skills
+                  <div class="tooltip-arrow" data-popper-arrow></div>
+                </div>
+              </div>
             <% elsif user.resume_url.present? %>
-              <%= link_to user.resume_url, target: "_blank", rel: "noopener noreferrer",
-                  class: "inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-primary-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5" do %>
-                <span class="text-primary-400 mr-2">$</span>
-                <span>curl resume.pdf</span>
-              <% end %>
+              <div data-tooltip-target="resume-url-tooltip" data-tooltip-trigger="hover">
+                <%= link_to user.resume_url, target: "_blank", rel: "noopener noreferrer",
+                    class: "inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-primary-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5" do %>
+                  <span class="text-primary-400 mr-2">$</span>
+                  <span>curl resume.pdf</span>
+                <% end %>
+                <div id="resume-url-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                  View my resume online - Access my professional experience and skills
+                  <div class="tooltip-arrow" data-popper-arrow></div>
+                </div>
+              </div>
             <% end %>
             
-            <button onclick="window.print()" 
-                    class="inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-warning-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
-              <span class="text-warning-400 mr-2">$</span>
-              <span>lp profile</span>
-            </button>
+            <div data-tooltip-target="print-tooltip" data-tooltip-trigger="hover">
+              <button onclick="window.print()" 
+                      class="inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-warning-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
+                <span class="text-warning-400 mr-2">$</span>
+                <span>lp profile</span>
+              </button>
+              <div id="print-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                Print this profile - Save or print a copy of this page
+                <div class="tooltip-arrow" data-popper-arrow></div>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -216,45 +240,75 @@
         <!-- Social Links and Contact -->
         <div class="flex flex-wrap gap-3">
           <% if user.github_url.present? %>
-            <%= link_to user.github_url, target: "_blank", rel: "noopener noreferrer",
-                class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-primary-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 no-print" do %>
-              <span class="text-primary-400 mr-2">$</span>
-              <span>git clone github</span>
-            <% end %>
+            <div data-tooltip-target="github-tooltip" data-tooltip-trigger="hover">
+              <%= link_to user.github_url, target: "_blank", rel: "noopener noreferrer",
+                  class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-primary-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 no-print" do %>
+                <span class="text-primary-400 mr-2">$</span>
+                <span>git clone github</span>
+              <% end %>
+              <div id="github-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                View my GitHub profile - See my code repositories and projects
+                <div class="tooltip-arrow" data-popper-arrow></div>
+              </div>
+            </div>
           <% end %>
           
           <% if user.linkedin_url.present? %>
-            <%= link_to user.linkedin_url, target: "_blank", rel: "noopener noreferrer",
-                class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-accent-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 no-print" do %>
-              <svg class="w-5 h-5 text-accent-400 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-              </svg>
-              <span>open linkedin</span>
-            <% end %>
+            <div data-tooltip-target="linkedin-tooltip" data-tooltip-trigger="hover">
+              <%= link_to user.linkedin_url, target: "_blank", rel: "noopener noreferrer",
+                  class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-accent-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 no-print" do %>
+                <svg class="w-5 h-5 text-accent-400 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+                <span>open linkedin</span>
+              <% end %>
+              <div id="linkedin-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                Connect with me on LinkedIn - View my professional experience and network
+                <div class="tooltip-arrow" data-popper-arrow></div>
+              </div>
+            </div>
           <% end %>
           
           <% if user.twitter_url.present? %>
-            <%= link_to user.twitter_url, target: "_blank", rel: "noopener noreferrer",
-                class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-secondary-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 no-print" do %>
-              <span class="text-secondary-400 mr-2">$</span>
-              <span>tweet --follow</span>
-            <% end %>
+            <div data-tooltip-target="twitter-tooltip" data-tooltip-trigger="hover">
+              <%= link_to user.twitter_url, target: "_blank", rel: "noopener noreferrer",
+                  class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-secondary-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 no-print" do %>
+                <span class="text-secondary-400 mr-2">$</span>
+                <span>tweet --follow</span>
+              <% end %>
+              <div id="twitter-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                Follow me on Twitter/X - See my latest updates and thoughts
+                <div class="tooltip-arrow" data-popper-arrow></div>
+              </div>
+            </div>
           <% end %>
           
           <% if user.website_url.present? %>
-            <%= link_to user.website_url, target: "_blank", rel: "noopener noreferrer",
-                class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-warning-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 no-print" do %>
-              <span class="text-warning-400 mr-2">$</span>
-              <span>curl -L website</span>
-            <% end %>
+            <div data-tooltip-target="website-tooltip" data-tooltip-trigger="hover">
+              <%= link_to user.website_url, target: "_blank", rel: "noopener noreferrer",
+                  class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-warning-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 no-print" do %>
+                <span class="text-warning-400 mr-2">$</span>
+                <span>curl -L website</span>
+              <% end %>
+              <div id="website-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                Visit my personal website - Learn more about me and my work
+                <div class="tooltip-arrow" data-popper-arrow></div>
+              </div>
+            </div>
           <% end %>
           
           <% if user.contact_email.present? %>
-            <%= link_to "mailto:#{user.contact_email}",
-                class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-pink-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5" do %>
-              <span class="text-pink-400 mr-2">$</span>
-              <span>mail -s "hello"</span>
-            <% end %>
+            <div data-tooltip-target="email-tooltip" data-tooltip-trigger="hover">
+              <%= link_to "mailto:#{user.contact_email}",
+                  class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-pink-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5" do %>
+                <span class="text-pink-400 mr-2">$</span>
+                <span>mail -s "hello"</span>
+              <% end %>
+              <div id="email-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                Send me an email - Get in touch for opportunities or collaboration
+                <div class="tooltip-arrow" data-popper-arrow></div>
+              </div>
+            </div>
           <% end %>
         </div>
       </div>
