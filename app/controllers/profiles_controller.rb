@@ -2,17 +2,6 @@ class ProfilesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_user
 
-  # Display user profile page (authenticated user's own profile)
-  def show
-    # Set the public profile URL for sharing
-    @public_profile_url = public_profile_url(@user.friendly_id)
-
-    # Get recent blog posts for the user (mirroring public profile structure)
-    @recent_blog_posts = @user.blog_posts.published_posts.limit(6)
-
-    # Get recent projects for the user
-    @recent_projects = @user.projects.published.order(created_at: :desc).limit(6)
-  end
 
   # Show profile edit form
   def edit
@@ -21,7 +10,7 @@ class ProfilesController < ApplicationController
   # Update user profile with validation and proper error handling
   def update
     if @user.update(profile_params)
-      redirect_to profile_path, notice: "Profile updated successfully!"
+      redirect_to dashboard_path, notice: "Profile updated successfully!"
     else
       # Re-render edit form with validation errors
       render :edit, status: :unprocessable_entity

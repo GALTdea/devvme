@@ -5,6 +5,9 @@ class DashboardController < ApplicationController
     # Dashboard main view - shows user statistics and recent activity
     @user = current_user
 
+    # Set the public profile URL for sharing (moved from profiles controller)
+    @public_profile_url = public_profile_url(@user.friendly_id)
+
     # Calculate key metrics for dashboard widgets
     @projects_count = @user.projects_count
     @published_projects_count = @user.published_projects_count
