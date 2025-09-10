@@ -21,46 +21,11 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_user_session_path
   end
 
-  # Show profile tests
-  test "should show profile when authenticated" do
+  # Show profile tests - now redirects to dashboard
+  test "should redirect to dashboard when accessing profile" do
     sign_in @user
     get profile_path
-    assert_response :success
-
-    # Should display user information
-    assert_select "p", text: /@#{@user.username}/
-    assert_select "h1", text: /#{@user.full_name}/
-    assert_select "p", text: /#{@user.bio}/
-  end
-
-  test "should display social links on profile" do
-    sign_in @user
-    get profile_path
-    assert_response :success
-
-    # Should show social media links
-    assert_select "a[href='#{@user.github_url}']"
-    assert_select "a[href='#{@user.linkedin_url}']"
-    assert_select "a[href='#{@user.website_url}']"
-  end
-
-  test "should display profile completion percentage" do
-    sign_in @user
-    get profile_path
-    assert_response :success
-
-    # Should show profile completion
-    completion_percentage = @user.profile_completion_percentage
-    assert_select "dd", text: /#{completion_percentage}%/
-  end
-
-  test "should display edit profile link" do
-    sign_in @user
-    get profile_path
-    assert_response :success
-
-    # Should have edit profile link
-    assert_select "a[href='#{edit_profile_path}']", text: /Edit Profile/
+    assert_redirected_to dashboard_path
   end
 
   # Complete profile tests
@@ -148,7 +113,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     patch profile_path, params: { user: new_attributes }
 
     # Should redirect to profile page
-    assert_redirected_to profile_path
+    assert_redirected_to dashboard_path
     follow_redirect!
 
     # Should show success message
@@ -175,7 +140,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
       }
     }
 
-    assert_redirected_to profile_path
+    assert_redirected_to dashboard_path
 
     @user.reload
     assert_equal "https://github.com/user", @user.github_url
@@ -255,7 +220,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     }
 
     # Should redirect successfully
-    assert_redirected_to profile_path
+    assert_redirected_to dashboard_path
 
     # Should update username
     @user.reload
@@ -297,7 +262,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     }
 
     # Should redirect successfully
-    assert_redirected_to profile_path
+    assert_redirected_to dashboard_path
 
     # Should clear fields
     @user.reload
@@ -322,7 +287,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     patch profile_path, params: { user: new_attributes }
 
     # Should redirect to profile page
-    assert_redirected_to profile_path
+    assert_redirected_to dashboard_path
     follow_redirect!
 
     # Should show success message

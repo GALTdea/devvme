@@ -2,6 +2,10 @@ class ProfilesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_user
 
+  # Redirect profile show to dashboard
+  def show
+    redirect_to dashboard_path
+  end
 
   # Show profile edit form
   def edit

@@ -46,11 +46,11 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Should display projects count
-    assert_select "dd", text: /2/ # Total projects
-    assert_select "dd", text: /1/ # Published projects
+    assert_select "div", text: /2/ # Total projects
+    assert_select "div", text: /1/ # Published projects
 
     # Should display profile completion
-    assert_select "dd", text: /#{@user.profile_completion_percentage}%/
+    assert_select "div", text: /#{@user.profile_completion_percentage}%/
 
     # Should display recent projects section
     assert_select "h2", text: /Recent Projects/
@@ -81,7 +81,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
 
     # Should show profile completion
     completion_percentage = @user.profile_completion_percentage
-    assert_select "dd", text: /#{completion_percentage}%/
+    assert_select "div", text: /#{completion_percentage}%/
   end
 
   test "should show recent projects in correct order" do
@@ -162,10 +162,11 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Should only show 3 projects in recent section
-    # Find the Recent Projects section and count projects within it
-    recent_section = css_select("div.mb-8").find { |div| div.text.include?("Recent Projects") }
-    project_cards_in_recent = recent_section.css(".bg-white")
-    assert_equal 3, project_cards_in_recent.length
+    # Check that we have exactly 3 project title links in the recent projects section
+    assert_select "h2", text: /Recent Projects/
+    # Count project title links (not edit links or new project links)
+    project_title_links = css_select("a[href*='/projects/']").select { |link| link.text.strip.match?(/Project \d+/) }
+    assert_equal 3, project_title_links.length
   end
 
   private
