@@ -6,7 +6,8 @@ class PublicProfilesController < ApplicationController
   # Accessible at /:username (e.g., /gustavo)
   def show
     # Redirect authenticated users to their private profile page
-    if user_signed_in? && @user == current_user
+    # unless they explicitly want to preview their public profile
+    if user_signed_in? && @user == current_user && !params[:preview]
       redirect_to profile_path
       return
     end

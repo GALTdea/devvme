@@ -98,6 +98,14 @@
                   </button>
                 </div>
                 
+                <!-- Preview Public Profile Button -->
+                <%= link_to public_profile_path(@user, preview: true), 
+                    class: "inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-secondary-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5",
+                    target: "_blank" do %>
+                  <span class="text-secondary-400 mr-2">$</span>
+                  <span>cat public_profile.html</span>
+                <% end %>
+                
                 <!-- Edit Profile Button -->
                 <%= link_to edit_profile_path, 
                     class: "inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-primary-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5" do %>
