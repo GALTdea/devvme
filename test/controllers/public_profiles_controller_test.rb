@@ -120,17 +120,49 @@ class PublicProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", active_user.display_name
   end
 
-  test "should allow access to pending activation accounts for all users" do
+  test "should redirect pending activation user to their limited access page" do
     pending_user = users(:pending_user)
+    sign_in pending_user
     get public_profile_path(pending_user.username)
-    assert_response :success
-    assert_select "h1", pending_user.display_name
+    assert_redirected_to pending_activation_path
   end
 
-  test "should allow access to suspended accounts for all users" do
+  test "should show 404 for pending activation account when not signed in" do
+    pending_user = users(:pending_user)
+    get public_profile_path(pending_user.username)
+    assert_response :not_found
+  end
+
+  test "should show 404 for pending activation account when signed in as different user" do
+    pending_user = users(:pending_user)
+    other_user = users(:test_user_two)
+    other_user.update!(account_status: :active)
+
+    sign_in other_user
+    get public_profile_path(pending_user.username)
+    assert_response :not_found
+  end
+
+  test "should redirect suspended user to their limited access page" do
+    suspended_user = users(:suspended_user)
+    sign_in suspended_user
+    get public_profile_path(suspended_user.username)
+    assert_redirected_to suspended_path
+  end
+
+  test "should show 404 for suspended account when not signed in" do
     suspended_user = users(:suspended_user)
     get public_profile_path(suspended_user.username)
-    assert_response :success
-    assert_select "h1", suspended_user.display_name
+    assert_response :not_found
+  end
+
+  test "should show 404 for suspended account when signed in as different user" do
+    suspended_user = users(:suspended_user)
+    other_user = users(:test_user_two)
+    other_user.update!(account_status: :active)
+
+    sign_in other_user
+    get public_profile_path(suspended_user.username)
+    assert_response :not_found
   end
 end

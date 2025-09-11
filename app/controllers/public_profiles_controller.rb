@@ -1,4 +1,7 @@
 class PublicProfilesController < ApplicationController
+  # Skip the user suspension check since we handle it in check_profile_access
+  skip_before_action :check_user_suspension, if: :user_signed_in?
+
   before_action :set_user
   before_action :check_profile_access
   before_action :set_cache_headers
@@ -39,14 +42,42 @@ class PublicProfilesController < ApplicationController
   def check_profile_access
     return if @user.nil? # Let set_user handle the 404
 
-    # Allow access if user is active or pending activation
-    return if @user.active? || @user.pending_activation?
+    # Allow access if user is active
+    return if @user.active?
+
+    # Redirect pending activation users to their limited access page
+    if @user.pending_activation?
+      if user_signed_in? && current_user == @user
+        redirect_to pending_activation_path
+        return
+      else
+        # Show 404 for pending users to unauthorized users
+        render file: "#{Rails.root}/public/404-profile.html", status: :not_found, layout: false
+        return
+      end
+    end
+
+    # Redirect suspended users to their limited access page
+    if @user.suspended? && !@user.deactivated?
+      if user_signed_in? && current_user == @user
+        redirect_to suspended_path
+        return
+      else
+        # Show 404 for suspended users to unauthorized users
+        render file: "#{Rails.root}/public/404-profile.html", status: :not_found, layout: false
+        return
+      end
+    end
 
     # For deactivated accounts, only allow access to:
-    # 1. The account owner
-    # 2. Admin users
+    # 1. The account owner (can view their own profile)
+    # 2. Admin users (can view deactivated profiles)
     if @user.deactivated?
-      if user_signed_in? && (current_user == @user || current_user.can_access_admin?)
+      if user_signed_in? && current_user == @user
+        # Account owner can view their own profile
+        return
+      elsif user_signed_in? && current_user.can_access_admin?
+        # Admin users can view deactivated profiles
         return
       else
         # Show 404 for deactivated accounts to unauthorized users
@@ -54,9 +85,6 @@ class PublicProfilesController < ApplicationController
         return
       end
     end
-
-    # Allow access if user is suspended (existing behavior) - but not deactivated
-    return if @user.suspended? && !@user.deactivated?
   end
 
   # Find user by username using FriendlyId with optimized includes

@@ -1,6 +1,8 @@
 class LimitedAccessController < ApplicationController
   # Skip the pending activation check for this controller since we're handling limited access
   skip_before_action :check_pending_activation, only: [:pending_activation, :suspended, :deactivated]
+  # Skip the limited access check for this controller since we're handling limited access
+  skip_before_action :check_limited_access, only: [:pending_activation, :suspended, :deactivated]
 
   def pending_activation
     # Only allow pending activation users to access this page

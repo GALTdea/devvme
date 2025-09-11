@@ -94,6 +94,9 @@ class ApplicationController < ActionController::Base
   def check_user_suspension
     # Only handle suspended users, not deactivated users
     if current_user.suspended? && current_user.account_status != "deactivated"
+      # Allow access to limited access pages
+      return if request.path == suspended_path
+
       suspension_reason = current_user.suspension_reason
       sign_out current_user
       redirect_to new_user_session_path, alert: "Your account has been suspended. Reason: #{suspension_reason}"

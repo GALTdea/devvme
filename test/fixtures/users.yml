@@ -6,6 +6,7 @@ test_user_one:
   full_name: Test User One
   bio: I am test user one
   slug: test_user1
+  account_status: active
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
   
 test_user_two:
@@ -14,6 +15,7 @@ test_user_two:
   full_name: Test User Two
   bio: I am test user two
   slug: test_user2
+  account_status: active
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
 
 test_admin:
