@@ -23,6 +23,9 @@ class ApplicationController < ActionController::Base
   # Check if user account is pending activation
   before_action :check_pending_activation, if: :user_signed_in?
 
+  # Check for limited access status (deactivated, suspended, etc.)
+  before_action :check_limited_access, if: :user_signed_in?
+
   # Track visitors (non-signed-up users)
   before_action :track_visitor, unless: :user_signed_in?
 
@@ -89,7 +92,8 @@ class ApplicationController < ActionController::Base
   end
 
   def check_user_suspension
-    if current_user.suspended?
+    # Only handle suspended users, not deactivated users
+    if current_user.suspended? && current_user.account_status != "deactivated"
       suspension_reason = current_user.suspension_reason
       sign_out current_user
       redirect_to new_user_session_path, alert: "Your account has been suspended. Reason: #{suspension_reason}"
@@ -200,6 +204,11 @@ class ApplicationController < ActionController::Base
     return true if request.path == destroy_user_session_path
     return true if request.path == root_path # Allow access to home page
     return true if request.path.start_with?("/public") # Allow access to public pages
+
+    # Allow deactivated users to view their own public profile
+    if user_signed_in? && current_user.deactivated? && request.path == "/#{current_user.friendly_id}"
+      return true
+    end
 
     false
   end
