@@ -4,20 +4,20 @@ This document outlines the setup and configuration for MailerSend email service 
 
 ## Required Environment Variables
 
-### For Production (Hatchbox.ai)
+### For Production (Kamal Deployment)
 
-Set these environment variables in your Hatchbox deployment:
+Set these environment variables in your deployment environment:
 
 ```bash
-# MailerSend Configuration
+# MailerSend Configuration (REQUIRED)
 MAILERSEND_API_TOKEN=your_mailersend_api_token_here
-MAILERSEND_FROM_EMAIL=noreply@devv.me
-MAILERSEND_FROM_NAME=DevV.me
 
-# Rails Mailer Configuration
-RAILS_MAILER_RAISE_DELIVERY_ERRORS=true
-RAILS_MAILER_PERFORM_DELIVERIES=true
-RAILS_HOST=devv.me
+# These are set in config/deploy.yml as clear variables:
+# MAILERSEND_FROM_EMAIL=noreply@devv.me
+# MAILERSEND_FROM_NAME=DevV.me
+# RAILS_MAILER_RAISE_DELIVERY_ERRORS=true
+# RAILS_MAILER_PERFORM_DELIVERIES=true
+# RAILS_HOST=devv.me
 ```
 
 ### For Development

@@ -86,8 +86,8 @@ if Rails.env.production?
     CACHE_DATABASE_URL
     QUEUE_DATABASE_URL
     CABLE_DATABASE_URL
-    SMTP_USERNAME
-    SMTP_PASSWORD
+    MAILERSEND_API_TOKEN
+    MAILERSEND_FROM_EMAIL
   ]
 
   missing_vars = required_vars.select { |var| ENV[var].blank? }
