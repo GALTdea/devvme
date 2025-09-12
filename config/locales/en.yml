@@ -35,3 +35,6 @@ en:
   user_activation_mailer:
     activation_notification:
       subject: "🎉 Your DevV.me account is now active!"
+  user_welcome_mailer:
+    welcome_notification:
+      subject: "Welcome to DevV.me! 🚀"

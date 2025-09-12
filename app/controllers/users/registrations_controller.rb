@@ -13,6 +13,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
       # Track visitor conversion
       track_visitor_conversion(resource)
 
+      # Send welcome email
+      send_welcome_email(resource)
+
       # Sign in the user and redirect to dashboard
       sign_in(resource)
       set_flash_message! :notice, :signed_up
@@ -46,6 +49,17 @@ class Users::RegistrationsController < Devise::RegistrationsController
     rescue => e
       # Log error but don't break the registration process
       Rails.logger.error "Failed to track visitor conversion: #{e.message}"
+    end
+  end
+
+  def send_welcome_email(user)
+    return unless user
+
+    begin
+      UserWelcomeMailer.welcome_notification(user).deliver_later
+    rescue => e
+      # Log error but don't break the registration process
+      Rails.logger.error "Failed to send welcome email to #{user.email}: #{e.message}"
     end
   end
 end

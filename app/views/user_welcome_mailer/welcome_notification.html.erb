@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to DevV.me!</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f8fafc; }
+      .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+      .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
+      .header h1 { margin: 0; font-size: 28px; font-weight: 700; }
+      .content { padding: 40px 30px; }
+      .welcome-badge { display: inline-block; background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+      .cta-button { display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
+      .cta-button:hover { background: #2563eb; }
+      .cta-button.secondary { background: #6b7280; }
+      .cta-button.secondary:hover { background: #4b5563; }
+      .features { background: #f1f5f9; padding: 20px; border-radius: 6px; margin: 20px 0; }
+      .features ul { margin: 0; padding-left: 20px; }
+      .features li { margin: 8px 0; }
+      .status-box { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 20px; margin: 20px 0; }
+      .status-box h3 { margin: 0 0 10px 0; color: #92400e; }
+      .footer { background: #f8fafc; padding: 20px 30px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 14px; color: #64748b; }
+      .button-group { text-align: center; margin: 30px 0; }
+      .button-group .cta-button { margin: 0 10px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🚀 Welcome to DevV.me!</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Your developer journey starts here</p>
+      </div>
+      
+      <div class="content">
+        <div class="welcome-badge">✨ Account Created Successfully</div>
+        
+        <h2>Hi <%= @user.display_name %>!</h2>
+        
+        <p>Welcome to DevV.me! We're thrilled to have you join our community of developers. Your account has been created successfully and you're now part of our beta program.</p>
+        
+        <div class="status-box">
+          <h3>📋 Beta Access Status</h3>
+          <p>Your account is currently <strong>pending activation</strong>. Our team will review and activate your account soon. You'll receive an email notification once your account is active and you have full access to all features.</p>
+        </div>
+        
+        <p>Once activated, you'll be able to:</p>
+        
+        <div class="features">
+          <ul>
+            <li><strong>Create and showcase your projects</strong> with rich descriptions and images</li>
+            <li><strong>Write and publish blog posts</strong> with our markdown editor</li>
+            <li><strong>Build your developer profile</strong> with your skills and experience</li>
+            <li><strong>Share your profile</strong> with the unique URL: <strong>devv.me/<%= @user.username %></strong></li>
+            <li><strong>Connect with other developers</strong> in our growing community</li>
+          </ul>
+        </div>
+        
+        <div class="button-group">
+          <a href="<%= @dashboard_url %>" class="cta-button">Go to Dashboard</a>
+          <a href="<%= @profile_url %>" class="cta-button secondary">View Your Profile</a>
+        </div>
+        
+        <p>In the meantime, feel free to explore the platform and get familiar with the interface. As a beta user, your feedback is incredibly valuable to us!</p>
+        
+        <p>If you have any questions or need assistance, don't hesitate to reach out to our support team.</p>
+        
+        <p>Welcome to the community!</p>
+        
+        <p>Best regards,<br>The DevV.me Team</p>
+      </div>
+      
+      <div class="footer">
+        <p>You're receiving this email because you created a DevV.me account.</p>
+        <p>If you have any questions, contact us at <a href="mailto:support@devv.me" style="color: #3b82f6;">support@devv.me</a></p>
+      </div>
+    </div>
+  </body>
+</html>
