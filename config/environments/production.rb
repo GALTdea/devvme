@@ -75,9 +75,11 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
+  # Allow the main domain and any subdomains
   config.hosts = [
-    ENV.fetch("RAILS_HOST", "devv.me"),
-    /.*\.#{ENV.fetch("RAILS_HOST", "devv.me").gsub('.', '\.')}/
+    "devv.me",
+    /.*\.devv\.me/,
+    /.*\.hatchboxapp\.com/  # Allow Hatchbox domains
   ]
 
   # Skip DNS rebinding protection for the default health check endpoint.
