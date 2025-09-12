@@ -1,0 +1,97 @@
+# DevvMe Environment Variables Configuration
+# Copy this file to .env.local for development or set these in your production environment
+
+# =============================================================================
+# REQUIRED - Application Configuration
+# =============================================================================
+
+# Rails Master Key (REQUIRED for production)
+# Generate with: bin/rails credentials:show
+RAILS_MASTER_KEY=your_master_key_here
+
+# Application Host (REQUIRED for production)
+RAILS_HOST=devv.me
+
+# =============================================================================
+# REQUIRED - Database Configuration
+# =============================================================================
+
+# Primary Database URL (REQUIRED)
+DATABASE_URL=postgresql://username:password@localhost:5432/devvme_app_production
+
+# Cache Database URL (REQUIRED for Solid Cache)
+CACHE_DATABASE_URL=postgresql://username:password@localhost:5432/devvme_app_production_cache
+
+# Queue Database URL (REQUIRED for Solid Queue)
+QUEUE_DATABASE_URL=postgresql://username:password@localhost:5432/devvme_app_production_queue
+
+# Cable Database URL (REQUIRED for Action Cable)
+CABLE_DATABASE_URL=postgresql://username:password@localhost:5432/devvme_app_production_cable
+
+# =============================================================================
+# REQUIRED - Email Configuration
+# =============================================================================
+
+# SMTP Configuration (REQUIRED for production)
+SMTP_ADDRESS=smtp.gmail.com
+SMTP_PORT=587
+SMTP_DOMAIN=devv.me
+SMTP_USERNAME=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+SMTP_AUTHENTICATION=plain
+SMTP_ENABLE_STARTTLS_AUTO=true
+
+# Email Settings
+DEVISE_MAILER_SENDER=noreply@devv.me
+RAILS_MAILER_PERFORM_DELIVERIES=true
+RAILS_MAILER_RAISE_DELIVERY_ERRORS=false
+
+# =============================================================================
+# OPTIONAL - External Services
+# =============================================================================
+
+# Google Analytics (Optional)
+GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+
+# Facebook App ID (Optional - for social sharing)
+FACEBOOK_APP_ID=your_facebook_app_id
+
+# IPInfo Token (Optional - for geolocation)
+IPINFO_TOKEN=your_ipinfo_token
+
+# =============================================================================
+# OPTIONAL - Performance & Monitoring
+# =============================================================================
+
+# Redis URL (Optional - for advanced caching)
+# REDIS_URL=redis://localhost:6379/0
+
+# Log Level (Optional)
+RAILS_LOG_LEVEL=info
+
+# Web Server Configuration (Optional)
+WEB_CONCURRENCY=2
+JOB_CONCURRENCY=3
+RAILS_MAX_THREADS=5
+
+# =============================================================================
+# OPTIONAL - Development Only
+# =============================================================================
+
+# Development Database (for local development)
+# DATABASE_URL=postgresql://localhost:5432/devvme_app_development
+
+# Development Host (for local development)
+# RAILS_HOST=localhost:3000
+
+# =============================================================================
+# SECURITY NOTES
+# =============================================================================
+
+# 1. NEVER commit .env files to version control
+# 2. Use strong, unique passwords for all services
+# 3. Rotate secrets regularly
+# 4. Use environment-specific values
+# 5. Consider using a secrets management service for production
+# 6. Monitor access logs for suspicious activity
+# 7. Keep this file updated as you add new environment variables

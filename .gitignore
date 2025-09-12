@@ -9,6 +9,10 @@
 
 # Ignore all environment files.
 /.env*
+/.env.local
+/.env.production
+/.env.staging
+/.env.development
 
 # Ignore all logfiles and tempfiles.
 /log/*
@@ -32,6 +36,15 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# Ignore sensitive configuration files
+/config/database.local.yml
+/config/secrets.yml
+/config/secrets.local.yml
+
+# Ignore deployment secrets
+/.kamal/secrets.local
+/.kamal/secrets.production
 
 /app/assets/builds/*
 !/app/assets/builds/.keep

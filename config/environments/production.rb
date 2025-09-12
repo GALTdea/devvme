@@ -53,22 +53,27 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  config.action_mailer.raise_delivery_errors = false
-  config.action_mailer.perform_deliveries = false  # Temporarily disable until SMTP is configured
+  # Email configuration
+  config.action_mailer.raise_delivery_errors = ENV.fetch("RAILS_MAILER_RAISE_DELIVERY_ERRORS", "false") == "true"
+  config.action_mailer.perform_deliveries = ENV.fetch("RAILS_MAILER_PERFORM_DELIVERIES", "true") == "true"
+  config.action_mailer.delivery_method = :smtp
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "devv.me" }
+  config.action_mailer.default_url_options = {
+    host: ENV.fetch("RAILS_HOST", "devv.me"),
+    protocol: "https"
+  }
 
-  # Specify outgoing SMTP server. Remember to add smtp/* credentials via rails credentials:edit.
-  # config.action_mailer.smtp_settings = {
-  #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
-  #   password: Rails.application.credentials.dig(:smtp, :password),
-  #   address: "smtp.example.com",
-  #   port: 587,
-  #   authentication: :plain
-  # }
+  # SMTP configuration using environment variables
+  config.action_mailer.smtp_settings = {
+    address: ENV.fetch("SMTP_ADDRESS", "smtp.gmail.com"),
+    port: ENV.fetch("SMTP_PORT", "587").to_i,
+    domain: ENV.fetch("SMTP_DOMAIN", "devv.me"),
+    user_name: ENV.fetch("SMTP_USERNAME", ""),
+    password: ENV.fetch("SMTP_PASSWORD", ""),
+    authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain").to_sym,
+    enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true"
+  }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
@@ -81,11 +86,22 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
-  #
+  config.hosts = [
+    ENV.fetch("RAILS_HOST", "devv.me"),
+    /.*\.#{ENV.fetch("RAILS_HOST", "devv.me").gsub('.', '\.')}/
+  ]
+
   # Skip DNS rebinding protection for the default health check endpoint.
-  # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  # Security headers
+  config.force_ssl = true
+  config.ssl_options = {
+    redirect: { exclude: ->(request) { request.path == "/up" } },
+    hsts: {
+      expires: 1.year,
+      include_subdomains: true,
+      preload: true
+    }
+  }
 end
