@@ -83,3 +83,6 @@ end
 
 
 gem "pundit", "~> 2.5"
+
+# Email service provider
+gem "mailersend-ruby", "~> 3.0"

@@ -53,26 +53,15 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
-  # Email configuration
-  config.action_mailer.raise_delivery_errors = ENV.fetch("RAILS_MAILER_RAISE_DELIVERY_ERRORS", "false") == "true"
+  # Email configuration - Use MailerSend for production
+  config.action_mailer.raise_delivery_errors = ENV.fetch("RAILS_MAILER_RAISE_DELIVERY_ERRORS", "true") == "true"
   config.action_mailer.perform_deliveries = ENV.fetch("RAILS_MAILER_PERFORM_DELIVERIES", "true") == "true"
-  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.delivery_method = :mailersend
 
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = {
     host: ENV.fetch("RAILS_HOST", "devv.me"),
     protocol: "https"
-  }
-
-  # SMTP configuration using environment variables
-  config.action_mailer.smtp_settings = {
-    address: ENV.fetch("SMTP_ADDRESS", "smtp.gmail.com"),
-    port: ENV.fetch("SMTP_PORT", "587").to_i,
-    domain: ENV.fetch("SMTP_DOMAIN", "devv.me"),
-    user_name: ENV.fetch("SMTP_USERNAME", ""),
-    password: ENV.fetch("SMTP_PASSWORD", ""),
-    authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain").to_sym,
-    enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true"
   }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
