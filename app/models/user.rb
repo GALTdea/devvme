@@ -47,6 +47,9 @@ class User < ApplicationRecord
   # Admin activity associations
   has_many :admin_activities, foreign_key: :admin_id, dependent: :destroy
 
+  # Visitor tracking associations
+  has_many :visitors, dependent: :nullify
+
   # Validations
   validates :username, presence: true,
                       uniqueness: { case_sensitive: false },

@@ -279,11 +279,20 @@
                         </p>
                         <p class="text-sm text-secondary-500 dark:text-secondary-400 truncate">@<%= user.username %></p>
                       </div>
-                      <div class="flex-shrink-0">
+                      <div class="flex-shrink-0 flex items-center space-x-2">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                                <%= user.suspended? ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' %>">
                           <%= user.suspended? ? 'Suspended' : 'Active' %>
                         </span>
+                        <% if current_user.super_admin? && user != current_user %>
+                          <%= button_to "Delete", admin_user_path(user), 
+                              method: :delete,
+                              data: { 
+                                confirm: "Are you sure you want to permanently delete this user? This action cannot be undone.",
+                                turbo_confirm: "Are you sure you want to permanently delete this user? This action cannot be undone."
+                              },
+                              class: "text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-xs underline" %>
+                        <% end %>
                       </div>
                     </div>
                   </li>
