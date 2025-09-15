@@ -60,9 +60,14 @@ class User < ApplicationRecord
   validates :full_name, length: { maximum: 100 }
   validates :bio, length: { maximum: 500 }
 
-  validates :github_url, :linkedin_url, :website_url, :twitter_url,
+  validates :github_url, :linkedin_url, :website_url,
             format: { with: /\A(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\z/i,
                      message: "must be a valid URL" },
+            allow_blank: true
+
+  validates :twitter_url,
+            format: { with: /\A(https?:\/\/)?(twitter\.com\/|x\.com\/)?@?[a-zA-Z0-9_]{1,15}\z/i,
+                     message: "must be a valid Twitter handle or URL" },
             allow_blank: true
 
   validates :job_title, length: { maximum: 100 }
@@ -128,7 +133,7 @@ class User < ApplicationRecord
   # Calculates profile completion percentage based on filled fields
   # Used to encourage users to complete their profiles
   def profile_completion_percentage
-    total_fields = 12
+    total_fields = 13
     completed_fields = 0
 
     # Count each completed profile field
@@ -138,6 +143,7 @@ class User < ApplicationRecord
     completed_fields += 1 if avatar.attached?
     completed_fields += 1 if github_url.present?
     completed_fields += 1 if linkedin_url.present?
+    completed_fields += 1 if twitter_url.present?
     completed_fields += 1 if website_url.present?
     completed_fields += 1 if job_title.present?
     completed_fields += 1 if location.present?
@@ -182,6 +188,28 @@ class User < ApplicationRecord
 
   def display_name
     full_name.present? ? full_name : username
+  end
+
+  # Extract Twitter handle from URL for display purposes
+  def twitter_handle
+    return nil if twitter_url.blank?
+
+    # Extract handle from various Twitter URL formats
+    # Examples: https://twitter.com/username, https://x.com/username, @username
+    if twitter_url.include?('twitter.com/') || twitter_url.include?('x.com/')
+      twitter_url.split('/').last&.gsub('@', '')
+    elsif twitter_url.start_with?('@')
+      twitter_url.gsub('@', '')
+    else
+      # If it's just a handle without URL, return as is
+      twitter_url.gsub('@', '')
+    end
+  end
+
+  # Generate Twitter profile URL from handle
+  def twitter_profile_url
+    return nil if twitter_handle.blank?
+    "https://twitter.com/#{twitter_handle}"
   end
 
   # Generate public profile URL for sharing

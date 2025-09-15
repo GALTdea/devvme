@@ -290,6 +290,26 @@
               <% end %>
             </div>
 
+            <!-- Twitter URL -->
+            <div>
+              <%= form.label :twitter_url, "Twitter Profile", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+              <div class="mt-1 flex rounded-md shadow-sm">
+                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 text-gray-500 dark:text-gray-400 text-sm">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </span>
+                <%= form.text_field :twitter_url, 
+                    placeholder: "https://twitter.com/yourusername or @yourusername",
+                    class: "flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500 sm:text-sm #{'border-red-300 focus:border-red-500 focus:ring-red-500' if @user.errors[:twitter_url].any?}" %>
+              </div>
+              <% if @user.errors[:twitter_url].any? %>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                  <%= @user.errors[:twitter_url].first %>
+                </div>
+              <% end %>
+            </div>
+
             <!-- Website URL -->
             <div>
               <%= form.label :website_url, "Personal Website", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>

@@ -37,7 +37,7 @@ class ProfilesController < ApplicationController
   # Strong parameters for profile updates
   # Only allows specific profile fields to be updated
   def profile_params
-    params.require(:user).permit(:username, :full_name, :bio, :github_url, :linkedin_url, :website_url, :avatar, :job_title, :location, :headline, :contact_email, :skills_list)
+    params.require(:user).permit(:username, :full_name, :bio, :github_url, :linkedin_url, :twitter_url, :website_url, :avatar, :job_title, :location, :headline, :contact_email, :skills_list)
   end
 
   # Identify missing profile fields for completion page
@@ -50,6 +50,7 @@ class ProfilesController < ApplicationController
     missing_fields << { name: "Profile Picture", field: :avatar, path: edit_profile_path } unless @user.avatar.attached?
     missing_fields << { name: "GitHub URL", field: :github_url, path: edit_profile_path } unless @user.github_url.present?
     missing_fields << { name: "LinkedIn URL", field: :linkedin_url, path: edit_profile_path } unless @user.linkedin_url.present?
+    missing_fields << { name: "Twitter URL", field: :twitter_url, path: edit_profile_path } unless @user.twitter_url.present?
     missing_fields << { name: "Website URL", field: :website_url, path: edit_profile_path } unless @user.website_url.present?
     missing_fields << { name: "Job Title", field: :job_title, path: edit_profile_path } unless @user.job_title.present?
     missing_fields << { name: "Location", field: :location, path: edit_profile_path } unless @user.location.present?

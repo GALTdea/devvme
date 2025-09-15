@@ -271,10 +271,12 @@
           
           <% if user.twitter_url.present? %>
             <div data-tooltip-target="twitter-tooltip" data-tooltip-trigger="hover">
-              <%= link_to user.twitter_url, target: "_blank", rel: "noopener noreferrer",
+              <%= link_to user.twitter_profile_url, target: "_blank", rel: "noopener noreferrer",
                   class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-secondary-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 no-print" do %>
-                <span class="text-secondary-400 mr-2">$</span>
-                <span>tweet --follow</span>
+                <svg class="w-5 h-5 text-secondary-400 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                <span>@<%= user.twitter_handle %></span>
               <% end %>
               <div id="twitter-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
                 Follow me on Twitter/X - See my latest updates and thoughts
