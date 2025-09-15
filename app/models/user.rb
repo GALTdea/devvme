@@ -197,11 +197,16 @@ class User < ApplicationRecord
     # Extract handle from various Twitter URL formats
     # Examples: https://twitter.com/username, https://x.com/username, @username
     if twitter_url.include?('twitter.com/') || twitter_url.include?('x.com/')
+      # Extract from full URL
       twitter_url.split('/').last&.gsub('@', '')
     elsif twitter_url.start_with?('@')
+      # Remove @ symbol
+      twitter_url.gsub('@', '')
+    elsif twitter_url.start_with?('http')
+      # If it starts with http but doesn't contain twitter.com or x.com, treat as handle
       twitter_url.gsub('@', '')
     else
-      # If it's just a handle without URL, return as is
+      # If it's just a handle without URL or @, return as is
       twitter_url.gsub('@', '')
     end
   end
@@ -454,7 +459,7 @@ class User < ApplicationRecord
     normalize_url(:github_url)
     normalize_url(:linkedin_url)
     normalize_url(:website_url)
-    normalize_url(:twitter_url)
+    normalize_twitter_url
     normalize_url(:resume_url)
   end
 
@@ -465,6 +470,28 @@ class User < ApplicationRecord
     # Add https:// prefix if no protocol is specified
     unless url.start_with?("http://", "https://")
       self[field] = "https://#{url}"
+    end
+  end
+
+  def normalize_twitter_url
+    url = self[:twitter_url]
+    return if url.blank?
+
+    # Only add https:// if it's a full URL, not just a handle
+    if url.include?('twitter.com/') || url.include?('x.com/')
+      # It's already a URL, normalize it
+      unless url.start_with?("http://", "https://")
+        self[:twitter_url] = "https://#{url}"
+      end
+    elsif url.start_with?('@')
+      # It's a handle with @, keep as is
+      self[:twitter_url] = url
+    elsif url.start_with?("http://", "https://")
+      # It's already a full URL, keep as is
+      self[:twitter_url] = url
+    else
+      # It's just a handle without @, keep as is
+      self[:twitter_url] = url
     end
   end
 
