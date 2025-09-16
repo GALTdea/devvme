@@ -54,9 +54,16 @@ if Rails.env.production? || ENV["MAILERSEND_DEVELOPMENT"] == "true"
           email.add_text(text_body)
         end
 
+        # Ensure we have at least one content type
+        unless html_body.present? || text_body.present?
+          Rails.logger.warn "No content found for email to #{to}, using fallback text"
+          email.add_text("Email content not available")
+        end
+
         # Send email
         response = email.send
         Rails.logger.info "MailerSend email sent successfully to #{to}"
+        Rails.logger.info "MailerSend response: #{response.inspect}"
         response
       rescue => e
         Rails.logger.error "MailerSend delivery failed: #{e.message}"
