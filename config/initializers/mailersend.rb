@@ -21,17 +21,41 @@ if Rails.env.production? || ENV["MAILERSEND_DEVELOPMENT"] == "true"
         subject = mail.subject
 
         # Get email body (prefer HTML, fallback to text)
-        body = mail.html_part&.body&.to_s || mail.text_part&.body&.to_s || mail.body.to_s
+        html_body = nil
+        text_body = nil
+
+        if mail.multipart?
+          # Multipart email - extract HTML and text parts
+          html_body = mail.html_part&.body&.to_s
+          text_body = mail.text_part&.body&.to_s
+        else
+          # Single part email - determine type by content type
+          if mail.content_type&.include?('text/html')
+            html_body = mail.body.to_s
+          elsif mail.content_type&.include?('text/plain')
+            text_body = mail.body.to_s
+          else
+            # Fallback - treat as text
+            text_body = mail.body.to_s
+          end
+        end
 
         # Create email object
-        email = Mailersend::Email.new
-        email.set_from(from_email, from_name)
-        email.set_recipients([{ email: to }])
-        email.set_subject(subject)
-        email.set_html(body)
+        email = Mailersend::Email.new(client)
+        email.add_from({ email: from_email, name: from_name })
+        email.add_recipients([{ email: to }])
+        email.add_subject(subject)
+
+        # Add content based on what's available
+        if html_body.present?
+          email.add_html(html_body)
+        end
+        if text_body.present?
+          email.add_text(text_body)
+        end
 
         # Send email
-        response = client.send(email)
+        response = email.send
         Rails.logger.info "MailerSend email sent successfully to #{to}"
         response
       rescue => e
