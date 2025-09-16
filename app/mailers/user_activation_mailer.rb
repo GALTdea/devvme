@@ -12,7 +12,7 @@ class UserActivationMailer < ApplicationMailer
 
     mail(
       to: @user.email,
-      subject: "🎉 Your DevV.me account is now active!"
+      subject: "🎉 Your Devv.me account is now active!"
     )
   end
 end
