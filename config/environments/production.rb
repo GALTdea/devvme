@@ -56,7 +56,7 @@ Rails.application.configure do
   # Email configuration - Use MailerSend for production
   config.action_mailer.raise_delivery_errors = ENV.fetch("RAILS_MAILER_RAISE_DELIVERY_ERRORS", "true") == "true"
   config.action_mailer.perform_deliveries = ENV.fetch("RAILS_MAILER_PERFORM_DELIVERIES", "true") == "true"
-  config.action_mailer.delivery_method = :mailersend
+  # Delivery method is configured in config/initializers/mailersend.rb
 
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = {

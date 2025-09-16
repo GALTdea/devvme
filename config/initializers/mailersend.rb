@@ -1,22 +1,17 @@
-# frozen_string_literal: true
+# MailerSend configuration for Rails ActionMailer
+# This initializer sets up MailerSend as a delivery method for ActionMailer
 
-require "mailersend-ruby"
+if Rails.env.production? || ENV["MAILERSEND_DEVELOPMENT"] == "true"
+  require "mailersend-ruby"
 
-# MailerSend configuration
-Rails.application.configure do
-  # Initialize MailerSend client
-  config.mailersend_client = Mailersend::Client.new(
-    ENV.fetch("MAILERSEND_API_TOKEN", "")
-  )
+  # Configure MailerSend delivery method
+  ActionMailer::Base.add_delivery_method :mailersend, MailerSend::DeliveryMethod, {
+    api_key: ENV.fetch("MAILERSEND_API_KEY", ""),
+    domain: ENV.fetch("MAILERSEND_DOMAIN", "devv.me"),
+    from_name: ENV.fetch("MAILERSEND_FROM_NAME", "DevV.me"),
+    from_email: ENV.fetch("MAILERSEND_FROM_EMAIL", "noreply@devv.me")
+  }
 
-  # Set default from email for MailerSend
-  config.mailersend_from_email = ENV.fetch("MAILERSEND_FROM_EMAIL", "noreply@devv.me")
-  config.mailersend_from_name = ENV.fetch("MAILERSEND_FROM_NAME", "DevV.me")
-end
-
-# Make MailerSend client available globally
-Rails.application.config.after_initialize do
-  MailerSendClient = Rails.application.config.mailersend_client
-  MailerSendFromEmail = Rails.application.config.mailersend_from_email
-  MailerSendFromName = Rails.application.config.mailersend_from_name
+  # Set the delivery method for ActionMailer
+  ActionMailer::Base.delivery_method = :mailersend
 end

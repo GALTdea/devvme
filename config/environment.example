@@ -32,19 +32,20 @@ CABLE_DATABASE_URL=postgresql://username:password@localhost:5432/devvme_app_prod
 # REQUIRED - Email Configuration
 # =============================================================================
 
-# SMTP Configuration (REQUIRED for production)
-SMTP_ADDRESS=smtp.gmail.com
-SMTP_PORT=587
-SMTP_DOMAIN=devv.me
-SMTP_USERNAME=your_email@gmail.com
-SMTP_PASSWORD=your_app_password
-SMTP_AUTHENTICATION=plain
-SMTP_ENABLE_STARTTLS_AUTO=true
+# MailerSend Configuration (REQUIRED for production)
+MAILERSEND_API_KEY=your_mailersend_api_key_here
+MAILERSEND_DOMAIN=devv.me
+MAILERSEND_FROM_NAME=DevV.me
+MAILERSEND_FROM_EMAIL=noreply@devv.me
 
 # Email Settings
 DEVISE_MAILER_SENDER=noreply@devv.me
 RAILS_MAILER_PERFORM_DELIVERIES=true
-RAILS_MAILER_RAISE_DELIVERY_ERRORS=false
+RAILS_MAILER_RAISE_DELIVERY_ERRORS=true
+
+# Development Email Testing (optional)
+# Set to true to use MailerSend in development instead of Letter Opener
+# MAILERSEND_DEVELOPMENT=false
 
 # =============================================================================
 # OPTIONAL - External Services
