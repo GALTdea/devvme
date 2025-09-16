@@ -30,9 +30,9 @@ if Rails.env.production? || ENV["MAILERSEND_DEVELOPMENT"] == "true"
           text_body = mail.text_part&.body&.to_s
         else
           # Single part email - determine type by content type
-          if mail.content_type&.include?('text/html')
+          if mail.content_type&.include?("text/html")
             html_body = mail.body.to_s
-          elsif mail.content_type&.include?('text/plain')
+          elsif mail.content_type&.include?("text/plain")
             text_body = mail.body.to_s
           else
             # Fallback - treat as text
@@ -43,7 +43,7 @@ if Rails.env.production? || ENV["MAILERSEND_DEVELOPMENT"] == "true"
         # Create email object
         email = Mailersend::Email.new(client)
         email.add_from({ email: from_email, name: from_name })
-        email.add_recipients([{ email: to }])
+        email.add_recipients({ "email" => to })
         email.add_subject(subject)
 
         # Add content based on what's available
