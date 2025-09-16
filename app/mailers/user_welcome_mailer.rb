@@ -1,4 +1,6 @@
 class UserWelcomeMailer < ApplicationMailer
+  layout false # Disable layout since our template is self-contained
+
   # Subject can be set in your I18n file at config/locales/en.yml
   # with the following lookup:
   #

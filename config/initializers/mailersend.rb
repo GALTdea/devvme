@@ -79,7 +79,7 @@ if Rails.env.production? || ENV["MAILERSEND_DEVELOPMENT"] == "true"
   ActionMailer::Base.add_delivery_method :mailersend, MailerSendDeliveryMethod, {
     api_token: mailersend_api_token,
     domain: ENV.fetch("MAILERSEND_DOMAIN", "devv.me"),
-    from_name: ENV.fetch("MAILERSEND_FROM_NAME", "DevV.me"),
+    from_name: ENV.fetch("MAILERSEND_FROM_NAME", "Devv.me"),
     from_email: ENV.fetch("MAILERSEND_FROM_EMAIL", "noreply@devv.me")
   }
 
