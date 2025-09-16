@@ -12,7 +12,7 @@ if Rails.env.production? || ENV["MAILERSEND_DEVELOPMENT"] == "true"
 
     def deliver!(mail)
       begin
-        client = Mailersend::Client.new(@settings[:api_key])
+        client = Mailersend::Client.new(@settings[:api_token])
 
         # Extract email details
         to = mail.to.is_a?(Array) ? mail.to.first : mail.to
@@ -72,9 +72,12 @@ if Rails.env.production? || ENV["MAILERSEND_DEVELOPMENT"] == "true"
     end
   end
 
+  # Resolve API token from ENV (prefer KEY, fallback to TOKEN)
+  mailersend_api_token = ENV["MAILERSEND_API_KEY"].presence || ENV["MAILERSEND_API_TOKEN"]
+
   # Configure MailerSend delivery method
   ActionMailer::Base.add_delivery_method :mailersend, MailerSendDeliveryMethod, {
-    api_key: ENV.fetch("MAILERSEND_API_KEY", ""),
+    api_token: mailersend_api_token,
     domain: ENV.fetch("MAILERSEND_DOMAIN", "devv.me"),
     from_name: ENV.fetch("MAILERSEND_FROM_NAME", "DevV.me"),
     from_email: ENV.fetch("MAILERSEND_FROM_EMAIL", "noreply@devv.me")
