@@ -43,7 +43,7 @@ if Rails.env.production? || ENV["MAILERSEND_DEVELOPMENT"] == "true"
         # Create email object
         email = Mailersend::Email.new(client)
         email.add_from({ email: from_email, name: from_name })
-        email.add_recipients({ "email" => to })
+        email.add_recipients({ email: to })
         email.add_subject(subject)
 
         # Add content based on what's available
