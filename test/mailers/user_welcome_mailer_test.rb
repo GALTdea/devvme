@@ -71,8 +71,8 @@ class UserWelcomeMailerTest < ActionMailer::TestCase
     assert_not_nil html_part
     assert_not_nil text_part
 
-    # Test HTML content
-    assert_match "<h1>🚀 Welcome to DevV.me!</h1>", html_part.body.encoded
+    # Test HTML content (checking within the full HTML document)
+    assert_match /<h1[^>]*>🚀 Welcome to DevV\.me!<\/h1>/, html_part.body.encoded
     assert_match user.display_name, html_part.body.encoded
 
     # Test text content
