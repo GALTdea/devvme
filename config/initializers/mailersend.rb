@@ -64,6 +64,12 @@ if Rails.env.production? || ENV["MAILERSEND_DEVELOPMENT"] == "true"
         response = email.send
         Rails.logger.info "MailerSend email sent successfully to #{to}"
         Rails.logger.info "MailerSend response: #{response.inspect}"
+
+        # Log response body for debugging
+        if response.respond_to?(:body)
+          Rails.logger.info "MailerSend response body: #{response.body}"
+        end
+
         response
       rescue => e
         Rails.logger.error "MailerSend delivery failed: #{e.message}"
