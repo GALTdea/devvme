@@ -218,6 +218,23 @@
           <div data-controller="technology-tags" 
                data-technology-tags-technologies-value="<%= @user.skills.to_json %>">
             <%= form.label :skills_list, "Skills", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+            
+            <!-- Quick Selection Area -->
+            <div class="mb-3">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Quick add popular skills:</p>
+              <div class="flex flex-wrap gap-2">
+                <% %w[Ruby Rails JavaScript TypeScript React Vue.js Python Django Node.js PostgreSQL Git Docker AWS].each do |skill| %>
+                  <button type="button" 
+                          class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                          data-action="click->technology-tags#addQuickSkill"
+                          data-skill="<%= skill %>">
+                    <%= skill %>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Input Area -->
             <div data-technology-tags-target="container" 
                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus-within:border-primary-500 focus-within:ring-primary-500 sm:text-sm <%= 'border-red-300 focus-within:border-red-500 focus-within:ring-red-500' if @user.errors[:skills].any? %>">
               <div data-technology-tags-target="tagsContainer" 
@@ -227,7 +244,7 @@
               <input type="text" 
                      data-technology-tags-target="input"
                      data-action="keydown->technology-tags#handleKeydown blur->technology-tags#handleBlur"
-                     placeholder="Add a skill and press Enter..."
+                     placeholder="Type to search, paste multiple skills (comma-separated), or press Enter..."
                      class="w-full px-3 pb-3 pt-1 border-0 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-sm">
             </div>
             <%= form.hidden_field :skills_list, data: { technology_tags_target: "hiddenField" } %>
@@ -237,7 +254,7 @@
               </div>
             <% else %>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Add your technical skills by typing and pressing Enter. Maximum 10 skills allowed.
+                Type to search, use autocomplete, or paste multiple skills separated by commas. Maximum 10 skills allowed.
               </p>
             <% end %>
           </div>
