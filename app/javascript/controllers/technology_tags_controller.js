@@ -47,7 +47,14 @@ export default class extends Controller {
     }
 
     technologiesValueChanged() {
-        this.tags = this.technologiesValue || []
+        // Handle null, undefined, or empty values
+        if (this.technologiesValue === null || this.technologiesValue === undefined) {
+            this.tags = []
+        } else if (Array.isArray(this.technologiesValue)) {
+            this.tags = this.technologiesValue
+        } else {
+            this.tags = []
+        }
         this.renderTags()
         this.updateHiddenField()
     }

@@ -139,7 +139,7 @@
       <%= form.label :technologies_display, "Technologies", class: "block text-sm font-medium text-gray-700 mb-2" %>
       <div class="relative"
            data-controller="technology-tags"
-           data-technology-tags-technologies-value="<%= project.technologies_used.to_json %>">
+           data-technology-tags-technologies-value="<%= (project.technologies_used || []).to_json %>">
         
         <!-- Hidden field for form submission -->
         <%= form.hidden_field :technologies_display, 

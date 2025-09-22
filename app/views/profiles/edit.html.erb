@@ -216,7 +216,7 @@
 
           <!-- Skills -->
           <div data-controller="technology-tags" 
-               data-technology-tags-technologies-value="<%= @user.skills.to_json %>">
+               data-technology-tags-technologies-value="<%= (@user.skills || []).to_json %>">
             <%= form.label :skills_list, "Skills", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
             
             <!-- Quick Selection Area -->
