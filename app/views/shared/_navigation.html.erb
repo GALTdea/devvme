@@ -111,11 +111,19 @@
               Sign In
             <% end %>
           </li>
+          <% if registration_enabled? %>
           <li>
             <%= link_to new_user_registration_path, class: "text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2 text-center shadow-md hover:shadow-lg transition-all duration-300 dark:focus:ring-primary-800 block md:inline-block" do %>
               Start Building
             <% end %>
           </li>
+          <% else %>
+          <li>
+            <%= link_to new_user_registration_path, class: "text-gray-400 bg-gray-200 cursor-not-allowed font-medium rounded-lg text-sm px-4 py-2 text-center block md:inline-block", title: "Registration temporarily disabled" do %>
+              Coming Soon
+            <% end %>
+          </li>
+          <% end %>
         <% end %>
         
         <!-- Dark Mode Toggle -->

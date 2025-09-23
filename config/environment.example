@@ -43,6 +43,10 @@ DEVISE_MAILER_SENDER=noreply@devv.me
 RAILS_MAILER_PERFORM_DELIVERIES=true
 RAILS_MAILER_RAISE_DELIVERY_ERRORS=true
 
+# Registration Control (Optional)
+# Set to 'true' to temporarily disable new user registrations
+# DISABLE_REGISTRATION=true
+
 # Development Email Testing (optional)
 # Set to true to use MailerSend in development instead of Letter Opener
 # MAILERSEND_DEVELOPMENT=false

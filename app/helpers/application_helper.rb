@@ -400,4 +400,9 @@ module ApplicationHelper
   def can_manage_users?
     user_signed_in? && current_user.can_manage_users?
   end
+
+  # Registration control helper
+  def registration_enabled?
+    !Rails.env.production? || ENV["DISABLE_REGISTRATION"].blank?
+  end
 end

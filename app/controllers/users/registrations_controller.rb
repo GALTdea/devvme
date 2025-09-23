@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class Users::RegistrationsController < Devise::RegistrationsController
-    # Override create action to set users to pending_activation by default
+  before_action :check_registration_enabled, only: [:new, :create]
+
+  # Override create action to set users to pending_activation by default
   def create
     build_resource(sign_up_params)
 
@@ -40,6 +42,16 @@ class Users::RegistrationsController < Devise::RegistrationsController
   end
 
   private
+
+  def check_registration_enabled
+    return if registration_enabled?
+
+    render 'registration_disabled', layout: 'application'
+  end
+
+  def registration_enabled?
+    !Rails.env.production? || ENV['DISABLE_REGISTRATION'].blank?
+  end
 
   def track_visitor_conversion(user)
     return unless user
