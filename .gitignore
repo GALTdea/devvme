@@ -48,3 +48,8 @@
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
+
+# Ignore test scripts that might contain sensitive information
+test_*.sh
+*_production.sh
+*_test.sh
