@@ -93,6 +93,9 @@ Rails.application.routes.draw do
     get :complete, on: :member
   end
 
+  # Social media images for profiles
+  get "social/:username/image", to: "social_images#profile_image", as: :social_profile_image, constraints: { username: /[a-zA-Z0-9_-]+/ }
+
   # Public profile routes - for sharing and visitor access
   # Uses username with FriendlyId for clean URLs like /gustavo
   get "/:username", to: "public_profiles#show", as: :public_profile, constraints: { username: /[a-zA-Z0-9_-]+/ }

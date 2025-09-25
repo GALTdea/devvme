@@ -136,8 +136,8 @@ class PublicProfilesController < ApplicationController
     # Page title
     @seo_title = "#{@user.display_name} (@#{@user.username})"
 
-    # Avatar URL for social sharing
-    @seo_avatar_url = @user.avatar.attached? ? url_for(@user.avatar) : nil
+    # Social media image URL for sharing (branded image)
+    @seo_avatar_url = social_profile_image_url(@user.username)
 
     # Full profile URL
     @seo_profile_url = request.original_url
