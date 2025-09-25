@@ -7,14 +7,8 @@ class SocialImageGeneratorService
 
   def generate_profile_image
     # Generate a branded social media image for the user's profile
-    # For now, we'll create a simple approach using the user's avatar with branding
-    # In production, you'd use a service like Puppeteer, wkhtmltoimage, or ImageMagick
-
-    if @user.avatar.attached?
-      create_branded_avatar_image
-    else
-      create_default_branded_image
-    end
+    # Always create the branded template for consistency across all users
+    create_branded_template_image
   end
 
   private
@@ -26,12 +20,12 @@ class SocialImageGeneratorService
     rails_blob_url(@user.avatar, host: "#{host_options[:host]}:#{host_options[:port]}")
   end
 
-  def create_default_branded_image
-    # Create a default branded image for users without avatars
-    create_simple_branded_image
+  def create_branded_template_image
+    # Create a branded template image for all users
+    create_branded_svg_image
   end
 
-  def create_simple_branded_image
+  def create_branded_svg_image
     # Create a simple branded image using SVG and save as file
     # This creates a gradient background with the user's name and branding
 
@@ -64,9 +58,8 @@ class SocialImageGeneratorService
         <!-- Main card -->
         <rect x="100" y="65" width="1000" height="500" rx="24" fill="url(#card)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
 
-        <!-- Avatar placeholder -->
-        <rect x="148" y="113" width="160" height="160" rx="20" fill="#667eea"/>
-        <text x="228" y="200" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="80" font-weight="bold">👨‍💻</text>
+        <!-- Avatar -->
+        #{avatar_svg}
 
         <!-- Badge -->
         <rect x="348" y="113" width="180" height="32" rx="16" fill="#667eea"/>
@@ -95,6 +88,30 @@ class SocialImageGeneratorService
     File.write(file_path, svg_content)
 
     file_path
+  end
+
+  def avatar_svg
+    if @user.avatar.attached?
+      # Use the user's avatar in the branded template
+      host_options = Rails.application.config.action_mailer.default_url_options
+      avatar_url = rails_blob_url(@user.avatar, host: "#{host_options[:host]}:#{host_options[:port]}")
+
+      <<~SVG
+        <defs>
+          <clipPath id="avatar-clip">
+            <rect x="148" y="113" width="160" height="160" rx="20"/>
+          </clipPath>
+        </defs>
+        <image x="148" y="113" width="160" height="160" href="#{avatar_url}" clip-path="url(#avatar-clip)"/>
+        <rect x="148" y="113" width="160" height="160" rx="20" fill="none" stroke="#667eea" stroke-width="3"/>
+      SVG
+    else
+      # Default avatar placeholder
+      <<~SVG
+        <rect x="148" y="113" width="160" height="160" rx="20" fill="#667eea"/>
+        <text x="228" y="200" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="80" font-weight="bold">👨‍💻</text>
+      SVG
+    end
   end
 
   def skills_svg(skills)
