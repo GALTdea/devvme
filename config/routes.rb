@@ -12,6 +12,7 @@ Rails.application.routes.draw do
 
     get "dashboard/export", to: "dashboard#export", as: :dashboard_export
     get "dashboard/online_users", to: "dashboard#online_users", as: :dashboard_online_users
+    get "dashboard/online_visitors", to: "dashboard#online_visitors", as: :dashboard_online_visitors
 
     resources :users do
       member do

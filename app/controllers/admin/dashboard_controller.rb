@@ -17,6 +17,16 @@ class Admin::DashboardController < ApplicationController
       online_users: User.online_users
     }
 
+    @visitor_stats = {
+      total_visitors: Visitor.total_visitors,
+      active_visitors: Visitor.active_visitors(@days),
+      online_visitors: Visitor.online_visitors,
+      new_visitors_in_period: Visitor.new_visitors_in_period(@days),
+      unique_visitors: Visitor.unique_visitors(@days),
+      returning_visitors: Visitor.returning_visitors(@days),
+      conversion_rate: Visitor.conversion_rate(@days)
+    }
+
     @content_stats = {
       total_blog_posts: BlogPost.count,
       published_blog_posts: BlogPost.published_posts.count,
@@ -49,6 +59,12 @@ class Admin::DashboardController < ApplicationController
   def online_users
     respond_to do |format|
       format.json { render json: { count: User.online_users } }
+    end
+  end
+
+  def online_visitors
+    respond_to do |format|
+      format.json { render json: { count: Visitor.online_visitors } }
     end
   end
 
@@ -130,10 +146,19 @@ class Admin::DashboardController < ApplicationController
 
     CSV.generate do |csv|
       csv << ['Metric', 'Value', 'Period']
+      # User metrics
       csv << ['Total Users', User.total_users, 'All Time']
       csv << ['Active Users', User.active_users(@days), "#{@days} days"]
       csv << ['New Users', User.new_users_in_period(@days), "#{@days} days"]
       csv << ['Suspended Users', User.suspended_users, 'All Time']
+      csv << ['Online Users', User.online_users, 'Current']
+      # Visitor metrics
+      csv << ['Total Visitors', Visitor.total_visitors, 'All Time']
+      csv << ['Active Visitors', Visitor.active_visitors(@days), "#{@days} days"]
+      csv << ['New Visitors', Visitor.new_visitors_in_period(@days), "#{@days} days"]
+      csv << ['Online Visitors', Visitor.online_visitors, 'Current']
+      csv << ['Conversion Rate', "#{Visitor.conversion_rate(@days)}%", "#{@days} days"]
+      # Content metrics
       csv << ['Total Blog Posts', BlogPost.count, 'All Time']
       csv << ['Published Blog Posts', BlogPost.published_posts.count, 'All Time']
       csv << ['Total Projects', Project.count, 'All Time']
@@ -148,6 +173,7 @@ class Admin::DashboardController < ApplicationController
       days: @days,
       generated_at: Time.current,
       user_stats: @user_stats,
+      visitor_stats: @visitor_stats,
       content_stats: @content_stats,
       registration_chart_data: @registration_chart_data,
       blog_views_chart_data: @blog_views_chart_data,
