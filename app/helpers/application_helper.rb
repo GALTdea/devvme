@@ -233,7 +233,9 @@ module ApplicationHelper
     # Image with enhanced properties
     if options[:image]
       tags << tag.meta(property: "og:image", content: options[:image])
-      tags << tag.meta(property: "og:image:type", content: "image/jpeg")
+      # Use PNG for social images for better Twitter compatibility
+      image_type = options[:image].include?("/social/") ? "image/png" : "image/jpeg"
+      tags << tag.meta(property: "og:image:type", content: image_type)
       tags << tag.meta(property: "og:image:width", content: "1200")
       tags << tag.meta(property: "og:image:height", content: "630")
       tags << tag.meta(property: "og:image:alt", content: options[:image_alt] || options[:title] || "Devvme App")

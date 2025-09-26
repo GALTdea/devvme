@@ -82,19 +82,36 @@ class SocialImageGeneratorService
       </svg>
     SVG
 
-    # Save SVG to file
-    filename = "social_#{@user.id}_#{Time.current.to_i}.svg"
-    file_path = Rails.root.join("tmp", filename)
-    File.write(file_path, svg_content)
+    # Save SVG to file first
+    svg_filename = "social_#{@user.id}_#{Time.current.to_i}.svg"
+    svg_path = Rails.root.join("tmp", svg_filename)
+    File.write(svg_path, svg_content)
 
-    file_path
+    # Convert SVG to PNG for better social media compatibility
+    png_filename = "social_#{@user.id}_#{Time.current.to_i}.png"
+    png_path = Rails.root.join("tmp", png_filename)
+
+    # Use ImageMagick to convert SVG to PNG
+    system("convert -background none -size 1200x630 #{svg_path} #{png_path}")
+
+    # Clean up the SVG file
+    File.delete(svg_path) if File.exist?(svg_path)
+
+    # Return PNG path if conversion succeeded, otherwise return SVG path
+    File.exist?(png_path) ? png_path : svg_path
   end
 
   def avatar_svg
     if @user.avatar.attached?
       # Use the user's avatar in the branded template
       host_options = Rails.application.config.action_mailer.default_url_options
-      avatar_url = rails_blob_url(@user.avatar, host: "#{host_options[:host]}:#{host_options[:port]}")
+
+      # Build the correct URL for production
+      if host_options[:port]
+        avatar_url = rails_blob_url(@user.avatar, host: "#{host_options[:host]}:#{host_options[:port]}")
+      else
+        avatar_url = rails_blob_url(@user.avatar, host: host_options[:host], protocol: host_options[:protocol] || "https")
+      end
 
       <<~SVG
         <defs>
