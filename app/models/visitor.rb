@@ -72,6 +72,20 @@ class Visitor < ApplicationRecord
       .count
   end
 
+  # Admin dashboard analytics methods
+  def self.active_visitors(days = 30)
+    where("last_visit_at > ?", days.days.ago).count
+  end
+
+  def self.online_visitors
+    # Visitors who have been active in the last 15 minutes
+    where("last_visit_at > ?", 15.minutes.ago).count
+  end
+
+  def self.new_visitors_in_period(days)
+    where("first_visit_at > ?", days.days.ago).count
+  end
+
   # Instance methods
   def mark_as_converted!(user)
     update!(converted: true, user: user)
