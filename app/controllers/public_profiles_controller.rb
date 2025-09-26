@@ -137,7 +137,8 @@ class PublicProfilesController < ApplicationController
     @seo_title = "#{@user.display_name} (@#{@user.username})"
 
     # Social media image URL for sharing (branded image)
-    @seo_avatar_url = social_profile_image_url(@user.username)
+    # Add cache busting parameter to force X/Twitter to refresh
+    @seo_avatar_url = social_profile_image_url(@user.username, v: @user.updated_at.to_i)
 
     # Full profile URL
     @seo_profile_url = request.original_url
