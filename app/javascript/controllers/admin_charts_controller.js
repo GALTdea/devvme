@@ -2,12 +2,13 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="admin-charts"
 export default class extends Controller {
-    static targets = ["registrationChart", "activityChart", "contentChart", "onlineUsers"]
+    static targets = ["registrationChart", "activityChart", "contentChart", "onlineUsers", "onlineVisitors"]
     static values = {
         registrationData: Object,
         activityData: Object,
         contentData: Array,
-        onlineUsersUrl: String
+        onlineUsersUrl: String,
+        onlineVisitorsUrl: String
     }
 
     connect() {
@@ -16,6 +17,7 @@ export default class extends Controller {
             this.initializeCharts()
         })
         this.startOnlineUsersUpdates()
+        this.startOnlineVisitorsUpdates()
     }
 
     async loadChartJS() {
@@ -34,6 +36,7 @@ export default class extends Controller {
 
     disconnect() {
         this.stopOnlineUsersUpdates()
+        this.stopOnlineVisitorsUpdates()
     }
 
     initializeCharts() {
@@ -175,6 +178,21 @@ export default class extends Controller {
         }
     }
 
+    startOnlineVisitorsUpdates() {
+        if (this.hasOnlineVisitorsTarget && this.onlineVisitorsUrlValue) {
+            this.updateOnlineVisitors()
+            this.onlineVisitorsInterval = setInterval(() => {
+                this.updateOnlineVisitors()
+            }, 30000) // Update every 30 seconds
+        }
+    }
+
+    stopOnlineVisitorsUpdates() {
+        if (this.onlineVisitorsInterval) {
+            clearInterval(this.onlineVisitorsInterval)
+        }
+    }
+
     updateOnlineUsers() {
         fetch(this.onlineUsersUrlValue, {
             method: 'GET',
@@ -188,5 +206,20 @@ export default class extends Controller {
                 this.onlineUsersTarget.textContent = data.count
             })
             .catch(error => console.log('Error updating online users:', error))
+    }
+
+    updateOnlineVisitors() {
+        fetch(this.onlineVisitorsUrlValue, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                this.onlineVisitorsTarget.textContent = data.count
+            })
+            .catch(error => console.log('Error updating online visitors:', error))
     }
 }
