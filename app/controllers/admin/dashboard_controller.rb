@@ -53,6 +53,8 @@ class Admin::DashboardController < ApplicationController
     @blog_views_chart_data = blog_views_stats(@days)
     @activity_chart_data = activity_stats(@days)
     @content_creation_chart_data = content_creation_stats(@days)
+    @visitor_activity_chart_data = visitor_activity_stats(@days)
+    @combined_activity_chart_data = combined_activity_stats(@days)
   end
 
   def export
@@ -149,6 +151,36 @@ class Admin::DashboardController < ApplicationController
     ProfileView.where("visited_at > ?", @days.days.ago).count
   end
 
+  def visitor_activity_stats(days)
+    Visitor.where("last_activity_at > ?", days.days.ago)
+           .group("DATE(last_activity_at)")
+           .order("DATE(last_activity_at)")
+           .count
+  end
+
+  def combined_activity_stats(days)
+    # Get user activity (using last_login_at)
+    user_activity = User.where("last_login_at > ?", days.days.ago)
+                       .group("DATE(last_login_at)")
+                       .count
+
+    # Get visitor activity (using last_activity_at)
+    visitor_activity = Visitor.where("last_activity_at > ?", days.days.ago)
+                              .group("DATE(last_activity_at)")
+                              .count
+
+    # Combine the data by date
+    all_dates = (user_activity.keys + visitor_activity.keys).uniq.sort
+    all_dates.map do |date|
+      {
+        date: date,
+        users: user_activity[date] || 0,
+        visitors: visitor_activity[date] || 0,
+        total: (user_activity[date] || 0) + (visitor_activity[date] || 0)
+      }
+    end
+  end
+
   def generate_csv_report
     require 'csv'
 
@@ -166,6 +198,8 @@ class Admin::DashboardController < ApplicationController
       csv << ['New Visitors', Visitor.new_visitors_in_period(@days), "#{@days} days"]
       csv << ['Online Visitors', Visitor.online_visitors, 'Current']
       csv << ['Conversion Rate', "#{Visitor.conversion_rate(@days)}%", "#{@days} days"]
+      csv << ['Recently Active Visitors (1 hour)', Visitor.recently_active_visitors(60), '1 hour']
+      csv << ['Peak Activity Time', Visitor.peak_activity_time(7) || 'N/A', '7 days']
       # Combined metrics
       csv << ['Total Active Sessions', User.active_users(@days) + Visitor.active_visitors(@days), "#{@days} days"]
       csv << ['Online Now (All)', User.online_users + Visitor.online_visitors, 'Current']
@@ -190,7 +224,9 @@ class Admin::DashboardController < ApplicationController
       content_stats: @content_stats,
       registration_chart_data: @registration_chart_data,
       blog_views_chart_data: @blog_views_chart_data,
-      activity_chart_data: @activity_chart_data
+      activity_chart_data: @activity_chart_data,
+      visitor_activity_chart_data: @visitor_activity_chart_data,
+      combined_activity_chart_data: @combined_activity_chart_data
     }
   end
 end

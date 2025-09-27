@@ -312,6 +312,8 @@
          data-admin-charts-registration-data-value="<%= @registration_chart_data.to_json %>"
          data-admin-charts-activity-data-value="<%= @activity_chart_data.to_json %>"
          data-admin-charts-content-data-value="<%= @content_creation_chart_data.to_json %>"
+         data-admin-charts-visitor-activity-data-value="<%= @visitor_activity_chart_data.to_json %>"
+         data-admin-charts-combined-activity-data-value="<%= @combined_activity_chart_data.to_json %>"
          data-admin-charts-online-users-url-value="<%= admin_dashboard_online_users_path %>">
       <!-- Registration Chart -->
       <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
@@ -329,6 +331,26 @@
           <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Admin Activity</h3>
           <div class="h-64">
             <canvas data-admin-charts-target="activityChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visitor Activity Chart -->
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Visitor Activity</h3>
+          <div class="h-64">
+            <canvas data-admin-charts-target="visitorActivityChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Combined Activity Chart -->
+      <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white mb-4">Combined Activity (Users + Visitors)</h3>
+          <div class="h-64">
+            <canvas data-admin-charts-target="combinedActivityChart"></canvas>
           </div>
         </div>
       </div>

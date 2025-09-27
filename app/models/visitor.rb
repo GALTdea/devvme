@@ -74,12 +74,12 @@ class Visitor < ApplicationRecord
 
   # Admin dashboard analytics methods
   def self.active_visitors(days = 30)
-    where("last_visit_at > ?", days.days.ago).count
+    where("last_activity_at > ?", days.days.ago).count
   end
 
   def self.online_visitors
     # Visitors who have been active in the last 15 minutes
-    where("last_visit_at > ?", 15.minutes.ago).count
+    where("last_activity_at > ?", 15.minutes.ago).count
   end
 
   def self.new_visitors_in_period(days)
@@ -87,7 +87,41 @@ class Visitor < ApplicationRecord
   end
 
   def self.active_visitors_today
-    where("last_visit_at > ?", 1.day.ago).count
+    where("last_activity_at > ?", 1.day.ago).count
+  end
+
+  # Additional activity-based analytics methods
+  def self.recently_active_visitors(minutes = 60)
+    where("last_activity_at > ?", minutes.minutes.ago).count
+  end
+
+  def self.activity_stats_by_hour(days = 1)
+    where("last_activity_at > ?", days.days.ago)
+      .group("EXTRACT(hour FROM last_activity_at)")
+      .count
+  end
+
+  def self.peak_activity_time(days = 7)
+    activity_by_hour = activity_stats_by_hour(days)
+    return nil if activity_by_hour.empty?
+
+    peak_hour = activity_by_hour.max_by { |hour, count| count }&.first
+    "#{peak_hour.to_i}:00" if peak_hour
+  end
+
+  # Chart data methods for dashboard
+  def self.activity_stats(days = 30)
+    where("last_activity_at > ?", days.days.ago)
+      .group("DATE(last_activity_at)")
+      .order("DATE(last_activity_at)")
+      .count
+  end
+
+  def self.daily_new_visitors(days = 30)
+    where("first_visit_at > ?", days.days.ago)
+      .group("DATE(first_visit_at)")
+      .order("DATE(first_visit_at)")
+      .count
   end
 
   # Instance methods
@@ -98,8 +132,15 @@ class Visitor < ApplicationRecord
   def update_visit!
     update!(
       last_visit_at: Time.current,
+      last_activity_at: Time.current,
       visit_count: visit_count + 1
     )
+  end
+
+  def update_activity!
+    # Lightweight method to just update activity timestamp
+    # Use update_column to avoid callbacks and validations for performance
+    update_column(:last_activity_at, Time.current)
   end
 
   def add_page_view!(page_path, page_title: nil, referrer: nil, time_on_page: 0)
@@ -113,6 +154,9 @@ class Visitor < ApplicationRecord
 
     increment!(:page_views)
     increment!(:total_time_on_site, time_on_page) if time_on_page > 0
+
+    # Update activity timestamp whenever a page is viewed
+    update_column(:last_activity_at, Time.current)
   end
 
   def bounce_rate

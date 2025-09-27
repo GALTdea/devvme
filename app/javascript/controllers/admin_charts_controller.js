@@ -2,11 +2,13 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="admin-charts"
 export default class extends Controller {
-    static targets = ["registrationChart", "activityChart", "contentChart", "onlineUsers", "onlineVisitors", "combinedOnline"]
+    static targets = ["registrationChart", "activityChart", "contentChart", "onlineUsers", "onlineVisitors", "combinedOnline", "visitorActivityChart", "combinedActivityChart"]
     static values = {
         registrationData: Object,
         activityData: Object,
         contentData: Array,
+        visitorActivityData: Object,
+        combinedActivityData: Array,
         onlineUsersUrl: String,
         onlineVisitorsUrl: String
     }
@@ -57,6 +59,14 @@ export default class extends Controller {
 
         if (this.hasContentChartTarget) {
             this.createContentChart()
+        }
+
+        if (this.hasVisitorActivityChartTarget) {
+            this.createVisitorActivityChart()
+        }
+
+        if (this.hasCombinedActivityChartTarget) {
+            this.createCombinedActivityChart()
         }
     }
 
@@ -126,6 +136,73 @@ export default class extends Controller {
                 ]
             },
             options: this.getChartOptions()
+        })
+    }
+
+    createVisitorActivityChart() {
+        const ctx = this.visitorActivityChartTarget.getContext('2d')
+        const data = this.visitorActivityDataValue
+
+        new window.Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Object.keys(data).map(date => new Date(date).toLocaleDateString()),
+                datasets: [{
+                    label: 'Active Visitors',
+                    data: Object.values(data),
+                    borderColor: 'rgb(147, 51, 234)',
+                    backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: this.getChartOptions()
+        })
+    }
+
+    createCombinedActivityChart() {
+        const ctx = this.combinedActivityChartTarget.getContext('2d')
+        const data = this.combinedActivityDataValue
+
+        new window.Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(item => new Date(item.date).toLocaleDateString()),
+                datasets: [
+                    {
+                        label: 'Users',
+                        data: data.map(item => item.users),
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Visitors',
+                        data: data.map(item => item.visitors),
+                        backgroundColor: 'rgba(147, 51, 234, 0.8)',
+                        borderColor: 'rgb(147, 51, 234)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Total',
+                        data: data.map(item => item.total),
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: 'rgb(16, 185, 129)',
+                        borderWidth: 1,
+                        type: 'line',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                ...this.getChartOptions(),
+                scales: {
+                    ...this.getChartOptions().scales,
+                    y: {
+                        ...this.getChartOptions().scales.y,
+                        beginAtZero: true
+                    }
+                }
+            }
         })
     }
 

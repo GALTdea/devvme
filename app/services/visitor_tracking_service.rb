@@ -9,8 +9,11 @@ class VisitorTrackingService
   def track_page_view(page_path, page_title: nil)
     return unless should_track?
 
-    # Update visitor's last visit
+    # Update visitor's last visit if returning after a break
     @visitor.update_visit! if returning_visitor?
+
+    # Always update activity timestamp for better "online" tracking
+    @visitor.update_activity! unless returning_visitor?
 
     # Track the page view
     @visitor.add_page_view!(
@@ -62,7 +65,8 @@ class VisitorTrackingService
       user_agent: request.user_agent,
       referrer: request.referer,
       first_visit_at: Time.current,
-      last_visit_at: Time.current
+      last_visit_at: Time.current,
+      last_activity_at: Time.current
     )
 
     # Store visitor ID in session and cookie
