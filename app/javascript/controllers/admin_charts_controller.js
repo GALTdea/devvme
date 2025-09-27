@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="admin-charts"
 export default class extends Controller {
-    static targets = ["registrationChart", "activityChart", "contentChart", "onlineUsers", "onlineVisitors"]
+    static targets = ["registrationChart", "activityChart", "contentChart", "onlineUsers", "onlineVisitors", "combinedOnline"]
     static values = {
         registrationData: Object,
         activityData: Object,
@@ -204,6 +204,7 @@ export default class extends Controller {
             .then(response => response.json())
             .then(data => {
                 this.onlineUsersTarget.textContent = data.count
+                this.updateCombinedOnline()
             })
             .catch(error => console.log('Error updating online users:', error))
     }
@@ -219,7 +220,16 @@ export default class extends Controller {
             .then(response => response.json())
             .then(data => {
                 this.onlineVisitorsTarget.textContent = data.count
+                this.updateCombinedOnline()
             })
             .catch(error => console.log('Error updating online visitors:', error))
+    }
+
+    updateCombinedOnline() {
+        if (this.hasCombinedOnlineTarget && this.hasOnlineUsersTarget && this.hasOnlineVisitorsTarget) {
+            const usersCount = parseInt(this.onlineUsersTarget.textContent) || 0
+            const visitorsCount = parseInt(this.onlineVisitorsTarget.textContent) || 0
+            this.combinedOnlineTarget.textContent = usersCount + visitorsCount
+        }
     }
 }

@@ -86,6 +86,10 @@ class Visitor < ApplicationRecord
     where("first_visit_at > ?", days.days.ago).count
   end
 
+  def self.active_visitors_today
+    where("last_visit_at > ?", 1.day.ago).count
+  end
+
   # Instance methods
   def mark_as_converted!(user)
     update!(converted: true, user: user)

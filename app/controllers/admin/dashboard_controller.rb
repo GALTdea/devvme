@@ -27,6 +27,14 @@ class Admin::DashboardController < ApplicationController
       conversion_rate: Visitor.conversion_rate(@days)
     }
 
+    @combined_stats = {
+      total_active_sessions: @user_stats[:active_users] + @visitor_stats[:active_visitors],
+      online_now: @user_stats[:online_users] + @visitor_stats[:online_visitors],
+      new_sessions_in_period: @user_stats[:new_users_in_period] + @visitor_stats[:new_visitors_in_period],
+      total_sessions: @user_stats[:total_users] + @visitor_stats[:total_visitors],
+      active_today: @user_stats[:active_users_today] + Visitor.active_visitors_today
+    }
+
     @content_stats = {
       total_blog_posts: BlogPost.count,
       published_blog_posts: BlogPost.published_posts.count,
@@ -158,6 +166,10 @@ class Admin::DashboardController < ApplicationController
       csv << ['New Visitors', Visitor.new_visitors_in_period(@days), "#{@days} days"]
       csv << ['Online Visitors', Visitor.online_visitors, 'Current']
       csv << ['Conversion Rate', "#{Visitor.conversion_rate(@days)}%", "#{@days} days"]
+      # Combined metrics
+      csv << ['Total Active Sessions', User.active_users(@days) + Visitor.active_visitors(@days), "#{@days} days"]
+      csv << ['Online Now (All)', User.online_users + Visitor.online_visitors, 'Current']
+      csv << ['Total Sessions', User.total_users + Visitor.total_visitors, 'All Time']
       # Content metrics
       csv << ['Total Blog Posts', BlogPost.count, 'All Time']
       csv << ['Published Blog Posts', BlogPost.published_posts.count, 'All Time']
@@ -174,6 +186,7 @@ class Admin::DashboardController < ApplicationController
       generated_at: Time.current,
       user_stats: @user_stats,
       visitor_stats: @visitor_stats,
+      combined_stats: @combined_stats,
       content_stats: @content_stats,
       registration_chart_data: @registration_chart_data,
       blog_views_chart_data: @blog_views_chart_data,
