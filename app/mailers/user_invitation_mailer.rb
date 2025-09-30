@@ -29,12 +29,10 @@ class UserInvitationMailer < ApplicationMailer
       to: @user.email,
       subject: build_subject,
       reply_to: 'noreply@devv.me',
-      headers: {
-        'X-Mailer-Type' => 'invitation',
-        'X-User-ID' => @user.id.to_s,
-        'X-Admin-ID' => @admin&.id&.to_s,
-        'X-Tracking-ID' => @tracking_id
-      }
+      'X-Mailer-Type' => 'invitation',
+      'X-User-ID' => @user.id.to_s,
+      'X-Admin-ID' => @admin&.id&.to_s,
+      'X-Tracking-ID' => @tracking_id
     )
   end
 
@@ -57,12 +55,10 @@ class UserInvitationMailer < ApplicationMailer
       to: @user.email,
       subject: "⏰ Reminder: Your Devv.me profile invitation expires in #{@days_remaining} days",
       reply_to: 'noreply@devv.me',
-      headers: {
-        'X-Mailer-Type' => 'invitation_reminder',
-        'X-User-ID' => @user.id.to_s,
-        'X-Admin-ID' => @admin&.id&.to_s,
-        'X-Tracking-ID' => @tracking_id
-      }
+      'X-Mailer-Type' => 'invitation_reminder',
+      'X-User-ID' => @user.id.to_s,
+      'X-Admin-ID' => @admin&.id&.to_s,
+      'X-Tracking-ID' => @tracking_id
     )
   end
 
@@ -81,12 +77,10 @@ class UserInvitationMailer < ApplicationMailer
       to: @user.email,
       subject: "❌ Your Devv.me profile invitation has expired",
       reply_to: 'noreply@devv.me',
-      headers: {
-        'X-Mailer-Type' => 'invitation_expired',
-        'X-User-ID' => @user.id.to_s,
-        'X-Admin-ID' => @admin&.id&.to_s,
-        'X-Tracking-ID' => @tracking_id
-      }
+      'X-Mailer-Type' => 'invitation_expired',
+      'X-User-ID' => @user.id.to_s,
+      'X-Admin-ID' => @admin&.id&.to_s,
+      'X-Tracking-ID' => @tracking_id
     )
   end
 
