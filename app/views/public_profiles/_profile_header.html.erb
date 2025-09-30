@@ -66,19 +66,37 @@
             
             <!-- Developer Status Badges -->
             <div class="flex flex-wrap items-center gap-3 mb-4">
-              <!-- Availability Status -->
-              <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300 border border-primary-200 dark:border-primary-700">
-                <div class="w-2 h-2 bg-primary-500 rounded-full mr-2 animate-pulse"></div>
-                Available for hire
-              </div>
-              
-              <!-- Years Coding -->
-              <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-secondary-100 text-secondary-800 dark:bg-secondary-900/30 dark:text-secondary-300 border border-secondary-200 dark:border-secondary-700">
-                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                3+ years coding
-              </div>
+              <% if unclaimed_profile? %>
+                <!-- Unclaimed Status Badge -->
+                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-700">
+                  <div class="w-2 h-2 bg-amber-500 rounded-full mr-2 animate-pulse"></div>
+                  Profile Unclaimed
+                </div>
+                
+                <!-- Preview Mode Badge -->
+                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                  </svg>
+                  Preview Mode
+                </div>
+              <% else %>
+                <!-- Regular Status Badges -->
+                <!-- Availability Status -->
+                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300 border border-primary-200 dark:border-primary-700">
+                  <div class="w-2 h-2 bg-primary-500 rounded-full mr-2 animate-pulse"></div>
+                  Available for hire
+                </div>
+                
+                <!-- Years Coding -->
+                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-secondary-100 text-secondary-800 dark:bg-secondary-900/30 dark:text-secondary-300 border border-secondary-200 dark:border-secondary-700">
+                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  3+ years coding
+                </div>
+              <% end %>
             </div>
             
             <!-- Currently Coding In -->
@@ -131,21 +149,52 @@
           
           <!-- Action Buttons -->
           <div class="flex flex-wrap gap-3 no-print">
-            <div data-tooltip-target="share-tooltip" data-tooltip-trigger="hover">
-              <div data-controller="share-button"
-                   data-share-button-url-value="<%= request.original_url %>"
-                   data-share-button-title-value="<%= user.display_name %>'s Profile">
-                <button data-action="click->share-button#share"
-                        class="inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-accent-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
-                  <span class="text-accent-400 mr-2">$</span>
-                  <span>share --profile</span>
-                </button>
+            <% if unclaimed_profile? %>
+              <!-- Claim Profile Button (Primary Action) -->
+              <% if invitation_data[:pending] && !invitation_data[:expired] %>
+                <%= link_to "/invitations/#{@user.invitation_token}/claim", 
+                    class: "inline-flex items-center px-6 py-3 bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800" do %>
+                  <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v-2l-4.257-4.257A6 6 0 0117 9z" />
+                  </svg>
+                  Claim Profile
+                <% end %>
+              <% end %>
+              
+              <!-- Limited Share Button for Unclaimed Profiles -->
+              <div data-tooltip-target="share-unclaimed-tooltip" data-tooltip-trigger="hover">
+                <div data-controller="share-button"
+                     data-share-button-url-value="<%= request.original_url %>"
+                     data-share-button-title-value="<%= user.display_name %>'s Unclaimed Profile">
+                  <button data-action="click->share-button#share"
+                          class="inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-accent-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
+                    <span class="text-accent-400 mr-2">$</span>
+                    <span>share --preview</span>
+                  </button>
+                </div>
+                <div id="share-unclaimed-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                  Share this unclaimed profile - Let others know about this developer
+                  <div class="tooltip-arrow" data-popper-arrow></div>
+                </div>
               </div>
-              <div id="share-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                Share this profile - Copy link to share with others
-                <div class="tooltip-arrow" data-popper-arrow></div>
+            <% else %>
+              <!-- Regular Action Buttons for Active Profiles -->
+              <div data-tooltip-target="share-tooltip" data-tooltip-trigger="hover">
+                <div data-controller="share-button"
+                     data-share-button-url-value="<%= request.original_url %>"
+                     data-share-button-title-value="<%= user.display_name %>'s Profile">
+                  <button data-action="click->share-button#share"
+                          class="inline-flex items-center px-4 py-2 bg-charcoal-800 hover:bg-charcoal-900 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-accent-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
+                    <span class="text-accent-400 mr-2">$</span>
+                    <span>share --profile</span>
+                  </button>
+                </div>
+                <div id="share-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                  Share this profile - Copy link to share with others
+                  <div class="tooltip-arrow" data-popper-arrow></div>
+                </div>
               </div>
-            </div>
+            <% end %>
             
             <% if user.resume.attached? %>
               <div data-tooltip-target="resume-tooltip" data-tooltip-trigger="hover">
@@ -300,17 +349,32 @@
           <% end %>
           
           <% if user.contact_email.present? %>
-            <div data-tooltip-target="email-tooltip" data-tooltip-trigger="hover">
-              <%= link_to "mailto:#{user.contact_email}",
-                  class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-pink-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5" do %>
-                <span class="text-pink-400 mr-2">$</span>
-                <span>mail -s "hello"</span>
-              <% end %>
-              <div id="email-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                Send me an email - Get in touch for opportunities or collaboration
-                <div class="tooltip-arrow" data-popper-arrow></div>
+            <% if can_contact_user?(user) %>
+              <div data-tooltip-target="email-tooltip" data-tooltip-trigger="hover">
+                <%= link_to "mailto:#{user.contact_email}",
+                    class: "inline-flex items-center px-4 py-2 bg-charcoal-900 hover:bg-charcoal-800 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-cream-100 font-mono text-sm rounded-lg border border-charcoal-600 hover:border-pink-500 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5" do %>
+                  <span class="text-pink-400 mr-2">$</span>
+                  <span>mail -s "hello"</span>
+                <% end %>
+                <div id="email-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                  Send me an email - Get in touch for opportunities or collaboration
+                  <div class="tooltip-arrow" data-popper-arrow></div>
+                </div>
               </div>
-            </div>
+            <% else %>
+              <!-- Disabled Contact Button for Unclaimed Profiles -->
+              <div data-tooltip-target="email-disabled-tooltip" data-tooltip-trigger="hover">
+                <button disabled
+                        class="inline-flex items-center px-4 py-2 bg-gray-500 dark:bg-gray-600 text-gray-300 dark:text-gray-400 font-mono text-sm rounded-lg border border-gray-400 dark:border-gray-500 cursor-not-allowed opacity-60">
+                  <span class="text-gray-400 mr-2">$</span>
+                  <span>mail --disabled</span>
+                </button>
+                <div id="email-disabled-tooltip" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                  Contact unavailable - Profile must be claimed first
+                  <div class="tooltip-arrow" data-popper-arrow></div>
+                </div>
+              </div>
+            <% end %>
           <% end %>
         </div>
       </div>

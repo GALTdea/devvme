@@ -67,3 +67,19 @@ active_user:
   slug: active_user
   account_status: active
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password123') %>
+
+invited_user:
+  email: invited@example.com
+  username: invited_user
+  full_name: Invited User
+  bio: I am an invited user with an unclaimed profile
+  slug: invited_user
+  account_status: invited
+  invitation_token: <%= SecureRandom.urlsafe_base64(32) %>
+  invitation_sent_at: <%= 1.day.ago %>
+  job_title: Senior Developer
+  location: San Francisco, CA
+  skills: ["Ruby", "Rails", "JavaScript", "React"]
+  github_url: https://github.com/inviteduser
+  linkedin_url: https://linkedin.com/in/inviteduser
+  contact_email: contact@inviteduser.com

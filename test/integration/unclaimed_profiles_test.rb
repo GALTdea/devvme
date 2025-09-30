@@ -2,20 +2,9 @@ require "test_helper"
 
 class UnclaimedProfilesTest < ActionDispatch::IntegrationTest
   def setup
-    @invited_user = User.create!(
-      username: "inviteduser",
-      email: "invited@example.com",
-      full_name: "Invited User",
-      bio: "This is an invited user profile",
-      job_title: "Software Developer",
-      location: "Test City",
-      account_status: :invited
-    )
-    @invited_user.invite!(send_email: false)
-  end
-
-  def teardown
-    @invited_user.destroy if @invited_user.persisted?
+    @invited_user = users(:invited_user)
+    # Ensure the user has a valid invitation token
+    @invited_user.invite!(send_email: false) unless @invited_user.invitation_token.present?
   end
 
   test "should display unclaimed profile publicly" do
