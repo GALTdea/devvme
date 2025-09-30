@@ -1,6 +1,8 @@
 require "test_helper"
 
 class InvitationEmailServiceTest < ActiveSupport::TestCase
+  include ActionMailer::TestHelper
+  include ActiveJob::TestHelper
   setup do
     @invited_user = users(:invited_user)
     @admin = users(:test_admin)
@@ -73,9 +75,17 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
 
   test "handles email delivery failures with retry" do
     # Mock the mailer to fail
-    UserInvitationMailer.stub :invitation_notification, -> (*args) { raise StandardError, "SMTP Error" } do
+    original_method = UserInvitationMailer.method(:invitation_notification)
+    UserInvitationMailer.define_singleton_method(:invitation_notification) do |*args|
+      raise StandardError, "SMTP Error"
+    end
+
+    begin
       result = InvitationEmailService.send_invitation(@invited_user, @admin, deliver_now: true)
       assert_not result, "Should return false on delivery failure"
+    ensure
+      # Restore original method
+      UserInvitationMailer.define_singleton_method(:invitation_notification, original_method)
     end
   end
 
@@ -129,8 +139,13 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
     # Capture log output
     log_output = StringIO.new
     logger = Logger.new(log_output)
-    Rails.stub :logger, logger do
+    original_logger = Rails.logger
+
+    begin
+      Rails.logger = logger
       InvitationEmailService.send_invitation(@invited_user, @admin, deliver_now: true)
+    ensure
+      Rails.logger = original_logger
     end
 
     log_content = log_output.string
@@ -174,14 +189,25 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
   end
 
   test "email service queues emails by default" do
-    # Test that emails are queued, not delivered immediately
-    assert_no_emails do
-      result = InvitationEmailService.send_invitation(@invited_user, @admin)
-      assert result, "Should queue email successfully"
-    end
+    # Temporarily set queue adapter to test mode to prevent immediate execution
+    original_adapter = ActiveJob::Base.queue_adapter
+    ActiveJob::Base.queue_adapter = :test
 
-    # Check that job was enqueued
-    assert_enqueued_jobs 1, only: ActionMailer::MailDeliveryJob
+    begin
+      clear_enqueued_jobs
+
+      # Test that emails are queued, not delivered immediately
+      assert_no_emails do
+        result = InvitationEmailService.send_invitation(@invited_user, @admin)
+        assert result, "Should queue email successfully"
+      end
+
+      # Check that job was enqueued
+      assert_enqueued_jobs 1, only: ActionMailer::MailDeliveryJob
+    ensure
+      # Restore original adapter
+      ActiveJob::Base.queue_adapter = original_adapter
+    end
   end
 
   test "email service delivers immediately when requested" do

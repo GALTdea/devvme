@@ -44,6 +44,9 @@ class InvitationEmailService
       log_successful_delivery
       true
 
+    rescue ArgumentError => e
+      # Don't retry validation errors, just re-raise them
+      raise e
     rescue => e
       retries += 1
 
@@ -62,17 +65,18 @@ class InvitationEmailService
 
   def validate_email_delivery
     raise ArgumentError, "User is required" unless @user
-    raise ArgumentError, "User email is required" unless @user.email.present?
-    raise ArgumentError, "User must have invited status for invitations" if @email_type == 'invitation' && !@user.invited?
+    raise ArgumentError, "User email is required" unless @user&.email.present?
 
     # Check if email is valid format
     unless @user.email.match?(/\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i)
-      raise ArgumentError, "Invalid email format: #{@user.email}"
+      raise ArgumentError, "Invalid email format"
     end
+
+    raise ArgumentError, "User must have invited status" if @email_type == 'invitation' && !@user.invited?
 
     # Check if user has invitation token for invitation/reminder emails
     if ['invitation', 'reminder'].include?(@email_type) && @user.invitation_token.blank?
-      raise ArgumentError, "User must have invitation token for #{@email_type} emails"
+      raise ArgumentError, "User must have invitation token"
     end
   end
 
@@ -132,12 +136,15 @@ class InvitationEmailService
   end
 
   def handle_delivery_failure(error)
-    Rails.logger.error "Failed to send #{@email_type} email to #{@user.email} after #{@max_retries} attempts"
+    user_email = @user&.email || 'unknown'
+    Rails.logger.error "Failed to send #{@email_type} email to #{user_email} after #{@max_retries} attempts"
     Rails.logger.error "Error: #{error.message}"
     Rails.logger.error error.backtrace.join("\n")
 
-    # Track failure
-    track_email_event('delivery_failed', { error: error.message })
+    # Track failure only if user exists
+    if @user
+      track_email_event('delivery_failed', { error: error.message })
+    end
 
     # Notify admins of critical email failures
     if Rails.env.production?
@@ -169,11 +176,54 @@ class InvitationEmailService
     Rails.logger.info "Email analytics: #{event_data.to_json}"
   end
 
+  def generate_tracking_id
+    timestamp = Time.current.to_i
+    random_hex = SecureRandom.hex(8)
+    "#{@email_type}_#{@user.id}_#{timestamp}_#{random_hex}"
+  end
+
+  def calculate_profile_completion
+    completed_fields = []
+    total_fields = 4
+
+    # Basic Info (name, email, username)
+    if @user.full_name.present? && @user.email.present? && @user.username.present?
+      completed_fields << 'Basic Info'
+    end
+
+    # Professional (job title, bio)
+    if @user.job_title.present? && @user.bio.present?
+      completed_fields << 'Professional'
+    end
+
+    # Skills
+    if @user.skills.present? && @user.skills.any?
+      completed_fields << 'Skills'
+    end
+
+    # Social Links (at least one)
+    if @user.github_url.present? || @user.linkedin_url.present? || @user.contact_email.present?
+      completed_fields << 'Social Links'
+    end
+
+    percentage = (completed_fields.length.to_f / total_fields * 100).round
+
+    {
+      percentage: percentage,
+      completed_fields: completed_fields,
+      total_fields: total_fields
+    }
+  end
+
   def notify_admin_of_email_failure(error)
     # This could send a notification to admin users or a monitoring service
     # For now, just log it as an error
     Rails.logger.error "ADMIN ALERT: Critical email delivery failure"
-    Rails.logger.error "User: #{@user.email} (ID: #{@user.id})"
+    if @user
+      Rails.logger.error "User: #{@user.email} (ID: #{@user.id})"
+    else
+      Rails.logger.error "User: unknown (nil user)"
+    end
     Rails.logger.error "Email type: #{@email_type}"
     Rails.logger.error "Error: #{error.message}"
 
