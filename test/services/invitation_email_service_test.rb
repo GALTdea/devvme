@@ -41,7 +41,7 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
 
   test "validates user email is present" do
     user_without_email = User.new(username: "test", account_status: :invited)
-    
+
     assert_raises(ArgumentError, "User email is required") do
       InvitationEmailService.send_invitation(user_without_email, @admin, deliver_now: true)
     end
@@ -49,7 +49,7 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
 
   test "validates email format" do
     @invited_user.update_column(:email, "invalid-email")
-    
+
     assert_raises(ArgumentError, "Invalid email format") do
       InvitationEmailService.send_invitation(@invited_user, @admin, deliver_now: true)
     end
@@ -57,7 +57,7 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
 
   test "validates user has invited status for invitations" do
     @invited_user.update_column(:account_status, User.account_statuses[:active])
-    
+
     assert_raises(ArgumentError, "User must have invited status") do
       InvitationEmailService.send_invitation(@invited_user, @admin, deliver_now: true)
     end
@@ -65,7 +65,7 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
 
   test "validates user has invitation token" do
     @invited_user.update_column(:invitation_token, nil)
-    
+
     assert_raises(ArgumentError, "User must have invitation token") do
       InvitationEmailService.send_invitation(@invited_user, @admin, deliver_now: true)
     end
@@ -91,7 +91,7 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
     )
 
     user2 = User.create!(
-      username: "expiring2", 
+      username: "expiring2",
       email: "expiring2@example.com",
       full_name: "Expiring User 2",
       account_status: :invited,
@@ -111,7 +111,7 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
     # Create expired user
     expired_user = User.create!(
       username: "expired1",
-      email: "expired1@example.com", 
+      email: "expired1@example.com",
       full_name: "Expired User",
       account_status: :invited,
       invitation_token: SecureRandom.urlsafe_base64(32),
@@ -142,7 +142,7 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
   test "email service generates tracking IDs" do
     service = InvitationEmailService.new(user: @invited_user, admin: @admin, email_type: 'invitation')
     tracking_id = service.send(:generate_tracking_id)
-    
+
     assert tracking_id.present?
     assert_match(/invitation_#{@invited_user.id}_\d+_[a-f0-9]+/, tracking_id)
   end
@@ -151,14 +151,14 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
     # Add profile data
     @invited_user.update!(
       bio: "Test bio",
-      job_title: "Developer", 
+      job_title: "Developer",
       skills: ["Ruby", "Rails"],
       github_url: "https://github.com/test"
     )
 
     service = InvitationEmailService.new(user: @invited_user, admin: @admin, email_type: 'invitation')
     completion = service.send(:calculate_profile_completion)
-    
+
     assert completion[:percentage] > 0
     assert completion[:completed_fields].include?('Basic Info')
     assert completion[:completed_fields].include?('Professional')
@@ -197,9 +197,9 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
   test "different email types have different priorities" do
     # This test would need to be expanded based on your job queue implementation
     # For now, just test that different email types can be sent
-    
+
     assert InvitationEmailService.send_invitation(@invited_user, @admin)
-    assert InvitationEmailService.send_reminder(@invited_user, @admin)  
+    assert InvitationEmailService.send_reminder(@invited_user, @admin)
     assert InvitationEmailService.send_expired_notice(@invited_user, @admin)
   end
 end

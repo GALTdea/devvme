@@ -18,7 +18,7 @@ class UserInvitationMailerTest < ActionMailer::TestCase
     assert_equal [@invited_user.email], email.to
     assert_equal ["noreply@devv.me"], email.reply_to
     assert_match(/You've been invited to join Devv.me/, email.subject)
-    
+
     # Test custom headers
     assert_equal 'invitation', email['X-Mailer-Type']&.value
     assert_equal @invited_user.id.to_s, email['X-User-ID']&.value
@@ -29,16 +29,16 @@ class UserInvitationMailerTest < ActionMailer::TestCase
     assert_match @invited_user.display_name, email.html_part.body.to_s
     assert_match @invited_user.username, email.html_part.body.to_s
     assert_match @admin.display_name, email.html_part.body.to_s
-    
+
     # Test claim URL is present
     claim_url = "invitations/#{@invited_user.invitation_token}/claim"
     assert_match claim_url, email.html_part.body.to_s
     assert_match claim_url, email.text_part.body.to_s
-    
+
     # Test profile URL is present
     assert_match @invited_user.username, email.html_part.body.to_s
     assert_match @invited_user.username, email.text_part.body.to_s
-    
+
     # Test urgency indicators based on days remaining
     days_remaining = ((@invited_user.invitation_sent_at + 30.days).to_date - Date.current).to_i
     if days_remaining <= 7
@@ -62,7 +62,7 @@ class UserInvitationMailerTest < ActionMailer::TestCase
     assert_match(/reminder/i, email.html_part.body.to_s)
     assert_match(/expires/i, email.html_part.body.to_s)
     assert_match(/don't wait/i, email.html_part.body.to_s)
-    
+
     # Test countdown timer content
     days_remaining = ((@invited_user.invitation_sent_at + 30.days).to_date - Date.current).to_i
     assert_match days_remaining.to_s, email.html_part.body.to_s
@@ -84,7 +84,7 @@ class UserInvitationMailerTest < ActionMailer::TestCase
     assert_match(/expired/i, email.html_part.body.to_s)
     assert_match(/contact.*support/i, email.html_part.body.to_s)
     assert_match(/don't worry/i, email.html_part.body.to_s)
-    
+
     # Test support URL is present
     support_url = "mailto:support@devv.me"
     assert_match support_url, email.html_part.body.to_s
@@ -104,7 +104,7 @@ class UserInvitationMailerTest < ActionMailer::TestCase
     # Test that profile completion percentage is shown
     assert_match(/\d+%/, email.html_part.body.to_s)
     assert_match(/Complete/, email.html_part.body.to_s)
-    
+
     # Test that skills are shown
     assert_match("Ruby", email.html_part.body.to_s)
     assert_match("Rails", email.html_part.body.to_s)
@@ -134,7 +134,7 @@ class UserInvitationMailerTest < ActionMailer::TestCase
     # Should default to "Devv.me Team"
     assert_match("Devv.me Team", email.html_part.body.to_s)
     assert_match("Devv.me Team", email.text_part.body.to_s)
-    
+
     # Should not have admin ID header
     assert_nil email['X-Admin-ID']&.value
   end
@@ -180,7 +180,7 @@ class UserInvitationMailerTest < ActionMailer::TestCase
   test "email handles missing fields gracefully" do
     # Test with user without email - this will cause issues in the mailer
     user_without_email = User.new(username: "test", account_status: :invited)
-    
+
     # The mailer should handle missing invitation_sent_at gracefully
     # but will fail on missing email during delivery
     assert_raises(ArgumentError) do
