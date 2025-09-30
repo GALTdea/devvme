@@ -73,32 +73,92 @@ class ProjectTest < ActiveSupport::TestCase
 
   # URL validation tests
   test "should validate live_url format" do
-    invalid_urls = [ "not-a-url", "ftp://example.com", "javascript:alert('xss')" ]
+    # Test dangerous protocols
+    dangerous_urls = ["javascript:alert('xss')", "data:text/html,<script>alert('xss')</script>", "vbscript:msgbox('xss')", "file:///etc/passwd"]
+
+    dangerous_urls.each do |dangerous_url|
+      @project.live_url = dangerous_url
+      assert_not @project.valid?, "#{dangerous_url} should be invalid for live_url"
+      assert_includes @project.errors[:live_url].join, "cannot use"
+    end
+
+    # Test invalid formats
+    invalid_urls = ["not-a-url", "just-text", "spaces in url", "http://"]
 
     invalid_urls.each do |invalid_url|
       @project.live_url = invalid_url
-      assert_not @project.valid?, "#{invalid_url} should be invalid for live_url"
-      assert_includes @project.errors[:live_url], "must be a valid URL"
+      @project.errors.clear
+      @project.valid?
+      # The validation message varies based on the specific error
+      assert @project.errors[:live_url].any?, "#{invalid_url} should be invalid for live_url"
     end
+
+    # Test FTP (should be rejected as dangerous protocol)
+    @project.live_url = "ftp://example.com"
+    assert_not @project.valid?
+    assert_includes @project.errors[:live_url].join, "cannot use ftp protocol"
   end
 
   test "should validate source_code_url format" do
-    invalid_urls = [ "not-a-url", "ftp://example.com", "javascript:alert('xss')" ]
+    # Test dangerous protocols
+    dangerous_urls = ["javascript:alert('xss')", "data:text/html,<script>alert('xss')</script>"]
+
+    dangerous_urls.each do |dangerous_url|
+      @project.source_code_url = dangerous_url
+      assert_not @project.valid?, "#{dangerous_url} should be invalid for source_code_url"
+      assert_includes @project.errors[:source_code_url].join, "cannot use"
+    end
+
+    # Test invalid formats
+    invalid_urls = ["not-a-url", "just-text"]
 
     invalid_urls.each do |invalid_url|
       @project.source_code_url = invalid_url
-      assert_not @project.valid?, "#{invalid_url} should be invalid for source_code_url"
-      assert_includes @project.errors[:source_code_url], "must be a valid URL"
+      @project.errors.clear
+      @project.valid?
+      # The validation message varies based on the specific error
+      assert @project.errors[:source_code_url].any?, "#{invalid_url} should be invalid for source_code_url"
     end
   end
 
-  test "should allow valid URLs" do
-    valid_urls = [ "https://example.com", "http://example.com", "https://subdomain.example.com/path" ]
+  test "should allow valid URLs including user-friendly formats" do
+    # Test fully qualified URLs
+    valid_urls = ["https://example.com", "http://example.com", "https://subdomain.example.com/path", "https://github.com/user/repo"]
 
     valid_urls.each do |valid_url|
       @project.live_url = valid_url
       @project.source_code_url = valid_url
       assert @project.valid?, "#{valid_url} should be valid"
+    end
+
+    # Test user-friendly formats (domain only)
+    user_friendly_urls = ["devv.me", "example.com", "github.com/user/repo", "subdomain.example.com"]
+
+    user_friendly_urls.each do |friendly_url|
+      @project.live_url = friendly_url
+      @project.source_code_url = friendly_url
+      assert @project.valid?, "#{friendly_url} should be valid"
+    end
+  end
+
+  test "should reject URLs without proper domains" do
+    # Test domains that should be allowed
+    valid_domains = ["localhost", "192.168.1.1", "example.com"]
+
+    valid_domains.each do |valid_domain|
+      @project.live_url = valid_domain
+      @project.errors.clear
+      assert @project.valid?, "#{valid_domain} should be allowed"
+    end
+
+    # Test truly invalid domains
+    invalid_domains = ["just-text", "no-dots-no-ip"]
+
+    invalid_domains.each do |invalid_domain|
+      @project.live_url = invalid_domain
+      @project.errors.clear
+      @project.valid?
+      assert_includes @project.errors[:live_url].join, "must include a valid domain", "#{invalid_domain} should require a valid domain"
     end
   end
 

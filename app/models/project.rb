@@ -17,11 +17,11 @@ class Project < ApplicationRecord
   validates :description, presence: true, length: { maximum: 1000 }
   validates :display_order, presence: true, numericality: { only_integer: true, greater_than: 0 }
 
-  # URL validations with auto-formatting
+  # URL validations with custom validation method
   validates :live_url, :source_code_url,
-            format: { with: /\A(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\z/i,
-                     message: "must be a valid URL" },
+            presence: false,
             allow_blank: true
+  validate :validate_url_format
 
   # Technologies used validation - ensures it's an array
   validate :technologies_used_format
@@ -127,6 +127,63 @@ class Project < ApplicationRecord
     end
   end
 
+  # Validate URL format with user-friendly approach
+  def validate_url_format
+    validate_single_url(:live_url, "Live URL")
+    validate_single_url(:source_code_url, "Source code URL")
+  end
+
+  def validate_single_url(field, field_name)
+    url = self[field]
+    return if url.blank?
+
+    # Check for dangerous protocols first
+    if url.match?(/\A(javascript|data|vbscript|file|ftp):/i)
+      errors.add(field, "#{field_name} cannot use #{url.split(':').first} protocol for security reasons")
+      return
+    end
+
+    # Normalize the URL for validation
+    normalized_url = normalize_url_for_validation(url)
+
+    # Use Ruby's URI class for more robust validation
+    begin
+      uri = URI.parse(normalized_url)
+
+      # Ensure it's HTTP or HTTPS
+      unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+        errors.add(field, "#{field_name} must be a valid web URL")
+        return
+      end
+
+      # Ensure it has a host
+      if uri.host.nil? || uri.host.empty?
+        errors.add(field, "#{field_name} must include a domain name")
+        return
+      end
+
+      # Basic domain validation - must have at least one dot, be localhost, or be a valid IP
+      unless uri.host.include?('.') || uri.host == 'localhost' || valid_ip_address?(uri.host)
+        errors.add(field, "#{field_name} must include a valid domain (e.g., example.com)")
+        return
+      end
+
+    rescue URI::InvalidURIError
+      errors.add(field, "#{field_name} format is invalid. Please enter a valid URL like 'example.com' or 'https://example.com'")
+    end
+  end
+
+  def normalize_url_for_validation(url)
+    # Add https:// if no protocol is present
+    return url if url.match?(/\A[a-z][a-z0-9+.-]*:/i)
+    "https://#{url}"
+  end
+
+  def valid_ip_address?(host)
+    # Simple IP address validation (IPv4)
+    host.match?(/\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/)
+  end
+
   # Normalize URLs by adding https:// prefix if missing
   def normalize_urls
     normalize_url(:live_url)
@@ -137,9 +194,10 @@ class Project < ApplicationRecord
     url = self[field]
     return if url.blank?
 
-    # Add https:// prefix if no protocol is specified
-    unless url.start_with?("http://", "https://")
-      self[field] = "https://#{url}"
-    end
+    # Skip if already has protocol
+    return if url.match?(/\A[a-z][a-z0-9+.-]*:/i)
+
+    # Add https:// prefix for domain-only URLs
+    self[field] = "https://#{url}"
   end
 end
