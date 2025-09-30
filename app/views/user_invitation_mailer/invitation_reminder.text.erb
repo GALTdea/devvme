@@ -1,0 +1,33 @@
+⏰ REMINDER: Your Devv.me profile invitation expires soon!
+Don't miss out on claiming your profile
+
+Hi <%= @user.display_name %>!
+
+🚨 TIME SENSITIVE: This is a friendly reminder that your Devv.me profile invitation will expire soon. Don't let this opportunity slip away!
+
+⏰ COUNTDOWN: <%= @days_remaining %> DAY<%= 'S' if @days_remaining != 1 %> REMAINING
+
+📋 Your Profile is Waiting:
+- Username: @<%= @user.username %>
+- Profile URL: <%= @profile_url %>
+- Created by: <%= @admin_name %>
+
+🔐 CLAIM NOW - DON'T WAIT: <%= @claim_url %>
+
+⚠️ What happens if you don't claim your profile?
+• Your invitation link will expire on <%= @expires_at.strftime("%B %d, %Y") %>
+• You'll lose access to your pre-built profile
+• You'll need to contact support to get a new invitation
+
+Don't miss this chance to join the Devv.me community!
+
+Best regards,
+<%= @admin_name %>
+Devv.me Team
+
+---
+This is a reminder email for your Devv.me profile invitation.
+If you have any questions, contact us at support@devv.me
+
+Invitation expires on <%= @expires_at.strftime("%B %d, %Y at %I:%M %p %Z") %>
+Tracking ID: <%= @tracking_id %>

@@ -357,20 +357,23 @@ class User < ApplicationRecord
     generate_invitation_token
     update!(
       account_status: :invited,
-      invitation_sent_at: Time.current,
       invitation_accepted_at: nil
+      # Note: invitation_sent_at will be updated by InvitationEmailService when email is actually sent
     )
 
-    # Send invitation email
+    # Send invitation email using the enhanced service
     if send_email
-      begin
-        UserInvitationMailer.invitation_notification(self, admin).deliver_later
-      rescue => e
-        Rails.logger.error "Failed to send invitation email to #{email}: #{e.message}"
+      success = InvitationEmailService.send_invitation(self, admin)
+      unless success
+        Rails.logger.error "Failed to send invitation email to #{email} - check InvitationEmailService logs"
       end
+    else
+      # If not sending email, still update the timestamp for consistency
+      update_column(:invitation_sent_at, Time.current)
     end
 
     log_admin_activity(admin, 'invite_user') if admin
+    true
   end
 
   def claim_invitation!(password: nil, admin: nil)

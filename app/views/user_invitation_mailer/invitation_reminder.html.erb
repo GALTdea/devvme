@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Reminder: Your Devv.me profile invitation expires soon</title>
+    <style>
+      /* Reuse styles from invitation_notification.html.erb */
+      body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+      
+      body { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+        line-height: 1.6; 
+        color: #1f2937; 
+        margin: 0; 
+        padding: 0; 
+        background-color: #f9fafb;
+        min-width: 100%;
+        width: 100% !important;
+      }
+      
+      .email-container { 
+        max-width: 600px; 
+        margin: 20px auto; 
+        background: #ffffff; 
+        border-radius: 12px; 
+        overflow: hidden; 
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+      }
+      
+      .header { 
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%); 
+        color: white; 
+        padding: 40px 30px; 
+        text-align: center; 
+        position: relative;
+      }
+      
+      .header h1 { 
+        margin: 0; 
+        font-size: 32px; 
+        font-weight: 800; 
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .header p {
+        margin: 15px 0 0 0; 
+        opacity: 0.95; 
+        font-size: 18px;
+        position: relative;
+        z-index: 1;
+      }
+      
+      .content { padding: 40px 30px; }
+      
+      .urgency-badge { 
+        display: inline-block; 
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); 
+        color: white; 
+        padding: 12px 24px; 
+        border-radius: 25px; 
+        font-size: 16px; 
+        font-weight: 800; 
+        margin-bottom: 25px;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      
+      .cta-button { 
+        display: inline-block; 
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); 
+        color: white !important; 
+        padding: 18px 36px; 
+        text-decoration: none; 
+        border-radius: 8px; 
+        font-weight: 800; 
+        margin: 20px 0;
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        transition: all 0.3s ease;
+        font-size: 18px;
+        text-align: center;
+        min-width: 250px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      .cta-button:hover { 
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); 
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
+      }
+      
+      .countdown-timer {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border: 3px solid #ef4444;
+        padding: 25px;
+        border-radius: 12px;
+        margin: 25px 0;
+        text-align: center;
+      }
+      
+      .countdown-number {
+        font-size: 48px;
+        font-weight: 900;
+        color: #dc2626;
+        display: block;
+        line-height: 1;
+      }
+      
+      .countdown-label {
+        font-size: 18px;
+        color: #991b1b;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 10px;
+      }
+      
+      .profile-preview { 
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); 
+        padding: 25px; 
+        border-radius: 12px; 
+        margin: 25px 0; 
+        border-left: 5px solid #3b82f6;
+        border: 1px solid #e2e8f0;
+      }
+      
+      .footer { 
+        background: #f9fafb; 
+        padding: 30px; 
+        border-top: 1px solid #e5e7eb; 
+        text-align: center; 
+        font-size: 14px; 
+        color: #6b7280; 
+      }
+      
+      .footer a {
+        color: #3b82f6;
+        text-decoration: none;
+      }
+      
+      /* Mobile responsiveness */
+      @media only screen and (max-width: 600px) {
+        .email-container { margin: 10px; border-radius: 8px; }
+        .header { padding: 30px 20px; }
+        .header h1 { font-size: 28px; }
+        .content { padding: 30px 20px; }
+        .cta-button { display: block; margin: 15px 0; }
+        .countdown-number { font-size: 36px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="header">
+        <h1>⏰ Reminder: Your invitation expires soon!</h1>
+        <p>Don't miss out on claiming your Devv.me profile</p>
+      </div>
+      
+      <div class="content">
+        <div class="urgency-badge">🚨 Time Sensitive</div>
+        
+        <h2 style="color: #1f2937; margin-bottom: 20px;">Hi <%= @user.display_name %>!</h2>
+        
+        <p style="font-size: 16px; margin-bottom: 25px;">This is a friendly reminder that your Devv.me profile invitation will expire soon. Don't let this opportunity slip away!</p>
+        
+        <!-- Countdown Timer -->
+        <div class="countdown-timer">
+          <span class="countdown-number"><%= @days_remaining %></span>
+          <div class="countdown-label">Day<%= 's' if @days_remaining != 1 %> Remaining</div>
+        </div>
+        
+        <!-- Profile Preview -->
+        <div class="profile-preview">
+          <h3 style="margin-top: 0; color: #1e40af; font-size: 20px; font-weight: 700;">📋 Your Profile is Waiting</h3>
+          <p><strong>Username:</strong> @<%= @user.username %></p>
+          <p><strong>Profile URL:</strong> <a href="<%= @profile_url %>" style="color: #3b82f6; text-decoration: none;"><%= @profile_url %></a></p>
+          <p><strong>Created by:</strong> <%= @admin_name %></p>
+        </div>
+        
+        <!-- Urgent Call to Action -->
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="<%= @claim_url %>" class="cta-button" style="display: inline-block; margin: 10px;">
+            🔐 Claim Now - Don't Wait!
+          </a>
+        </div>
+        
+        <!-- What happens if they don't claim -->
+        <div style="background: #fef3c7; border: 2px solid #f59e0b; padding: 20px; border-radius: 12px; margin: 25px 0;">
+          <h3 style="margin-top: 0; color: #92400e;">⚠️ What happens if you don't claim your profile?</h3>
+          <ul style="color: #92400e; margin: 10px 0;">
+            <li>Your invitation link will expire on <strong><%= @expires_at.strftime("%B %d, %Y") %></strong></li>
+            <li>You'll lose access to your pre-built profile</li>
+            <li>You'll need to contact support to get a new invitation</li>
+          </ul>
+        </div>
+        
+        <p style="font-size: 16px; margin-top: 30px;">Don't miss this chance to join the Devv.me community!</p>
+        
+        <p style="margin-top: 30px;">
+          Best regards,<br>
+          <strong><%= @admin_name %></strong><br>
+          <span style="color: #6b7280;">Devv.me Team</span>
+        </p>
+      </div>
+      
+      <div class="footer">
+        <p>This is a reminder email for your Devv.me profile invitation.</p>
+        <p>If you have any questions, contact us at <a href="mailto:support@devv.me">support@devv.me</a></p>
+        <p style="margin-top: 20px; font-size: 12px;">
+          Invitation expires on <%= @expires_at.strftime("%B %d, %Y at %I:%M %p %Z") %>
+        </p>
+        <p style="font-size: 12px; color: #9ca3af;">
+          Tracking ID: <%= @tracking_id %>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

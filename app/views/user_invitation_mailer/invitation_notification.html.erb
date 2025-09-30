@@ -1,92 +1,389 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>You've been invited to join Devv.me!</title>
+    <!--[if mso]>
+    <noscript>
+      <xml>
+        <o:OfficeDocumentSettings>
+          <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+      </xml>
+    </noscript>
+    <![endif]-->
     <style>
-      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f8fafc; }
-      .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-      .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
-      .header h1 { margin: 0; font-size: 28px; font-weight: 700; }
+      /* Reset and base styles */
+      body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+      
+      /* Main styles */
+      body { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+        line-height: 1.6; 
+        color: #1f2937; 
+        margin: 0; 
+        padding: 0; 
+        background-color: #f9fafb;
+        min-width: 100%;
+        width: 100% !important;
+      }
+      
+      .email-container { 
+        max-width: 600px; 
+        margin: 20px auto; 
+        background: #ffffff; 
+        border-radius: 12px; 
+        overflow: hidden; 
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+      }
+      
+      .header { 
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%); 
+        color: white; 
+        padding: 40px 30px; 
+        text-align: center; 
+        position: relative;
+      }
+      
+      .header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="20" cy="80" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        pointer-events: none;
+      }
+      
+      .header h1 { 
+        margin: 0; 
+        font-size: 32px; 
+        font-weight: 800; 
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .header p {
+        margin: 15px 0 0 0; 
+        opacity: 0.95; 
+        font-size: 18px;
+        position: relative;
+        z-index: 1;
+      }
+      
       .content { padding: 40px 30px; }
-      .invitation-badge { display: inline-block; background: #f59e0b; color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
-      .cta-button { display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
-      .cta-button:hover { background: #2563eb; }
-      .cta-button.secondary { background: #10b981; }
-      .cta-button.secondary:hover { background: #059669; }
-      .profile-preview { background: #f1f5f9; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #3b82f6; }
-      .profile-preview h3 { margin-top: 0; color: #1e40af; }
-      .features { background: #f1f5f9; padding: 20px; border-radius: 6px; margin: 20px 0; }
-      .features ul { margin: 0; padding-left: 20px; }
-      .features li { margin: 8px 0; }
-      .footer { background: #f8fafc; padding: 20px 30px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 14px; color: #64748b; }
-      .unclaimed-notice { background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 6px; margin: 20px 0; }
-      .unclaimed-notice strong { color: #92400e; }
+      
+      .invitation-badge { 
+        display: inline-block; 
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
+        color: white; 
+        padding: 10px 20px; 
+        border-radius: 25px; 
+        font-size: 14px; 
+        font-weight: 700; 
+        margin-bottom: 25px;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      .cta-button { 
+        display: inline-block; 
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
+        color: white !important; 
+        padding: 16px 32px; 
+        text-decoration: none; 
+        border-radius: 8px; 
+        font-weight: 700; 
+        margin: 20px 0;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+        font-size: 16px;
+        text-align: center;
+        min-width: 200px;
+      }
+      
+      .cta-button:hover { 
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); 
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      }
+      
+      .cta-button.secondary { 
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      }
+      
+      .cta-button.secondary:hover { 
+        background: linear-gradient(135deg, #059669 0%, #047857 100%); 
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+      }
+      
+      .profile-preview { 
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); 
+        padding: 25px; 
+        border-radius: 12px; 
+        margin: 25px 0; 
+        border-left: 5px solid #3b82f6;
+        border: 1px solid #e2e8f0;
+      }
+      
+      .profile-preview h3 { 
+        margin-top: 0; 
+        color: #1e40af; 
+        font-size: 20px;
+        font-weight: 700;
+      }
+      
+      .profile-stats {
+        display: flex;
+        justify-content: space-around;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 1px solid #e5e7eb;
+      }
+      
+      .stat-item {
+        text-align: center;
+        flex: 1;
+      }
+      
+      .stat-number {
+        font-size: 24px;
+        font-weight: 800;
+        color: #3b82f6;
+        display: block;
+      }
+      
+      .stat-label {
+        font-size: 12px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 5px;
+      }
+      
+      .features { 
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); 
+        padding: 25px; 
+        border-radius: 12px; 
+        margin: 25px 0;
+        border: 1px solid #bae6fd;
+      }
+      
+      .features h3 {
+        margin-top: 0;
+        color: #0369a1;
+        font-size: 18px;
+        font-weight: 700;
+      }
+      
+      .features ul { 
+        margin: 15px 0 0 0; 
+        padding-left: 0;
+        list-style: none;
+      }
+      
+      .features li { 
+        margin: 12px 0;
+        padding-left: 30px;
+        position: relative;
+      }
+      
+      .features li::before {
+        content: '✨';
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-size: 16px;
+      }
+      
+      .urgency-notice {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #f59e0b;
+        padding: 20px;
+        border-radius: 12px;
+        margin: 25px 0;
+        text-align: center;
+      }
+      
+      .urgency-notice.high {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border-color: #ef4444;
+      }
+      
+      .urgency-notice strong { 
+        color: #92400e; 
+        font-size: 18px;
+      }
+      
+      .urgency-notice.high strong {
+        color: #dc2626;
+      }
+      
+      .footer { 
+        background: #f9fafb; 
+        padding: 30px; 
+        border-top: 1px solid #e5e7eb; 
+        text-align: center; 
+        font-size: 14px; 
+        color: #6b7280; 
+      }
+      
+      .footer a {
+        color: #3b82f6;
+        text-decoration: none;
+      }
+      
+      .social-proof {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border: 1px solid #e5e7eb;
+        text-align: center;
+      }
+      
+      .tracking-pixel {
+        width: 1px;
+        height: 1px;
+        border: 0;
+        display: block;
+      }
+      
+      /* Mobile responsiveness */
+      @media only screen and (max-width: 600px) {
+        .email-container { margin: 10px; border-radius: 8px; }
+        .header { padding: 30px 20px; }
+        .header h1 { font-size: 28px; }
+        .content { padding: 30px 20px; }
+        .cta-button { display: block; margin: 15px 0; }
+        .profile-stats { flex-direction: column; }
+        .stat-item { margin: 10px 0; }
+      }
     </style>
   </head>
   <body>
-    <div class="container">
+    <div class="email-container">
       <div class="header">
         <h1>🚀 You've been invited to Devv.me!</h1>
-        <p style="margin: 10px 0 0 0; opacity: 0.9;">Your professional developer profile is ready</p>
+        <p>Your professional developer profile is ready to claim</p>
       </div>
       
       <div class="content">
         <div class="invitation-badge">🎯 Personal Invitation</div>
         
-        <h2>Hi <%= @user.display_name %>!</h2>
+        <h2 style="color: #1f2937; margin-bottom: 20px;">Hi <%= @user.display_name %>!</h2>
         
-        <p><%= @admin_name %> has created a professional developer profile for you on Devv.me. Your profile is already live and ready to be claimed!</p>
+        <p style="font-size: 16px; margin-bottom: 25px;"><%= @admin_name %> has created a professional developer profile for you on Devv.me. Your profile is already live and ready to be claimed!</p>
         
+        <!-- Urgency Notice -->
+        <% if @days_remaining <= 7 %>
+          <div class="urgency-notice <%= 'high' if @days_remaining <= 3 %>">
+            <strong>⏰ Time Sensitive:</strong> Your invitation expires in <%= pluralize(@days_remaining, 'day') %>!
+          </div>
+        <% end %>
+        
+        <!-- Profile Preview Section -->
         <div class="profile-preview">
           <h3>📋 Your Profile Preview</h3>
           <p><strong>Username:</strong> @<%= @user.username %></p>
-          <p><strong>Profile URL:</strong> <a href="<%= @profile_url %>" style="color: #3b82f6;"><%= @profile_url %></a></p>
+          <p><strong>Profile URL:</strong> <a href="<%= @profile_url %>" style="color: #3b82f6; text-decoration: none;"><%= @profile_url %></a></p>
           <% if @user.job_title.present? %>
             <p><strong>Role:</strong> <%= @user.job_title %></p>
           <% end %>
           <% if @user.location.present? %>
             <p><strong>Location:</strong> <%= @user.location %></p>
           <% end %>
+          <% if @user.skills.present? && @user.skills.any? %>
+            <p><strong>Skills:</strong> <%= @user.skills.first(3).join(', ') %><%= ' and more...' if @user.skills.length > 3 %></p>
+          <% end %>
+          
+          <!-- Profile Completion Stats -->
+          <div class="profile-stats">
+            <div class="stat-item">
+              <span class="stat-number"><%= @profile_completion[:percentage] %>%</span>
+              <div class="stat-label">Complete</div>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number"><%= @profile_completion[:completed_fields].length %></span>
+              <div class="stat-label">Sections</div>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number"><%= @days_remaining %></span>
+              <div class="stat-label">Days Left</div>
+            </div>
+          </div>
         </div>
         
-        <div class="unclaimed-notice">
-          <strong>⚠️ Profile Status:</strong> Your profile is currently marked as "unclaimed" but is publicly visible. Claim it to take full control and start adding your projects and content!
+        <!-- Call to Action Buttons -->
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="<%= @claim_url %>" class="cta-button" style="display: inline-block; margin: 10px;">
+            🔐 Claim Your Profile Now
+          </a>
+          <br>
+          <a href="<%= @profile_url %>" class="cta-button secondary" style="display: inline-block; margin: 10px;">
+            👀 Preview Your Profile
+          </a>
         </div>
         
-        <p style="text-align: center;">
-          <a href="<%= @claim_url %>" class="cta-button">🔐 Claim Your Profile</a>
-        </p>
+        <!-- Social Proof -->
+        <div class="social-proof">
+          <p style="margin: 0; color: #6b7280; font-size: 14px;">
+            <strong>Join 1,000+ developers</strong> already showcasing their work on Devv.me
+          </p>
+        </div>
         
-        <p style="text-align: center; margin-top: 10px;">
-          <a href="<%= @profile_url %>" class="cta-button secondary">👀 Preview Your Profile</a>
-        </p>
-        
-        <p>Once you claim your profile, you'll be able to:</p>
-        
+        <!-- Features Section -->
         <div class="features">
+          <h3>✨ What you can do once you claim your profile:</h3>
           <ul>
             <li><strong>Take full control</strong> of your profile and make updates</li>
             <li><strong>Add your projects</strong> with rich descriptions and images</li>
             <li><strong>Write and publish blog posts</strong> with our markdown editor</li>
             <li><strong>Connect your social profiles</strong> and showcase your work</li>
             <li><strong>Set your password</strong> and access your dashboard</li>
+            <li><strong>Get discovered</strong> by potential employers and collaborators</li>
           </ul>
         </div>
         
-        <p><strong>Important:</strong> This invitation link will expire in 30 days. Make sure to claim your profile before then!</p>
+        <!-- Important Notice -->
+        <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #6b7280;">
+          <p style="margin: 0;"><strong>📅 Important:</strong> This invitation link will expire on <strong><%= @expires_at.strftime("%B %d, %Y") %></strong>. Make sure to claim your profile before then!</p>
+        </div>
         
-        <p>Welcome to the Devv.me community!</p>
+        <p style="font-size: 16px; margin-top: 30px;">Welcome to the Devv.me community! We're excited to see what you'll build.</p>
         
-        <p>Best regards,<br><%= @admin_name %><br>Devv.me Team</p>
+        <p style="margin-top: 30px;">
+          Best regards,<br>
+          <strong><%= @admin_name %></strong><br>
+          <span style="color: #6b7280;">Devv.me Team</span>
+        </p>
       </div>
       
       <div class="footer">
-        <p>You're receiving this email because <%= @admin_name %> created a profile for you on Devv.me.</p>
-        <p>If you have any questions, contact us at <a href="mailto:support@devv.me" style="color: #3b82f6;">support@devv.me</a></p>
-        <p>This invitation expires on <%= (@user.invitation_sent_at + 30.days).strftime("%B %d, %Y") %></p>
+        <p>You're receiving this email because <strong><%= @admin_name %></strong> created a profile for you on Devv.me.</p>
+        <p>If you have any questions, contact us at <a href="mailto:support@devv.me">support@devv.me</a></p>
+        <p style="margin-top: 20px; font-size: 12px;">
+          This invitation expires on <%= @expires_at.strftime("%B %d, %Y at %I:%M %p %Z") %>
+        </p>
+        <p style="font-size: 12px; color: #9ca3af;">
+          Tracking ID: <%= @tracking_id %>
+        </p>
       </div>
     </div>
+    
+    <!-- Email tracking pixel -->
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="tracking-pixel" alt="" />
   </body>
 </html>

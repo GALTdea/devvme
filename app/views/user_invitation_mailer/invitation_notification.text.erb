@@ -1,9 +1,14 @@
 🚀 You've been invited to join Devv.me!
+Your professional developer profile is ready to claim
 
 Hi <%= @user.display_name %>!
 
 <%= @admin_name %> has created a professional developer profile for you on Devv.me. Your profile is already live and ready to be claimed!
 
+<% if @days_remaining <= 7 -%>
+⏰ TIME SENSITIVE: Your invitation expires in <%= pluralize(@days_remaining, 'day') %>!
+
+<% end -%>
 📋 Your Profile Preview:
 - Username: @<%= @user.username %>
 - Profile URL: <%= @profile_url %>
@@ -13,23 +18,32 @@ Hi <%= @user.display_name %>!
 <% if @user.location.present? -%>
 - Location: <%= @user.location %>
 <% end -%>
+<% if @user.skills.present? && @user.skills.any? -%>
+- Skills: <%= @user.skills.first(3).join(', ') %><%= ' and more...' if @user.skills.length > 3 %>
+<% end -%>
 
-⚠️ Profile Status: Your profile is currently marked as "unclaimed" but is publicly visible. Claim it to take full control and start adding your projects and content!
+📊 Profile Stats:
+- <%= @profile_completion[:percentage] %>% Complete
+- <%= @profile_completion[:completed_fields].length %> Sections Filled
+- <%= @days_remaining %> Days Remaining
 
-🔐 Claim Your Profile: <%= @claim_url %>
+🔐 CLAIM YOUR PROFILE NOW: <%= @claim_url %>
 
 👀 Preview Your Profile: <%= @profile_url %>
 
-Once you claim your profile, you'll be able to:
+🌟 Join 1,000+ developers already showcasing their work on Devv.me
+
+✨ What you can do once you claim your profile:
 • Take full control of your profile and make updates
 • Add your projects with rich descriptions and images
 • Write and publish blog posts with our markdown editor
 • Connect your social profiles and showcase your work
 • Set your password and access your dashboard
+• Get discovered by potential employers and collaborators
 
-Important: This invitation link will expire in 30 days (<%= (@user.invitation_sent_at + 30.days).strftime("%B %d, %Y") %>). Make sure to claim your profile before then!
+📅 IMPORTANT: This invitation link will expire on <%= @expires_at.strftime("%B %d, %Y at %I:%M %p %Z") %>. Make sure to claim your profile before then!
 
-Welcome to the Devv.me community!
+Welcome to the Devv.me community! We're excited to see what you'll build.
 
 Best regards,
 <%= @admin_name %>
@@ -38,3 +52,5 @@ Devv.me Team
 ---
 You're receiving this email because <%= @admin_name %> created a profile for you on Devv.me.
 If you have any questions, contact us at support@devv.me
+
+Tracking ID: <%= @tracking_id %>

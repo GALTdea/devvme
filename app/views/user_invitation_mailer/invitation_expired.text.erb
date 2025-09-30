@@ -1,0 +1,34 @@
+❌ Your Devv.me profile invitation has expired
+But don't worry - we can help you get back on track
+
+Hi <%= @user.display_name %>!
+
+Unfortunately, your Devv.me profile invitation has expired. But don't worry - your profile is still there, and we can help you get access to it!
+
+📋 Your Profile is Still Available:
+- Username: @<%= @user.username %>
+- Profile URL: <%= @profile_url %>
+- Status: Unclaimed (Invitation Expired)
+
+🚀 What you can do next:
+• Contact our support team to request a new invitation
+• We'll send you a fresh link with a new 30-day expiration
+• Your profile data is safe - nothing has been lost
+• Claim your profile and start building your presence
+
+📧 CONTACT SUPPORT: <%= @support_url %>
+
+💡 Good news: Your profile information is completely safe and preserved. We just need to send you a new invitation link to get you started!
+
+We're sorry you missed the original deadline, but we're here to help you get your profile claimed!
+
+Best regards,
+<%= @admin_name %>
+Devv.me Team
+
+---
+Your Devv.me profile invitation has expired, but we're here to help.
+Contact us at support@devv.me for a new invitation.
+
+Original invitation created by <%= @admin_name %>
+Tracking ID: <%= @tracking_id %>

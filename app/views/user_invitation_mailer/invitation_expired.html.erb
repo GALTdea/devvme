@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Your Devv.me profile invitation has expired</title>
+    <style>
+      /* Reuse base styles */
+      body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+      
+      body { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+        line-height: 1.6; 
+        color: #1f2937; 
+        margin: 0; 
+        padding: 0; 
+        background-color: #f9fafb;
+        min-width: 100%;
+        width: 100% !important;
+      }
+      
+      .email-container { 
+        max-width: 600px; 
+        margin: 20px auto; 
+        background: #ffffff; 
+        border-radius: 12px; 
+        overflow: hidden; 
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+      }
+      
+      .header { 
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 50%, #374151 100%); 
+        color: white; 
+        padding: 40px 30px; 
+        text-align: center; 
+        position: relative;
+      }
+      
+      .header h1 { 
+        margin: 0; 
+        font-size: 32px; 
+        font-weight: 800; 
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .header p {
+        margin: 15px 0 0 0; 
+        opacity: 0.95; 
+        font-size: 18px;
+        position: relative;
+        z-index: 1;
+      }
+      
+      .content { padding: 40px 30px; }
+      
+      .expired-badge { 
+        display: inline-block; 
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); 
+        color: white; 
+        padding: 12px 24px; 
+        border-radius: 25px; 
+        font-size: 16px; 
+        font-weight: 700; 
+        margin-bottom: 25px;
+        box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      .cta-button { 
+        display: inline-block; 
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
+        color: white !important; 
+        padding: 16px 32px; 
+        text-decoration: none; 
+        border-radius: 8px; 
+        font-weight: 700; 
+        margin: 20px 0;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+        font-size: 16px;
+        text-align: center;
+        min-width: 200px;
+      }
+      
+      .cta-button:hover { 
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); 
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      }
+      
+      .profile-preview { 
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); 
+        padding: 25px; 
+        border-radius: 12px; 
+        margin: 25px 0; 
+        border-left: 5px solid #6b7280;
+        border: 1px solid #e2e8f0;
+      }
+      
+      .profile-preview h3 { 
+        margin-top: 0; 
+        color: #4b5563; 
+        font-size: 20px;
+        font-weight: 700;
+      }
+      
+      .next-steps {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        padding: 25px;
+        border-radius: 12px;
+        margin: 25px 0;
+        border: 1px solid #bae6fd;
+      }
+      
+      .next-steps h3 {
+        margin-top: 0;
+        color: #0369a1;
+        font-size: 18px;
+        font-weight: 700;
+      }
+      
+      .next-steps ul {
+        margin: 15px 0 0 0;
+        padding-left: 0;
+        list-style: none;
+      }
+      
+      .next-steps li {
+        margin: 12px 0;
+        padding-left: 30px;
+        position: relative;
+      }
+      
+      .next-steps li::before {
+        content: '👉';
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-size: 16px;
+      }
+      
+      .footer { 
+        background: #f9fafb; 
+        padding: 30px; 
+        border-top: 1px solid #e5e7eb; 
+        text-align: center; 
+        font-size: 14px; 
+        color: #6b7280; 
+      }
+      
+      .footer a {
+        color: #3b82f6;
+        text-decoration: none;
+      }
+      
+      /* Mobile responsiveness */
+      @media only screen and (max-width: 600px) {
+        .email-container { margin: 10px; border-radius: 8px; }
+        .header { padding: 30px 20px; }
+        .header h1 { font-size: 28px; }
+        .content { padding: 30px 20px; }
+        .cta-button { display: block; margin: 15px 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="header">
+        <h1>❌ Your invitation has expired</h1>
+        <p>But don't worry - we can help you get back on track</p>
+      </div>
+      
+      <div class="content">
+        <div class="expired-badge">⏰ Invitation Expired</div>
+        
+        <h2 style="color: #1f2937; margin-bottom: 20px;">Hi <%= @user.display_name %>!</h2>
+        
+        <p style="font-size: 16px; margin-bottom: 25px;">Unfortunately, your Devv.me profile invitation has expired. But don't worry - your profile is still there, and we can help you get access to it!</p>
+        
+        <!-- Profile Still Available -->
+        <div class="profile-preview">
+          <h3>📋 Your Profile is Still Available</h3>
+          <p><strong>Username:</strong> @<%= @user.username %></p>
+          <p><strong>Profile URL:</strong> <a href="<%= @profile_url %>" style="color: #6b7280; text-decoration: none;"><%= @profile_url %></a></p>
+          <p><strong>Status:</strong> <span style="color: #6b7280;">Unclaimed (Invitation Expired)</span></p>
+        </div>
+        
+        <!-- Next Steps -->
+        <div class="next-steps">
+          <h3>🚀 What you can do next:</h3>
+          <ul>
+            <li><strong>Contact our support team</strong> to request a new invitation</li>
+            <li><strong>We'll send you a fresh link</strong> with a new 30-day expiration</li>
+            <li><strong>Your profile data is safe</strong> - nothing has been lost</li>
+            <li><strong>Claim your profile</strong> and start building your presence</li>
+          </ul>
+        </div>
+        
+        <!-- Call to Action -->
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="<%= @support_url %>" class="cta-button" style="display: inline-block; margin: 10px;">
+            📧 Contact Support
+          </a>
+        </div>
+        
+        <!-- Reassurance -->
+        <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #6b7280;">
+          <p style="margin: 0;"><strong>💡 Good news:</strong> Your profile information is completely safe and preserved. We just need to send you a new invitation link to get you started!</p>
+        </div>
+        
+        <p style="font-size: 16px; margin-top: 30px;">We're sorry you missed the original deadline, but we're here to help you get your profile claimed!</p>
+        
+        <p style="margin-top: 30px;">
+          Best regards,<br>
+          <strong><%= @admin_name %></strong><br>
+          <span style="color: #6b7280;">Devv.me Team</span>
+        </p>
+      </div>
+      
+      <div class="footer">
+        <p>Your Devv.me profile invitation has expired, but we're here to help.</p>
+        <p>Contact us at <a href="mailto:support@devv.me">support@devv.me</a> for a new invitation.</p>
+        <p style="margin-top: 20px; font-size: 12px;">
+          Original invitation created by <%= @admin_name %>
+        </p>
+        <p style="font-size: 12px; color: #9ca3af;">
+          Tracking ID: <%= @tracking_id %>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
