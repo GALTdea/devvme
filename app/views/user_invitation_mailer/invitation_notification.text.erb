@@ -1,0 +1,40 @@
+🚀 You've been invited to join Devv.me!
+
+Hi <%= @user.display_name %>!
+
+<%= @admin_name %> has created a professional developer profile for you on Devv.me. Your profile is already live and ready to be claimed!
+
+📋 Your Profile Preview:
+- Username: @<%= @user.username %>
+- Profile URL: <%= @profile_url %>
+<% if @user.job_title.present? -%>
+- Role: <%= @user.job_title %>
+<% end -%>
+<% if @user.location.present? -%>
+- Location: <%= @user.location %>
+<% end -%>
+
+⚠️ Profile Status: Your profile is currently marked as "unclaimed" but is publicly visible. Claim it to take full control and start adding your projects and content!
+
+🔐 Claim Your Profile: <%= @claim_url %>
+
+👀 Preview Your Profile: <%= @profile_url %>
+
+Once you claim your profile, you'll be able to:
+• Take full control of your profile and make updates
+• Add your projects with rich descriptions and images
+• Write and publish blog posts with our markdown editor
+• Connect your social profiles and showcase your work
+• Set your password and access your dashboard
+
+Important: This invitation link will expire in 30 days (<%= (@user.invitation_sent_at + 30.days).strftime("%B %d, %Y") %>). Make sure to claim your profile before then!
+
+Welcome to the Devv.me community!
+
+Best regards,
+<%= @admin_name %>
+Devv.me Team
+
+---
+You're receiving this email because <%= @admin_name %> created a profile for you on Devv.me.
+If you have any questions, contact us at support@devv.me

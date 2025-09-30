@@ -364,7 +364,7 @@ class User < ApplicationRecord
     # Send invitation email
     if send_email
       begin
-        UserInvitationMailer.invitation_notification(self).deliver_later
+        UserInvitationMailer.invitation_notification(self, admin).deliver_later
       rescue => e
         Rails.logger.error "Failed to send invitation email to #{email}: #{e.message}"
       end

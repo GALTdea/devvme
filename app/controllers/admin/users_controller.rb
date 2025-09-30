@@ -1,7 +1,7 @@
 class Admin::UsersController < ApplicationController
   before_action :require_admin
-  before_action :set_user, only: [:show, :edit, :update, :destroy, :suspend, :unsuspend, :activate, :deactivate, :promote, :demote]
-  before_action :require_super_admin, only: [:destroy, :bulk_delete, :promote, :demote, :bulk_promote, :bulk_demote]
+  before_action :set_user, only: [:show, :edit, :update, :destroy, :suspend, :unsuspend, :activate, :deactivate, :promote, :demote, :resend_invitation]
+  before_action :require_super_admin, only: [:new, :create, :destroy, :bulk_delete, :promote, :demote, :bulk_promote, :bulk_demote]
 
   include Pagy::Backend
 
@@ -19,6 +19,8 @@ class Admin::UsersController < ApplicationController
     case params[:status]
     when 'pending_activation'
       @users = @users.where(account_status: :pending_activation)
+    when 'invited'
+      @users = @users.where(account_status: :invited)
     when 'active'
       @users = @users.where(account_status: :active)
     when 'suspended'
@@ -38,6 +40,7 @@ class Admin::UsersController < ApplicationController
     @total_users = User.count
     @active_users = User.where(account_status: :active).count
     @pending_activation_users = User.where(account_status: :pending_activation).count
+    @invited_users = User.where(account_status: :invited).count
     @suspended_users = User.where(account_status: :suspended).count
     @deactivated_users = User.where(account_status: :deactivated).count
     @admin_users = User.where(role: [:admin, :super_admin]).count
@@ -68,6 +71,36 @@ class Admin::UsersController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def new
+    @user = User.new
+    @user.role = 'user' # Default role
+  end
+
+  def create
+    @user = User.new(user_creation_params)
+    @user.account_status = :invited
+
+    if @user.save
+      # Send invitation email and generate token
+      @user.invite!(admin: current_user, send_email: true)
+
+      log_admin_activity('create_invited_user', {
+        username: @user.username,
+        email: @user.email,
+        role: @user.role,
+        invitation_sent: true
+      })
+
+      redirect_to admin_user_path(@user), notice: "User '#{@user.username}' has been created and invitation sent to #{@user.email}."
+    else
+      render :new, status: :unprocessable_entity
+    end
+  rescue => e
+    Rails.logger.error "Failed to create invited user: #{e.message}"
+    @user.errors.add(:base, "Failed to create user: #{e.message}")
+    render :new, status: :unprocessable_entity
   end
 
   def destroy
@@ -122,6 +155,27 @@ class Admin::UsersController < ApplicationController
       target_username: @user.username
     })
     redirect_to admin_user_path(@user), notice: 'User demoted to regular user.'
+  end
+
+  def resend_invitation
+    if @user.invited? && @user.invitation_pending?
+      @user.invite!(admin: current_user, send_email: true)
+      log_admin_activity('resend_invitation', {
+        username: @user.username,
+        email: @user.email
+      })
+      redirect_to admin_user_path(@user), notice: 'Invitation has been resent.'
+    elsif @user.invited? && @user.invitation_expired?
+      # Generate new token for expired invitations
+      @user.invite!(admin: current_user, send_email: true)
+      log_admin_activity('resend_expired_invitation', {
+        username: @user.username,
+        email: @user.email
+      })
+      redirect_to admin_user_path(@user), notice: 'New invitation has been sent (previous invitation expired).'
+    else
+      redirect_to admin_user_path(@user), alert: 'Cannot resend invitation for this user.'
+    end
   end
 
   def bulk_suspend
@@ -221,6 +275,13 @@ class Admin::UsersController < ApplicationController
     params.require(:user).permit(:username, :full_name, :email, :bio, :job_title,
                                  :location, :admin_notes, :github_url, :linkedin_url,
                                  :website_url, :twitter_url, :contact_email, :phone)
+  end
+
+  def user_creation_params
+    params.require(:user).permit(:username, :full_name, :email, :bio, :job_title,
+                                 :location, :admin_notes, :github_url, :linkedin_url,
+                                 :website_url, :twitter_url, :contact_email, :phone,
+                                 :headline, :role, skills: [])
   end
 
   def log_admin_activity(action, details = {})
