@@ -407,4 +407,37 @@ module ApplicationHelper
   def registration_enabled?
     !Rails.env.production? || ENV["DISABLE_REGISTRATION"].blank?
   end
+
+  # Unclaimed profile helpers
+  def unclaimed_profile?
+    @unclaimed_profile == true
+  end
+
+  def profile_limitations
+    @profile_limitations || {}
+  end
+
+  def invitation_data
+    @invitation_data || {}
+  end
+
+  def show_unclaimed_banner?
+    unclaimed_profile? && profile_limitations[:show_claim_banner]
+  end
+
+  def show_limited_functionality_notice?
+    unclaimed_profile? && profile_limitations[:show_preview_notice]
+  end
+
+  def can_contact_user?(user = nil)
+    return false if unclaimed_profile?
+    return false if profile_limitations[:no_contact]
+    true
+  end
+
+  def can_interact_with_profile?
+    return false if unclaimed_profile?
+    return false if profile_limitations[:no_interactions]
+    true
+  end
 end

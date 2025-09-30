@@ -11,25 +11,32 @@ class PublicProfilesController < ApplicationController
   def show
     # Redirect authenticated users to their private profile page
     # unless they explicitly want to preview their public profile
-    if user_signed_in? && @user == current_user && !params[:preview]
+    # Exception: Don't redirect for unclaimed profiles since the user can't access dashboard
+    if user_signed_in? && @user == current_user && !params[:preview] && !@unclaimed_profile
       redirect_to profile_path
       return
     end
 
     # Track profile visit asynchronously (only for external visitors, not self-visits)
-    track_profile_visit
+    # Don't track visits for unclaimed profiles
+    track_profile_visit unless @user.invited?
 
-    # Only show published projects to public visitors with optimized queries
-    @recent_projects = @user.projects
-                           .published
-                           .includes(thumbnail_attachment: :blob)
-                           .recent
-                           .limit(6)
+    # Prepare unclaimed profile specific data
+    if @unclaimed_profile
+      prepare_unclaimed_profile_data
+    else
+      # Only show published projects to public visitors with optimized queries
+      @recent_projects = @user.projects
+                             .published
+                             .includes(thumbnail_attachment: :blob)
+                             .recent
+                             .limit(6)
 
-    # Only show published blog posts to public visitors
-    @recent_blog_posts = @user.blog_posts
-                             .published_posts
-                             .limit(3)
+      # Only show published blog posts to public visitors
+      @recent_blog_posts = @user.blog_posts
+                               .published_posts
+                               .limit(3)
+    end
 
     # Prepare SEO data for the view
     prepare_seo_data
@@ -44,6 +51,14 @@ class PublicProfilesController < ApplicationController
 
     # Allow access if user is active
     return if @user.active?
+
+    # Allow public access to invited users (unclaimed profiles)
+    # These profiles are publicly visible but marked as unclaimed
+    if @user.invited?
+      # Set unclaimed profile flag for views
+      @unclaimed_profile = true
+      return
+    end
 
     # Redirect pending activation users to their limited access page
     if @user.pending_activation?
@@ -104,37 +119,101 @@ class PublicProfilesController < ApplicationController
     render file: "#{Rails.root}/public/404-profile.html", status: :not_found, layout: false
   end
 
-    # Set cache headers for better performance
+  # Set cache headers for better performance
   def set_cache_headers
-    # Cache public profiles for 15 minutes
-    expires_in 15.minutes, public: true
+    return unless @user
 
-    # Add ETag based on user updated_at timestamp
-    fresh_when(@user, public: true) if @user
+    if @unclaimed_profile
+      # Cache unclaimed profiles for shorter duration (5 minutes)
+      # since they might be claimed at any time
+      expires_in 5.minutes, public: true
+
+      # Add ETag based on user and invitation status
+      # Use a simple string-based ETag for unclaimed profiles
+      response.etag = "#{@user.id}-#{@user.updated_at.to_i}-#{@user.invitation_sent_at&.to_i}"
+    else
+      # Cache public profiles for 15 minutes
+      expires_in 15.minutes, public: true
+
+      # Add ETag based on user updated_at timestamp
+      fresh_when(@user, public: true)
+    end
+  end
+
+  # Prepare data specific to unclaimed profiles
+  def prepare_unclaimed_profile_data
+    # No projects or blog posts for unclaimed profiles
+    # They will be shown as "Coming soon when claimed"
+    @recent_projects = []
+    @recent_blog_posts = []
+
+    # Set invitation-specific data for views
+    @invitation_data = {
+      sent_at: @user.invitation_sent_at,
+      expires_at: @user.invitation_sent_at + 30.days,
+      expired: @user.invitation_expired?,
+      pending: @user.invitation_pending?,
+      days_remaining: (@user.invitation_sent_at + 30.days - Time.current).to_i / 1.day
+    }
+
+    # Set limited functionality flags for views
+    @profile_limitations = {
+      no_contact: true,           # No contact buttons
+      no_projects: true,          # No project creation/editing
+      no_blog_posts: true,        # No blog post creation/editing
+      no_interactions: true,      # No likes, comments, etc.
+      show_claim_banner: true,    # Show prominent claim banner
+      show_preview_notice: true   # Show "this is a preview" notice
+    }
   end
 
   # Prepare SEO data that will be used in the view
   def prepare_seo_data
     # Basic meta description
-    if @user.bio.present?
-      sanitized_bio = ActionView::Base.full_sanitizer.sanitize(@user.bio)
-      @seo_description = sanitized_bio.length > 155 ? "#{sanitized_bio[0..152]}..." : sanitized_bio
+    if @unclaimed_profile
+      # Special SEO for unclaimed profiles
+      if @user.bio.present?
+        sanitized_bio = ActionView::Base.full_sanitizer.sanitize(@user.bio)
+        @seo_description = "#{sanitized_bio} - This is an unclaimed developer profile on Devv.me."
+      else
+        @seo_description = "#{@user.display_name} - Unclaimed developer profile on Devv.me. Professional portfolio coming soon."
+      end
+
+      # Add unclaimed-specific keywords
+      @seo_keywords = [
+        @user.username,
+        @user.display_name,
+        "developer",
+        "portfolio",
+        "profile",
+        "unclaimed",
+        "coming soon"
+      ].compact.join(", ")
+
+      # Special title for unclaimed profiles
+      @seo_title = "#{@user.display_name} (@#{@user.username}) - Unclaimed Profile"
     else
-      @seo_description = "View #{@user.display_name}'s profile and projects on Devvme App. #{@user.published_projects_count} published projects."
+      # Regular SEO for active profiles
+      if @user.bio.present?
+        sanitized_bio = ActionView::Base.full_sanitizer.sanitize(@user.bio)
+        @seo_description = sanitized_bio.length > 155 ? "#{sanitized_bio[0..152]}..." : sanitized_bio
+      else
+        @seo_description = "View #{@user.display_name}'s profile and projects on Devvme App. #{@user.published_projects_count} published projects."
+      end
+
+      # Keywords based on user's profile
+      @seo_keywords = [
+        @user.username,
+        @user.display_name,
+        "developer",
+        "portfolio",
+        "projects",
+        "profile"
+      ].compact.join(", ")
+
+      # Page title
+      @seo_title = "#{@user.display_name} (@#{@user.username})"
     end
-
-    # Keywords based on user's profile
-    @seo_keywords = [
-      @user.username,
-      @user.display_name,
-      "developer",
-      "portfolio",
-      "projects",
-      "profile"
-    ].compact.join(", ")
-
-    # Page title
-    @seo_title = "#{@user.display_name} (@#{@user.username})"
 
     # Social media image URL for sharing (branded image)
     # Add cache busting parameter to force X/Twitter to refresh
