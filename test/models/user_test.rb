@@ -250,9 +250,9 @@ class UserTest < ActiveSupport::TestCase
   test "profile_completion_percentage should calculate correctly" do
     @user.save
 
-    # Username and full_name filled (2/12 = ~17%)
+    # Username and full_name filled (2/13 = ~15%)
     completion = @user.profile_completion_percentage
-    assert_equal 17, completion
+    assert_equal 15, completion
 
     # Add more fields
     @user.update(
@@ -263,7 +263,7 @@ class UserTest < ActiveSupport::TestCase
     )
 
     completion = @user.profile_completion_percentage
-    assert_equal 42, completion # 5/12 = ~42%
+    assert_equal 38, completion # 5/13 = ~38%
   end
 
   test "display_name should return full_name if present, otherwise username" do

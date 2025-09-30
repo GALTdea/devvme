@@ -6,6 +6,18 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  # Override Devise's password validation for invited users
+  def password_required?
+    return false if invited? # Invited users don't need password initially
+    return false if new_record? && will_be_invited? # Users about to be invited don't need password
+    super
+  end
+
+  # Helper method to check if user will be invited (used during creation)
+  def will_be_invited?
+    account_status == 'invited'
+  end
+
   # FriendlyId configuration
   friendly_id :username, use: :slugged
 
@@ -15,9 +27,10 @@ class User < ApplicationRecord
   # Account status system - tracks user activation state
   enum :account_status, {
     pending_activation: 0,  # User signed up but hasn't activated their account
-    active: 1,             # User account is active and verified
-    suspended: 2,          # User account is suspended (uses existing suspension logic)
-    deactivated: 3         # User has deactivated their own account
+    invited: 1,            # User invited by admin, profile visible but unclaimed
+    active: 2,             # User account is active and verified
+    suspended: 3,          # User account is suspended (uses existing suspension logic)
+    deactivated: 4         # User has deactivated their own account
   }
 
   # Active Storage associations
@@ -332,11 +345,66 @@ class User < ApplicationRecord
   end
 
   def can_access_application?
-    active? && !suspended?
+    (active? || invited?) && !suspended?
   end
 
   def activation_required?
     pending_activation?
+  end
+
+  # Invitation system methods
+  def invite!(admin: nil, send_email: true)
+    generate_invitation_token
+    update!(
+      account_status: :invited,
+      invitation_sent_at: Time.current,
+      invitation_accepted_at: nil
+    )
+
+    # Send invitation email
+    if send_email
+      begin
+        UserInvitationMailer.invitation_notification(self).deliver_later
+      rescue => e
+        Rails.logger.error "Failed to send invitation email to #{email}: #{e.message}"
+      end
+    end
+
+    log_admin_activity(admin, 'invite_user') if admin
+  end
+
+  def claim_invitation!(password: nil, admin: nil)
+    return false if invitation_expired? || !invited?
+
+    # Update password if provided
+    if password.present?
+      self.password = password
+      self.password_confirmation = password
+    end
+
+    update!(
+      account_status: :active,
+      invitation_accepted_at: Time.current
+    )
+
+    log_admin_activity(admin, 'claim_invitation') if admin
+    true
+  end
+
+  def invitation_pending?
+    invited? && invitation_token.present? && !invitation_expired?
+  end
+
+  def invitation_expired?
+    return false unless invitation_sent_at.present?
+    invitation_sent_at < 30.days.ago
+  end
+
+  def invitation_token_valid?(token)
+    invitation_token.present? &&
+    invitation_token == token &&
+    invited? &&
+    !invitation_expired?
   end
 
   # Override suspended? to also check account_status
@@ -448,9 +516,18 @@ class User < ApplicationRecord
 
   private
 
-  # Set new users to pending activation status
+  # Set new users to pending activation status (unless they're being invited)
   def set_pending_activation
+    return if invited? # Don't override invited status
     self.account_status = :pending_activation if new_record?
+  end
+
+  # Generate secure invitation token
+  def generate_invitation_token
+    loop do
+      self.invitation_token = SecureRandom.urlsafe_base64(32)
+      break unless User.exists?(invitation_token: invitation_token)
+    end
   end
 
   # Normalize URLs by adding https:// prefix if missing

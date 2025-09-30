@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_27_000747) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_30_190747) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -157,8 +157,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_27_000747) do
     t.datetime "last_login_at"
     t.text "admin_notes"
     t.integer "account_status", default: 0, null: false
+    t.string "invitation_token"
+    t.datetime "invitation_sent_at"
+    t.datetime "invitation_accepted_at"
     t.index ["account_status"], name: "index_users_on_account_status"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["invitation_accepted_at"], name: "index_users_on_invitation_accepted_at"
+    t.index ["invitation_sent_at"], name: "index_users_on_invitation_sent_at"
+    t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
     t.index ["last_login_at"], name: "index_users_on_last_login_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
