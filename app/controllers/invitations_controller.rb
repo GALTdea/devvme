@@ -96,6 +96,7 @@ class InvitationsController < ApplicationController
 
     if @user.invitation_expired?
       @expired = true
+      @invitation_data = build_invitation_data # Set invitation data for expired view
       render :expired
       return false
     end
@@ -168,14 +169,14 @@ class InvitationsController < ApplicationController
       return
     end
 
-    if password != password_confirmation
-      flash.now[:alert] = "Password confirmation doesn't match."
+    if password.length < 6
+      flash.now[:alert] = "Password must be at least 6 characters long."
       render :claim
       return
     end
 
-    if password.length < 6
-      flash.now[:alert] = "Password must be at least 6 characters long."
+    if password != password_confirmation
+      flash.now[:alert] = "Password confirmation doesn't match."
       render :claim
       return
     end
