@@ -28,6 +28,9 @@ gem "devise", "~> 4.9.4"
 # Friendly URLs for Rails models [https://github.com/norman/friendly_id]
 gem "friendly_id", "~> 5.5"
 
+# CSV processing for bulk operations
+gem "csv"
+
 # Markdown processing with syntax highlighting
 gem "redcarpet", "~> 3.6"
 gem "rouge", "~> 4.2"

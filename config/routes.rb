@@ -33,6 +33,17 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :invitations, only: [:index] do
+      collection do
+        get :analytics
+        get :bulk_create
+        post :bulk_create
+        post :bulk_resend
+        post :bulk_expire
+        post :cleanup_expired
+      end
+    end
+
     resources :activities, only: [:index, :show]
 
     namespace :content_moderation do

@@ -69,6 +69,23 @@ class AdminPolicy < ApplicationPolicy
     user&.can_access_admin? || false
   end
 
+  # Invitation management permissions
+  def manage_invitations?
+    user&.can_manage_users? || false
+  end
+
+  def view_invitation_analytics?
+    user&.can_access_admin? || false
+  end
+
+  def bulk_invitation_operations?
+    user&.super_admin? || false
+  end
+
+  def cleanup_invitations?
+    user&.super_admin? || false
+  end
+
   # Standard Pundit methods for admin namespace
   def index?
     access_admin?
