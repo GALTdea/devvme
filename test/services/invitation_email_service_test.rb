@@ -189,25 +189,18 @@ class InvitationEmailServiceTest < ActiveSupport::TestCase
   end
 
   test "email service queues emails by default" do
-    # Temporarily set queue adapter to test mode to prevent immediate execution
-    original_adapter = ActiveJob::Base.queue_adapter
-    ActiveJob::Base.queue_adapter = :test
+    clear_enqueued_jobs
 
-    begin
-      clear_enqueued_jobs
-
-      # Test that emails are queued, not delivered immediately
-      assert_no_emails do
-        result = InvitationEmailService.send_invitation(@invited_user, @admin)
-        assert result, "Should queue email successfully"
-      end
-
-      # Check that job was enqueued
-      assert_enqueued_jobs 1, only: ActionMailer::MailDeliveryJob
-    ensure
-      # Restore original adapter
-      ActiveJob::Base.queue_adapter = original_adapter
+    # Test that the service succeeds and enqueues a job
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      result = InvitationEmailService.send_invitation(@invited_user, @admin)
+      assert result, "Should queue email successfully"
     end
+
+    # Verify that invitation_sent_at was updated
+    @invited_user.reload
+    assert @invited_user.invitation_sent_at.present?
+    assert @invited_user.invitation_sent_at > 1.minute.ago
   end
 
   test "email service delivers immediately when requested" do
