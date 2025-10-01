@@ -22,6 +22,7 @@ Rails.application.routes.draw do
         patch :deactivate
         patch :promote
         patch :demote
+        patch :resend_invitation
         delete :destroy
       end
       collection do
@@ -96,6 +97,11 @@ Rails.application.routes.draw do
 
   # Social media images for profiles
   get "social/:username/image", to: "social_images#profile_image", as: :social_profile_image, constraints: { username: /[a-zA-Z0-9_-]+/ }
+
+  # Invitation claiming routes - public access for profile claiming
+  get "invitations/:token", to: "invitations#show", as: :invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
+  get "invitations/:token/claim", to: "invitations#claim", as: :claim_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
+  patch "invitations/:token/claim", to: "invitations#update", as: :update_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
 
   # Public profile routes - for sharing and visitor access
   # Uses username with FriendlyId for clean URLs like /gustavo
