@@ -1,6 +1,6 @@
 class Admin::UsersController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_user, only: [:show, :edit, :update, :destroy, :suspend, :unsuspend, :activate, :deactivate, :promote, :demote, :resend_invitation]
+  before_action :set_user, only: [:show, :edit, :update, :destroy, :suspend, :unsuspend, :activate, :deactivate, :promote, :demote, :resend_invitation, :generate_invitation_link]
 
   include Pagy::Backend
 
@@ -88,19 +88,27 @@ class Admin::UsersController < ApplicationController
 
     @user = User.new(user_creation_params)
     @user.account_status = :invited
+    send_email = params[:send_invitation_email] != '0'
 
     if @user.save
-      # Send invitation email and generate token
-      @user.invite!(admin: current_user, send_email: true)
+      # Generate invitation token and optionally send email
+      @user.invite!(admin: current_user, send_email: send_email)
 
       log_admin_activity('create_invited_user', {
         username: @user.username,
         email: @user.email,
         role: @user.role,
-        invitation_sent: true
+        invitation_sent: send_email
       })
 
-      redirect_to admin_user_path(@user), notice: "User '#{@user.username}' has been created and invitation sent to #{@user.email}."
+      if send_email
+        redirect_to admin_user_path(@user), notice: "User '#{@user.username}' has been created and invitation sent to #{@user.email}."
+      else
+        # Store invitation link in flash for display
+        invitation_url = "#{request.base_url}/invitations/#{@user.invitation_token}/claim"
+        flash[:invitation_link] = invitation_url
+        redirect_to admin_user_path(@user), notice: "User '#{@user.username}' has been created. Invitation link generated (no email sent)."
+      end
     else
       render :new, status: :unprocessable_entity
     end
@@ -198,6 +206,27 @@ class Admin::UsersController < ApplicationController
       redirect_to admin_user_path(@user), notice: 'New invitation has been sent (previous invitation expired).'
     else
       redirect_to admin_user_path(@user), alert: 'Cannot resend invitation for this user.'
+    end
+  end
+
+  def generate_invitation_link
+    authorize [:admin, @user], :resend_invitation?
+
+    if @user.invited?
+      # Generate new token if expired or refresh existing one
+      if @user.invitation_expired? || @user.invitation_token.blank?
+        @user.invite!(admin: current_user, send_email: false)
+        log_admin_activity('generate_new_invitation_link', {
+          username: @user.username,
+          email: @user.email
+        })
+      end
+
+      invitation_url = "#{request.base_url}/invitations/#{@user.invitation_token}/claim"
+      flash[:invitation_link] = invitation_url
+      redirect_to admin_user_path(@user), notice: 'Invitation link generated successfully (no email sent).'
+    else
+      redirect_to admin_user_path(@user), alert: 'Cannot generate invitation link for this user.'
     end
   end
 

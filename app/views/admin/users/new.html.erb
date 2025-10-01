@@ -25,7 +25,7 @@
         <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
           <%= form_with model: [:admin, @user], local: true, 
                         class: "space-y-6 p-6", 
-                        data: { controller: "admin-profile-form" },
+                        data: { controller: "admin-profile-form admin-invitation-toggle" },
                         multipart: true do |form| %>
             
             <!-- Error Messages -->
@@ -306,15 +306,45 @@
                   Private admin notes - not visible to the user
                 </p>
               </div>
+
+              <hr class="border-secondary-200 dark:border-secondary-700">
+
+              <!-- Invitation Options -->
+              <div>
+                <h3 class="text-lg font-medium text-secondary-900 dark:text-white mb-4">Invitation Options</h3>
+                <div class="space-y-4">
+                  <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                      <%= check_box_tag :send_invitation_email, '1', true, 
+                          id: 'send_invitation_email',
+                          class: "focus:ring-primary-500 h-4 w-4 text-primary-600 border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 rounded",
+                          data: { 
+                            'admin-invitation-toggle-target': 'checkbox',
+                            'action': 'change->admin-invitation-toggle#toggle'
+                          } %>
+                    </div>
+                    <div class="ml-3 text-sm">
+                      <%= label_tag :send_invitation_email, "Send invitation email automatically", 
+                          class: "font-medium text-secondary-700 dark:text-secondary-300" %>
+                      <p class="text-secondary-500 dark:text-secondary-400">
+                        When checked, an invitation email will be sent to the user. When unchecked, only the invitation link will be generated for manual sharing.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Form Actions -->
             <div class="flex items-center justify-end space-x-4 pt-6 border-t border-secondary-200 dark:border-secondary-700">
               <%= link_to "Cancel", admin_users_path, 
                   class: "inline-flex items-center px-4 py-2 border border-secondary-300 shadow-sm text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 dark:bg-secondary-700 dark:border-secondary-600 dark:text-secondary-200 dark:hover:bg-secondary-600" %>
-              <%= form.submit "Create Profile & Send Invitation", 
-                  class: "inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500",
-                  data: { disable_with: "Creating..." } %>
+              <button type="submit" 
+                  class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  data-disable-with="Creating..."
+                  data-admin-invitation-toggle-target="submitButton">
+                <span data-admin-invitation-toggle-target="submitText">Create Profile & Send Invitation</span>
+              </button>
             </div>
           <% end %>
         </div>
