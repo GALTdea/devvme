@@ -33,7 +33,7 @@ gem "csv"
 
 # Markdown processing with syntax highlighting
 gem "redcarpet", "~> 3.6"
-gem "rouge", "~> 4.2"
+gem "rouge", "~> 4.6"
 
 # Fast pagination for Rails [https://github.com/ddnexus/pagy]
 gem "pagy", "~> 9.2"
