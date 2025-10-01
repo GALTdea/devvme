@@ -20,32 +20,8 @@
               <h1 class="text-2xl font-bold text-secondary-900 dark:text-white"><%= @user.display_name %></h1>
               <p class="text-sm text-secondary-600 dark:text-secondary-400">@<%= @user.username %></p>
               <div class="flex items-center space-x-4 mt-2">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                       <%= case @user.role
-                           when 'super_admin'
-                             'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                           when 'admin' 
-                             'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                           else
-                             'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                           end %>">
-                  <%= @user.role.humanize %>
-                </span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                       <%= case @user.account_status
-                           when 'pending_activation'
-                             'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                           when 'invited'
-                             'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
-                           when 'active'
-                             'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                           when 'suspended'
-                             'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                           when 'deactivated'
-                             'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                           end %>">
-                  <%= @user.account_status.humanize %>
-                </span>
+                <%= user_role_badge(@user) %>
+                <%= user_status_badge(@user) %>
               </div>
             </div>
           </div>
@@ -57,6 +33,15 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Breadcrumbs -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <%= admin_breadcrumbs(
+      { text: "Admin Dashboard", path: admin_root_path },
+      { text: "User Management", path: admin_users_path },
+      { text: @user.display_name, path: admin_user_path(@user) }
+    ) %>
   </div>
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

@@ -4,6 +4,8 @@ class InvitationsController < ApplicationController
 
   # GET /invitations/:token/claim
   def show
+    authorize @user, :show?, policy_class: InvitationPolicy
+
     # Show the invitation details and claim form
     @page_title = "Claim Your Profile - #{@user.display_name}"
     @invitation_data = build_invitation_data
@@ -26,6 +28,8 @@ class InvitationsController < ApplicationController
 
   # GET /invitations/:token/claim
   def claim
+    authorize @user, :claim?, policy_class: InvitationPolicy
+
     # Show the claim form
     @page_title = "Complete Your Profile - #{@user.display_name}"
     @invitation_data = build_invitation_data
@@ -48,6 +52,8 @@ class InvitationsController < ApplicationController
 
   # PATCH/PUT /invitations/:token/claim
   def update
+    authorize @user, :update?, policy_class: InvitationPolicy
+
     # Process the claim form submission
     @invitation_data = build_invitation_data
 

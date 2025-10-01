@@ -1,11 +1,12 @@
 class Admin::UsersController < ApplicationController
-  before_action :require_admin
+  before_action :authenticate_user!
   before_action :set_user, only: [:show, :edit, :update, :destroy, :suspend, :unsuspend, :activate, :deactivate, :promote, :demote, :resend_invitation]
-  before_action :require_super_admin, only: [:new, :create, :destroy, :bulk_delete, :promote, :demote, :bulk_promote, :bulk_demote]
 
   include Pagy::Backend
 
   def index
+    authorize [:admin, User], :index?
+
     @pagy, @users = pagy(
       User.includes(:projects, :blog_posts)
           .order(params[:sort] || 'created_at DESC'),
@@ -47,6 +48,8 @@ class Admin::UsersController < ApplicationController
   end
 
   def show
+    authorize [:admin, @user], :show?
+
     @user_activities = @user.admin_activities.recent.limit(10) if @user.can_access_admin?
     @user_stats = {
       projects_count: @user.projects.count,
@@ -74,11 +77,15 @@ class Admin::UsersController < ApplicationController
   end
 
   def new
+    authorize [:admin, User], :new?
+
     @user = User.new
     @user.role = 'user' # Default role
   end
 
   def create
+    authorize [:admin, User], :create?
+
     @user = User.new(user_creation_params)
     @user.account_status = :invited
 
@@ -104,6 +111,8 @@ class Admin::UsersController < ApplicationController
   end
 
   def destroy
+    authorize [:admin, @user], :destroy?
+
     username = @user.username
     @user.destroy!
     log_admin_activity('delete_user', { username: username })
@@ -111,28 +120,38 @@ class Admin::UsersController < ApplicationController
   end
 
   def suspend
+    authorize [:admin, @user], :suspend?
+
     reason = params[:suspension_reason] || 'Suspended by admin'
     @user.suspend!(reason: reason, admin: current_user)
     redirect_to admin_user_path(@user), notice: 'User has been suspended.'
   end
 
   def unsuspend
+    authorize [:admin, @user], :unsuspend?
+
     @user.unsuspend!(admin: current_user)
     redirect_to admin_user_path(@user), notice: 'User has been unsuspended.'
   end
 
   def activate
+    authorize [:admin, @user], :activate?
+
     @user.activate_account!(admin: current_user)
     redirect_to admin_user_path(@user), notice: 'User account has been activated.'
   end
 
   def deactivate
+    authorize [:admin, @user], :deactivate?
+
     reason = params[:reason] || 'Account deactivated by admin'
     @user.deactivate_account!(reason: reason, admin: current_user)
     redirect_to admin_user_path(@user), notice: 'User account has been deactivated.'
   end
 
   def promote
+    authorize [:admin, @user], :promote?
+
     old_role = @user.role
     if @user.update(role: params[:role] || 'admin')
       log_admin_activity('promote_user', {
@@ -147,6 +166,8 @@ class Admin::UsersController < ApplicationController
   end
 
   def demote
+    authorize [:admin, @user], :demote?
+
     old_role = @user.role
     @user.update!(role: 'user')
     log_admin_activity('demote_user', {
@@ -158,6 +179,8 @@ class Admin::UsersController < ApplicationController
   end
 
   def resend_invitation
+    authorize [:admin, @user], :resend_invitation?
+
     if @user.invited? && @user.invitation_pending?
       @user.invite!(admin: current_user, send_email: true)
       log_admin_activity('resend_invitation', {
@@ -179,6 +202,8 @@ class Admin::UsersController < ApplicationController
   end
 
   def bulk_suspend
+    authorize [:admin, User], :bulk_suspend?
+
     user_ids = params[:user_ids] || []
     reason = params[:suspension_reason] || 'Bulk suspension by admin'
 
@@ -201,6 +226,8 @@ class Admin::UsersController < ApplicationController
   end
 
   def bulk_delete
+    authorize [:admin, User], :bulk_delete?
+
     user_ids = params[:user_ids] || []
 
     deleted_count = 0
@@ -224,6 +251,8 @@ class Admin::UsersController < ApplicationController
   end
 
   def bulk_promote
+    authorize [:admin, User], :bulk_promote?
+
     user_ids = params[:user_ids] || []
     role = params[:role] || 'admin'
 
@@ -246,6 +275,8 @@ class Admin::UsersController < ApplicationController
   end
 
   def bulk_demote
+    authorize [:admin, User], :bulk_demote?
+
     user_ids = params[:user_ids] || []
 
     demoted_count = 0
