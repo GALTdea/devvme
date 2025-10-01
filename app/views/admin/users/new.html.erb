@@ -1,0 +1,386 @@
+<% content_for :title, "Create User Profile - Admin" %>
+
+<div class="min-h-screen bg-secondary-50 dark:bg-secondary-900">
+  <!-- Header -->
+  <div class="bg-white dark:bg-secondary-800 shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="py-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-secondary-900 dark:text-white">Create User Profile</h1>
+            <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
+              Create a comprehensive developer profile that will be sent as an invitation
+            </p>
+          </div>
+          <div class="flex items-center space-x-4">
+            <%= link_to admin_users_path, class: "inline-flex items-center px-4 py-2 border border-secondary-300 shadow-sm text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 dark:bg-secondary-700 dark:border-secondary-600 dark:text-secondary-200 dark:hover:bg-secondary-600" do %>
+              ← Back to Users
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Main Form -->
+      <div class="lg:col-span-2">
+        <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+          <%= form_with model: [:admin, @user], local: true, 
+                        class: "space-y-6 p-6", 
+                        data: { controller: "admin-profile-form" },
+                        multipart: true do |form| %>
+            
+            <!-- Error Messages -->
+            <% if @user.errors.any? %>
+              <div id="alert-danger" class="flex items-center p-4 mb-4 text-red-800 rounded-lg bg-red-50 dark:bg-secondary-800 dark:text-red-400" role="alert">
+                <svg class="flex-shrink-0 w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                </svg>
+                <span class="sr-only">Error</span>
+                <div class="ms-3 text-sm font-medium">
+                  <% @user.errors.full_messages.each do |message| %>
+                    <div class="error-message"><%= message %></div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Basic Information -->
+            <div class="space-y-6">
+              <div>
+                <h3 class="text-lg font-medium text-secondary-900 dark:text-white mb-4">Basic Information</h3>
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  
+                  <!-- Username -->
+                  <div>
+                    <%= form.label :username, class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                    <%= form.text_field :username, 
+                        class: "mt-1 block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm #{'border-red-300 focus:border-red-500 focus:ring-red-500' if @user.errors[:username].any?}",
+                        placeholder: "e.g., john_doe",
+                        data: { action: "input->admin-profile-form#updatePreview" } %>
+                    <% if @user.errors[:username].any? %>
+                      <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        <%= @user.errors[:username].first %>
+                      </div>
+                    <% else %>
+                      <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                        3-30 characters, letters, numbers, hyphens, and underscores only
+                      </p>
+                    <% end %>
+                  </div>
+
+                  <!-- Email -->
+                  <div>
+                    <%= form.label :email, class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                    <%= form.email_field :email, 
+                        class: "mt-1 block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm #{'border-red-300 focus:border-red-500 focus:ring-red-500' if @user.errors[:email].any?}",
+                        placeholder: "john@example.com",
+                        data: { action: "input->admin-profile-form#updatePreview" } %>
+                    <% if @user.errors[:email].any? %>
+                      <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        <%= @user.errors[:email].first %>
+                      </div>
+                    <% else %>
+                      <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                        Invitation will be sent to this email address
+                      </p>
+                    <% end %>
+                  </div>
+
+                  <!-- Full Name -->
+                  <div>
+                    <%= form.label :full_name, class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                    <%= form.text_field :full_name, 
+                        class: "mt-1 block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm #{'border-red-300 focus:border-red-500 focus:ring-red-500' if @user.errors[:full_name].any?}",
+                        placeholder: "John Doe",
+                        data: { action: "input->admin-profile-form#updatePreview" } %>
+                    <% if @user.errors[:full_name].any? %>
+                      <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        <%= @user.errors[:full_name].first %>
+                      </div>
+                    <% end %>
+                  </div>
+
+                  <!-- Role -->
+                  <div>
+                    <%= form.label :role, class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                    <%= form.select :role, 
+                        options_for_select([
+                          ['User', 'user'],
+                          ['Admin', 'admin'],
+                          ['Super Admin', 'super_admin']
+                        ], @user.role),
+                        {},
+                        { class: "mt-1 block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" } %>
+                    <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                      Assign appropriate role for this user
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="border-secondary-200 dark:border-secondary-700">
+
+              <!-- Professional Information -->
+              <div class="space-y-6">
+                <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Professional Information</h3>
+                
+                <!-- Job Title -->
+                <div>
+                  <%= form.label :job_title, class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                  <%= form.text_field :job_title, 
+                      class: "mt-1 block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm",
+                      placeholder: "Senior Full Stack Developer",
+                      data: { action: "input->admin-profile-form#updatePreview" } %>
+                  <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                    Current job title or desired position
+                  </p>
+                </div>
+
+                <!-- Location -->
+                <div>
+                  <%= form.label :location, class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                  <%= form.text_field :location, 
+                      class: "mt-1 block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm",
+                      placeholder: "San Francisco, CA",
+                      data: { action: "input->admin-profile-form#updatePreview" } %>
+                  <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                    City, State/Country or "Remote"
+                  </p>
+                </div>
+
+                <!-- Headline -->
+                <div>
+                  <%= form.label :headline, class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                  <%= form.text_field :headline, 
+                      class: "mt-1 block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm",
+                      placeholder: "Building scalable web applications with modern technologies",
+                      data: { action: "input->admin-profile-form#updatePreview" } %>
+                  <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                    A short, compelling description of what they do
+                  </p>
+                </div>
+
+                <!-- Bio -->
+                <div>
+                  <%= form.label :bio, class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                  <%= form.text_area :bio, 
+                      class: "mt-1 block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm",
+                      rows: 4,
+                      placeholder: "Tell us about their background, experience, and what they're passionate about...",
+                      data: { action: "input->admin-profile-form#updatePreview" } %>
+                  <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                    Detailed professional background and interests
+                  </p>
+                </div>
+
+                <!-- Skills -->
+                <div data-controller="admin-skills-input" data-admin-skills-input-initial-value="">
+                  <%= form.label :skills, class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                  <div class="mt-1 relative">
+                    <input type="text" 
+                           data-admin-skills-input-target="input"
+                           class="block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                           placeholder="Type skills and press Enter (e.g., JavaScript, React, Node.js)">
+                    
+                    <div data-admin-skills-input-target="skillsList" class="mt-2 flex flex-wrap gap-2"></div>
+                    
+                    <!-- Hidden field to store skills -->
+                    <%= form.hidden_field :skills, data: { admin_skills_input_target: "hiddenField" } %>
+                  </div>
+                  <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                    Add technical skills, programming languages, frameworks, etc.
+                  </p>
+                </div>
+              </div>
+
+              <hr class="border-secondary-200 dark:border-secondary-700">
+
+              <!-- Contact Information -->
+              <div class="space-y-6">
+                <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Contact Information</h3>
+                
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <!-- Contact Email -->
+                  <div>
+                    <%= form.label :contact_email, "Public Contact Email", class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                    <%= form.email_field :contact_email, 
+                        class: "mt-1 block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm",
+                        placeholder: "contact@johndoe.com" %>
+                    <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                      Public email for professional inquiries (optional)
+                    </p>
+                  </div>
+
+                  <!-- Phone -->
+                  <div>
+                    <%= form.label :phone, class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                    <%= form.text_field :phone, 
+                        class: "mt-1 block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm",
+                        placeholder: "+1 (555) 123-4567" %>
+                    <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                      Phone number (optional)
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="border-secondary-200 dark:border-secondary-700">
+
+              <!-- Social Links -->
+              <div class="space-y-6">
+                <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Social Links</h3>
+                
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <!-- GitHub -->
+                  <div>
+                    <%= form.label :github_url, "GitHub Profile", class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                      <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-secondary-300 dark:border-secondary-600 bg-secondary-50 dark:bg-secondary-600 text-secondary-500 dark:text-secondary-400 text-sm">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                      </span>
+                      <%= form.url_field :github_url, 
+                          class: "flex-1 block w-full rounded-none rounded-r-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm",
+                          placeholder: "https://github.com/username" %>
+                    </div>
+                  </div>
+
+                  <!-- LinkedIn -->
+                  <div>
+                    <%= form.label :linkedin_url, "LinkedIn Profile", class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                      <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-secondary-300 dark:border-secondary-600 bg-secondary-50 dark:bg-secondary-600 text-secondary-500 dark:text-secondary-400 text-sm">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                      </span>
+                      <%= form.url_field :linkedin_url, 
+                          class: "flex-1 block w-full rounded-none rounded-r-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm",
+                          placeholder: "https://linkedin.com/in/username" %>
+                    </div>
+                  </div>
+
+                  <!-- Website -->
+                  <div>
+                    <%= form.label :website_url, "Personal Website", class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                      <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-secondary-300 dark:border-secondary-600 bg-secondary-50 dark:bg-secondary-600 text-secondary-500 dark:text-secondary-400 text-sm">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
+                        </svg>
+                      </span>
+                      <%= form.url_field :website_url, 
+                          class: "flex-1 block w-full rounded-none rounded-r-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm",
+                          placeholder: "https://johndoe.com" %>
+                    </div>
+                  </div>
+
+                  <!-- Twitter -->
+                  <div>
+                    <%= form.label :twitter_url, "Twitter Profile", class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                      <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-secondary-300 dark:border-secondary-600 bg-secondary-50 dark:bg-secondary-600 text-secondary-500 dark:text-secondary-400 text-sm">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                        </svg>
+                      </span>
+                      <%= form.url_field :twitter_url, 
+                          class: "flex-1 block w-full rounded-none rounded-r-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm",
+                          placeholder: "https://twitter.com/username" %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="border-secondary-200 dark:border-secondary-700">
+
+              <!-- Admin Notes -->
+              <div>
+                <h3 class="text-lg font-medium text-secondary-900 dark:text-white mb-4">Admin Notes</h3>
+                <%= form.label :admin_notes, class: "block text-sm font-medium text-secondary-700 dark:text-secondary-300" %>
+                <%= form.text_area :admin_notes, 
+                    class: "mt-1 block w-full rounded-md border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm",
+                    rows: 3,
+                    placeholder: "Internal notes about this user (not visible to the user)" %>
+                <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                  Private admin notes - not visible to the user
+                </p>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-secondary-200 dark:border-secondary-700">
+              <%= link_to "Cancel", admin_users_path, 
+                  class: "inline-flex items-center px-4 py-2 border border-secondary-300 shadow-sm text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 dark:bg-secondary-700 dark:border-secondary-600 dark:text-secondary-200 dark:hover:bg-secondary-600" %>
+              <%= form.submit "Create Profile & Send Invitation", 
+                  class: "inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500",
+                  data: { disable_with: "Creating..." } %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Profile Preview Sidebar -->
+      <div class="lg:col-span-1">
+        <div class="bg-white dark:bg-secondary-800 shadow rounded-lg sticky top-6">
+          <div class="px-6 py-4 border-b border-secondary-200 dark:border-secondary-700">
+            <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Profile Preview</h3>
+            <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
+              Live preview of how the profile will look
+            </p>
+          </div>
+          
+          <div class="px-6 py-4" data-admin-profile-form-target="preview">
+            <!-- Profile preview will be populated by JavaScript -->
+            <div class="text-center py-8">
+              <div class="h-16 w-16 bg-secondary-200 dark:bg-secondary-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <svg class="w-8 h-8 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <p class="text-sm text-secondary-500 dark:text-secondary-400">
+                Fill in the form to see a preview
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tips Card -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 shadow rounded-lg mt-6">
+          <div class="px-6 py-4 border-b border-blue-200 dark:border-blue-800">
+            <h3 class="text-lg font-medium text-blue-900 dark:text-blue-100">💡 Profile Creation Tips</h3>
+          </div>
+          <div class="px-6 py-4">
+            <ul class="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+              <li class="flex items-start">
+                <span class="text-blue-500 mr-2">•</span>
+                <span>Complete profiles get 3x more engagement</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-blue-500 mr-2">•</span>
+                <span>Add 5-10 relevant skills for better discoverability</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-blue-500 mr-2">•</span>
+                <span>Include social links to showcase their work</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-blue-500 mr-2">•</span>
+                <span>Write a compelling bio that tells their story</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-blue-500 mr-2">•</span>
+                <span>The invitation email will include a profile preview</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

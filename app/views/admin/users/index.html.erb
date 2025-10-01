@@ -13,6 +13,14 @@
             </p>
           </div>
           <div class="flex items-center space-x-4">
+            <% if current_user.super_admin? %>
+              <%= link_to new_admin_user_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Create User Profile
+              <% end %>
+            <% end %>
             <%= link_to admin_root_path, class: "inline-flex items-center px-4 py-2 border border-secondary-300 shadow-sm text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 dark:bg-secondary-700 dark:border-secondary-600 dark:text-secondary-200 dark:hover:bg-secondary-600" do %>
               ← Back to Dashboard
             <% end %>
@@ -124,6 +132,7 @@
               ['All Status', ''], 
               ['Active', 'active'], 
               ['Pending Activation', 'pending_activation'],
+              ['Invited', 'invited'],
               ['Suspended', 'suspended'],
               ['Deactivated', 'deactivated']
             ], params[:status]), 
@@ -200,6 +209,8 @@
                          <%= case user.account_status
                              when 'pending_activation'
                                'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                             when 'invited'
+                               'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
                              when 'active'
                                'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                              when 'suspended'
@@ -234,6 +245,11 @@
                             method: :patch,
                             data: { confirm: "Are you sure you want to activate this user's account?" },
                             class: "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 bg-transparent border-0 p-0 cursor-pointer underline" %>
+                      <% elsif user.invited? %>
+                        <%= button_to "Resend Invitation", resend_invitation_admin_user_path(user), 
+                            method: :patch,
+                            data: { confirm: "Are you sure you want to resend the invitation email?" },
+                            class: "text-amber-600 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300 bg-transparent border-0 p-0 cursor-pointer underline" %>
                       <% elsif user.active? %>
                         <%= button_to "Deactivate", deactivate_admin_user_path(user), 
                             method: :patch,

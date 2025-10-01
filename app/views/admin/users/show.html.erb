@@ -35,6 +35,8 @@
                        <%= case @user.account_status
                            when 'pending_activation'
                              'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                           when 'invited'
+                             'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
                            when 'active'
                              'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                            when 'suspended'
@@ -104,6 +106,28 @@
                   </dd>
                 </div>
               <% end %>
+              <% if @user.invited? %>
+                <div class="sm:col-span-2">
+                  <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Invitation Details</dt>
+                  <dd class="mt-1 text-sm text-secondary-900 dark:text-white">
+                    <% if @user.invitation_sent_at.present? %>
+                      <p><strong>Invitation Sent:</strong> <%= @user.invitation_sent_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+                      <p><strong>Status:</strong> 
+                        <% if @user.invitation_expired? %>
+                          <span class="text-red-600 dark:text-red-400">Expired</span>
+                        <% else %>
+                          <span class="text-amber-600 dark:text-amber-400">Pending (expires in <%= pluralize((@user.invitation_sent_at + 30.days - Time.current).to_i / 1.day, 'day') %>)</span>
+                        <% end %>
+                      </p>
+                      <p><strong>Invitation Link:</strong> 
+                        <%= link_to "View Profile", "/#{@user.username}", target: "_blank", class: "text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300" %>
+                      </p>
+                    <% else %>
+                      <p class="text-amber-600 dark:text-amber-400">Invitation not yet sent</p>
+                    <% end %>
+                  </dd>
+                </div>
+              <% end %>
               <% if @user.bio.present? %>
                 <div class="sm:col-span-2">
                   <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Bio</dt>
@@ -129,6 +153,11 @@
                     method: :patch,
                     data: { confirm: "Are you sure you want to activate this user's account?" },
                     class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+              <% elsif @user.invited? %>
+                <%= button_to "Resend Invitation", resend_invitation_admin_user_path(@user), 
+                    method: :patch,
+                    data: { confirm: "Are you sure you want to resend the invitation email?" },
+                    class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500" %>
               <% elsif @user.active? %>
                 <%= button_to "Deactivate Account", deactivate_admin_user_path(@user), 
                     method: :patch,
