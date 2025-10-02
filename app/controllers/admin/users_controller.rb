@@ -120,6 +120,9 @@ class Admin::UsersController < ApplicationController
 
   def destroy
     authorize [:admin, @user], :destroy?
+    # Rails.logger.info "Destroying user: #{@user.username}"
+    puts "This is the policy: #{policy(@user).class}##{action_name}?"
+    Rails.logger.info "POLICY: #{policy(@user).class}##{action_name}?"
 
     username = @user.username
     @user.destroy!

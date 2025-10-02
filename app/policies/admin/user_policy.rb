@@ -1,3 +1,4 @@
+# app/policies/admin/user_policy.rb
 class Admin::UserPolicy < ApplicationPolicy
   # Admin-specific user management policy
 
@@ -34,9 +35,10 @@ class Admin::UserPolicy < ApplicationPolicy
   end
 
   # User deletion - only super admins
-  def destroy?
-    user&.super_admin? || false
-  end
+  # def destroy?
+  #   debugger
+  #   user&.super_admin? || false
+  # end
 
   # Account status management
   def activate?
@@ -95,7 +97,7 @@ class Admin::UserPolicy < ApplicationPolicy
 
   # Override methods to include self-targeting checks
   def destroy?
-    super && can_target_user?
+    user&.super_admin? && can_target_user?
   end
 
   def suspend?
