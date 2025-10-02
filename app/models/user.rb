@@ -3,14 +3,17 @@ class User < ApplicationRecord
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  # Note: We handle email validation manually to allow reusing emails from deactivated users
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :rememberable
 
   # Override Devise's password validation for invited users
   def password_required?
     return false if invited? # Invited users don't need password initially
     return false if new_record? && will_be_invited? # Users about to be invited don't need password
-    super
+
+    # Since we removed :validatable, implement the default Devise logic
+    !persisted? || !password.nil? || !password_confirmation.nil?
   end
 
   # Helper method to check if user will be invited (used during creation)
@@ -69,6 +72,17 @@ class User < ApplicationRecord
                       length: { in: 3..30 },
                       format: { with: /\A[a-zA-Z0-9_-]+\z/,
                                message: "can only contain letters, numbers, hyphens, and underscores" }
+
+  # Custom email validation that allows reusing emails from deactivated users
+  validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :email, uniqueness: {
+    case_sensitive: false,
+    conditions: -> { where.not(account_status: ['deactivated', 'suspended']) }
+  }
+
+  # Password validation (since we removed :validatable from Devise)
+  validates :password, presence: true, length: { minimum: 6 }, if: :password_required?
+  validates :password, confirmation: true, if: :password_required?
 
   validates :full_name, length: { maximum: 100 }
   validates :bio, length: { maximum: 500 }
