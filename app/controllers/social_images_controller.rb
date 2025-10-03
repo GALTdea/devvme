@@ -5,9 +5,11 @@ class SocialImagesController < ApplicationController
   # Serve social media images for profiles
   def profile_image
     username = params[:username]
+    Rails.logger.info "Looking for user with username: #{username}"
 
     begin
       user = User.friendly.find(username)
+      Rails.logger.info "Found user: #{user.inspect}"
 
       # Check if user profile is accessible
       unless user.active?

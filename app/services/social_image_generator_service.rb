@@ -1,5 +1,6 @@
 class SocialImageGeneratorService
   include Rails.application.routes.url_helpers
+  require "base64"
 
   def initialize(user)
     @user = user
@@ -92,7 +93,20 @@ class SocialImageGeneratorService
     png_path = Rails.root.join("tmp", png_filename)
 
     # Use ImageMagick to convert SVG to PNG
-    system("convert -background none -size 1200x630 #{svg_path} #{png_path}")
+    # Use magick command for ImageMagick v7+ with proper color depth
+    conversion_result = system("magick -background transparent -size 1200x630 -type TrueColor #{svg_path} #{png_path}")
+
+    # Debug: Check if conversion worked
+    if File.exist?(png_path)
+      file_info = `file #{png_path}`.strip
+      Rails.logger.info "ImageMagick conversion result: #{file_info}"
+
+      # If it's still 1-bit, try alternative approach
+      if file_info.include?("1-bit")
+        Rails.logger.info "Retrying with different ImageMagick options"
+        system("magick -background transparent -size 1200x630 -depth 8 -type TrueColorAlpha #{svg_path} #{png_path}")
+      end
+    end
 
     # Clean up the SVG file
     File.delete(svg_path) if File.exist?(svg_path)
@@ -101,35 +115,40 @@ class SocialImageGeneratorService
     File.exist?(png_path) ? png_path : svg_path
   end
 
-  def avatar_svg
-    if @user.avatar.attached?
-      # Use the user's avatar in the branded template
-      host_options = Rails.application.config.action_mailer.default_url_options
+      def avatar_svg
+        if @user.avatar.attached?
+          # Convert avatar to base64 for embedding in SVG
+          begin
+            avatar_data = @user.avatar.download
+            avatar_base64 = Base64.encode64(avatar_data).gsub(/\n/, "")
+            avatar_mime_type = @user.avatar.content_type
 
-      # Build the correct URL for production
-      if host_options[:port]
-        avatar_url = rails_blob_url(@user.avatar, host: "#{host_options[:host]}:#{host_options[:port]}")
-      else
-        avatar_url = rails_blob_url(@user.avatar, host: host_options[:host], protocol: host_options[:protocol] || "https")
+            <<~SVG
+              <defs>
+                <clipPath id="avatar-clip">
+                  <rect x="148" y="113" width="160" height="160" rx="20"/>
+                </clipPath>
+              </defs>
+              <image x="148" y="113" width="160" height="160" href="data:#{avatar_mime_type};base64,#{avatar_base64}" clip-path="url(#avatar-clip)"/>
+              <rect x="148" y="113" width="160" height="160" rx="20" fill="none" stroke="#667eea" stroke-width="3"/>
+            SVG
+          rescue => e
+            Rails.logger.error "Failed to process avatar for user #{@user.id}: #{e.message}"
+            # Fall back to placeholder if avatar processing fails
+            default_avatar_svg
+          end
+        else
+          # Default avatar placeholder
+          default_avatar_svg
+        end
       end
 
-      <<~SVG
-        <defs>
-          <clipPath id="avatar-clip">
-            <rect x="148" y="113" width="160" height="160" rx="20"/>
-          </clipPath>
-        </defs>
-        <image x="148" y="113" width="160" height="160" href="#{avatar_url}" clip-path="url(#avatar-clip)"/>
-        <rect x="148" y="113" width="160" height="160" rx="20" fill="none" stroke="#667eea" stroke-width="3"/>
-      SVG
-    else
-      # Default avatar placeholder
-      <<~SVG
-        <rect x="148" y="113" width="160" height="160" rx="20" fill="#667eea"/>
-        <text x="228" y="200" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="80" font-weight="bold">👨‍💻</text>
-      SVG
-    end
-  end
+      def default_avatar_svg
+        <<~SVG
+          <rect x="148" y="113" width="160" height="160" rx="20" fill="#667eea"/>
+          <text x="228" y="200" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="80" font-weight="bold">👨‍💻</text>
+        SVG
+      end
 
   def skills_svg(skills)
     return "" if skills.empty?
