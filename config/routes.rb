@@ -107,6 +107,9 @@ Rails.application.routes.draw do
     get :complete, on: :member
   end
 
+  # Main site social media image (must come before username route)
+  get "social/main/image", to: "social_images#main_image", as: :main_social_image
+
   # Social media images for profiles
   get "social/:username/image", to: "social_images#profile_image", as: :social_profile_image, constraints: { username: /[a-zA-Z0-9_-]+/ }
 

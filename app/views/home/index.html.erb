@@ -1,3 +1,17 @@
+<%# SEO Meta Tags for Social Media %>
+<% content_for :title, @seo_title %>
+<% content_for :meta_description, @seo_description %>
+<% content_for :canonical, tag.link(rel: "canonical", href: @seo_url) %>
+<% content_for :social_meta, enhanced_open_graph_tags(
+  title: @seo_title,
+  description: @seo_description,
+  image: @seo_image_url,
+  url: @seo_url,
+  type: "website",
+  image_alt: "Devv.me - Developer Portfolio Platform",
+  twitter_creator: "@devvme_app"
+) %>
+
 <% if user_signed_in? %>
   <!-- Authenticated User Dashboard -->
   <div class="max-w-screen-xl mx-auto px-4 py-8">

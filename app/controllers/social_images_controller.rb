@@ -42,6 +42,22 @@ class SocialImagesController < ApplicationController
     end
   end
 
+  # Serve main site social media image
+  def main_image
+    # Serve a static branded image for the main site
+    main_image_path = Rails.root.join("public", "images", "main-social-image.png")
+
+    if File.exist?(main_image_path)
+      send_file main_image_path,
+                type: "image/png",
+                disposition: "inline",
+                filename: "devvme_main_social_image.png"
+    else
+      # Return 404 if image doesn't exist
+      head :not_found
+    end
+  end
+
   private
 
   def generate_social_image(user)
