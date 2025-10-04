@@ -93,8 +93,10 @@ class SocialImageGeneratorService
     png_path = Rails.root.join("tmp", png_filename)
 
     # Use ImageMagick to convert SVG to PNG
-    # Use magick command for ImageMagick v7+ with proper color depth
-    conversion_result = system("magick -background transparent -size 1200x630 -type TrueColor #{svg_path} #{png_path}")
+    # Use convert command for ImageMagick v6 (Hatchbox default)
+    Rails.logger.info "Converting SVG to PNG with ImageMagick"
+    conversion_result = system("convert -background transparent -size 1200x630 -type TrueColor #{svg_path} #{png_path}")
+    Rails.logger.info "ImageMagick conversion result: #{conversion_result}"
 
     # Debug: Check if conversion worked
     if File.exist?(png_path)
@@ -104,15 +106,17 @@ class SocialImageGeneratorService
       # If it's still 1-bit, try alternative approach
       if file_info.include?("1-bit")
         Rails.logger.info "Retrying with different ImageMagick options"
-        system("magick -background transparent -size 1200x630 -depth 8 -type TrueColorAlpha #{svg_path} #{png_path}")
+        system("convert -background transparent -size 1200x630 -depth 8 -type TrueColorAlpha #{svg_path} #{png_path}")
       end
+
+      # Clean up the SVG file only if PNG conversion succeeded
+      File.delete(svg_path) if File.exist?(svg_path)
+      png_path
+    else
+      # Conversion failed, return SVG path and keep the SVG file
+      Rails.logger.warn "ImageMagick conversion failed, returning SVG file"
+      svg_path
     end
-
-    # Clean up the SVG file
-    File.delete(svg_path) if File.exist?(svg_path)
-
-    # Return PNG path if conversion succeeded, otherwise return SVG path
-    File.exist?(png_path) ? png_path : svg_path
   end
 
       def avatar_svg
