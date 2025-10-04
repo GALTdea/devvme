@@ -39,11 +39,16 @@ class SocialImageGeneratorService
         <defs>
           <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
           </linearGradient>
           <linearGradient id="card" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
-            <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.9" />
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f8fafc;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="badge" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
           </linearGradient>
         </defs>
 
@@ -51,35 +56,36 @@ class SocialImageGeneratorService
         <rect width="1200" height="630" fill="url(#bg)"/>
 
         <!-- Background pattern -->
-        <pattern id="dots" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-          <circle cx="30" cy="30" r="2" fill="white" opacity="0.1"/>
+        <pattern id="dots" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+          <circle cx="40" cy="40" r="3" fill="white" opacity="0.15"/>
         </pattern>
         <rect width="1200" height="630" fill="url(#dots)"/>
 
-        <!-- Main card -->
-        <rect x="100" y="65" width="1000" height="500" rx="24" fill="url(#card)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+        <!-- Main card with shadow -->
+        <rect x="100" y="65" width="1000" height="500" rx="24" fill="url(#card)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+        <rect x="100" y="65" width="1000" height="500" rx="24" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
 
         <!-- Avatar -->
         #{avatar_svg}
 
-        <!-- Badge -->
-        <rect x="348" y="113" width="180" height="32" rx="16" fill="#667eea"/>
-        <text x="438" y="135" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="600">DEVELOPER PROFILE</text>
+        <!-- Badge with improved styling -->
+        <rect x="348" y="113" width="200" height="36" rx="18" fill="url(#badge)"/>
+        <text x="448" y="137" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="700">DEVELOPER PROFILE</text>
 
-        <!-- Name -->
-        <text x="348" y="200" fill="#1a202c" font-family="Arial, sans-serif" font-size="48" font-weight="700">#{name}</text>
+        <!-- Name with better contrast -->
+        <text x="348" y="200" fill="#1a202c" font-family="Arial, sans-serif" font-size="48" font-weight="800">#{name}</text>
 
-        <!-- Username -->
-        <text x="348" y="240" fill="#4a5568" font-family="Arial, sans-serif" font-size="24" font-weight="500">@#{username}</text>
+        <!-- Username with better styling -->
+        <text x="348" y="240" fill="#4a5568" font-family="Arial, sans-serif" font-size="24" font-weight="600">@#{username}</text>
 
-        <!-- Tagline -->
-        <text x="348" y="280" fill="#2d3748" font-family="Arial, sans-serif" font-size="20" font-weight="500">A developer profile worth sharing</text>
+        <!-- Tagline with better visibility -->
+        <text x="348" y="280" fill="#2d3748" font-family="Arial, sans-serif" font-size="20" font-weight="600">A developer profile worth sharing</text>
 
         <!-- Skills -->
         #{skills_svg(skills)}
 
-        <!-- Branding -->
-        <text x="1076" y="590" text-anchor="end" fill="rgba(255,255,255,0.8)" font-family="Arial, sans-serif" font-size="16" font-weight="500">devv.me</text>
+        <!-- Branding with better visibility -->
+        <text x="1076" y="590" text-anchor="end" fill="#667eea" font-family="Arial, sans-serif" font-size="18" font-weight="700">devv.me</text>
       </svg>
     SVG
 
@@ -149,8 +155,16 @@ class SocialImageGeneratorService
 
       def default_avatar_svg
         <<~SVG
-          <rect x="148" y="113" width="160" height="160" rx="20" fill="#667eea"/>
-          <text x="228" y="200" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="80" font-weight="bold">👨‍💻</text>
+          <defs>
+            <linearGradient id="avatar-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          <rect x="148" y="113" width="160" height="160" rx="20" fill="url(#avatar-bg)"/>
+          <circle cx="228" cy="173" r="50" fill="rgba(255,255,255,0.2)"/>
+          <text x="228" y="200" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="60" font-weight="bold">👨‍💻</text>
+          <rect x="148" y="113" width="160" height="160" rx="20" fill="none" stroke="#ffffff" stroke-width="3"/>
         SVG
       end
 
@@ -161,10 +175,10 @@ class SocialImageGeneratorService
     skills_html = ""
 
     skills.each_with_index do |skill, index|
-      x_pos = 348 + (index * 120)
+      x_pos = 348 + (index * 130)
       skills_html += <<~SVG
-        <rect x="#{x_pos}" y="#{y_pos}" width="100" height="24" rx="12" fill="rgba(102,126,234,0.1)" stroke="rgba(102,126,234,0.2)" stroke-width="1"/>
-        <text x="#{x_pos + 50}" y="#{y_pos + 16}" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12" font-weight="500">#{skill}</text>
+        <rect x="#{x_pos}" y="#{y_pos}" width="110" height="28" rx="14" fill="rgba(102,126,234,0.15)" stroke="rgba(102,126,234,0.3)" stroke-width="1"/>
+        <text x="#{x_pos + 55}" y="#{y_pos + 18}" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="13" font-weight="600">#{skill}</text>
       SVG
     end
 
