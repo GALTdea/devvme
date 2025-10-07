@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_30_190747) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_06_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -80,6 +80,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_30_190747) do
     t.index ["user_id", "published"], name: "index_blog_posts_on_user_id_and_published"
     t.index ["user_id"], name: "index_blog_posts_on_user_id"
     t.index ["views_count"], name: "index_blog_posts_on_views_count"
+  end
+
+  create_table "follows", force: :cascade do |t|
+    t.bigint "follower_id", null: false
+    t.bigint "followee_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["followee_id"], name: "index_follows_on_followee_id"
+    t.index ["follower_id", "followee_id"], name: "index_follows_on_follower_id_and_followee_id", unique: true
+    t.index ["follower_id"], name: "index_follows_on_follower_id"
   end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
@@ -218,6 +228,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_30_190747) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_activities", "users", column: "admin_id"
   add_foreign_key "blog_posts", "users"
+  add_foreign_key "follows", "users", column: "followee_id"
+  add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "profile_views", "users"
   add_foreign_key "projects", "users"
   add_foreign_key "visitor_page_views", "visitors"

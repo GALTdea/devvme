@@ -66,6 +66,31 @@ class User < ApplicationRecord
   # Visitor tracking associations
   has_many :visitors, dependent: :nullify
 
+  # Following relationships
+  has_many :active_follows, class_name: 'Follow', foreign_key: :follower_id, dependent: :destroy
+  has_many :passive_follows, class_name: 'Follow', foreign_key: :followee_id, dependent: :destroy
+  has_many :following, through: :active_follows, source: :followee
+  has_many :followers, through: :passive_follows, source: :follower
+
+  # Follow helpers
+  def can_be_followed?
+    active? || invited?
+  end
+
+  def follow!(other_user)
+    return false if other_user == self
+    return false unless other_user.can_be_followed?
+    active_follows.find_or_create_by!(followee: other_user)
+  end
+
+  def unfollow!(other_user)
+    active_follows.where(followee: other_user).destroy_all
+  end
+
+  def following?(other_user)
+    following.exists?(other_user.id)
+  end
+
   # Validations
   validates :username, presence: true,
                       uniqueness: { case_sensitive: false },

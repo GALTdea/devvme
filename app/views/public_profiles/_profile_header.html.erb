@@ -179,6 +179,7 @@
               </div>
             <% else %>
               <!-- Regular Action Buttons for Active Profiles -->
+              <%= render 'public_profiles/follow_button', user: user %>
               <div data-tooltip-target="share-tooltip" data-tooltip-trigger="hover">
                 <div data-controller="share-button"
                      data-share-button-url-value="<%= request.original_url %>"

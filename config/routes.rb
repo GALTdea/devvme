@@ -113,6 +113,10 @@ Rails.application.routes.draw do
   # Social media images for profiles
   get "social/:username/image", to: "social_images#profile_image", as: :social_profile_image, constraints: { username: /[a-zA-Z0-9_-]+/ }
 
+  # Follow/unfollow routes for public profiles
+  post ":username/follow", to: "follows#create", as: :follow_user, constraints: { username: /[a-zA-Z0-9_-]+/ }
+  delete ":username/follow", to: "follows#destroy", as: :unfollow_user, constraints: { username: /[a-zA-Z0-9_-]+/ }
+
   # Invitation claiming routes - public access for profile claiming
   get "invitations/:token", to: "invitations#show", as: :invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
   get "invitations/:token/claim", to: "invitations#claim", as: :claim_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
