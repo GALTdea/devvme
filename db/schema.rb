@@ -138,6 +138,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_06_000000) do
     t.index ["user_id"], name: "index_projects_on_user_id"
   end
 
+  create_table "user_digest_preferences", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.integer "frequency", default: 2, null: false
+    t.boolean "enabled", default: true, null: false
+    t.datetime "last_sent_at"
+    t.datetime "next_send_at"
+    t.boolean "include_blog_posts", default: true, null: false
+    t.boolean "include_projects", default: true, null: false
+    t.boolean "include_profile_updates", default: false, null: false
+    t.time "digest_time", default: "2000-01-01 08:00:00", null: false
+    t.string "timezone", default: "UTC", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["frequency", "enabled", "next_send_at"], name: "idx_on_frequency_enabled_next_send_at_d7bc4c43b0"
+    t.index ["next_send_at"], name: "index_user_digest_preferences_on_next_send_at"
+    t.index ["user_id"], name: "index_user_digest_preferences_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -232,6 +250,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_06_000000) do
   add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "profile_views", "users"
   add_foreign_key "projects", "users"
+  add_foreign_key "user_digest_preferences", "users"
   add_foreign_key "visitor_page_views", "visitors"
   add_foreign_key "visitors", "users"
 end

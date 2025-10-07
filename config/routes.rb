@@ -107,6 +107,11 @@ Rails.application.routes.draw do
     get :complete, on: :member
   end
 
+  # Digest preferences routes
+  resource :digest_preferences, only: [:show, :update] do
+    get :unsubscribe, on: :member
+  end
+
   # Main site social media image (must come before username route)
   get "social/main/image", to: "social_images#main_image", as: :main_social_image
 

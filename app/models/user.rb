@@ -72,6 +72,9 @@ class User < ApplicationRecord
   has_many :following, through: :active_follows, source: :followee
   has_many :followers, through: :passive_follows, source: :follower
 
+  # Digest preferences
+  has_one :digest_preference, class_name: 'UserDigestPreference', dependent: :destroy
+
   # Follow helpers
   def can_be_followed?
     active? || invited?
@@ -167,6 +170,9 @@ class User < ApplicationRecord
 
   # Set new users to pending activation status
   before_validation :set_pending_activation, on: :create
+
+  # Create digest preferences for new users
+  after_create :create_digest_preference
 
   # Override FriendlyId should_generate_new_friendly_id? to regenerate slug when username changes
   def should_generate_new_friendly_id?
@@ -627,5 +633,16 @@ class User < ApplicationRecord
         target_email: email
       )
     )
+  end
+
+  # Digest preference helpers
+  def digest_preference_or_create
+    digest_preference || create_digest_preference!
+  end
+
+  private
+
+  def create_digest_preference
+    build_digest_preference.save!
   end
 end

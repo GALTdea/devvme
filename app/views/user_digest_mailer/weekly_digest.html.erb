@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= @digest_preference.frequency.humanize %> Digest - Devv.me</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8fafc;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .header p {
+      margin: 10px 0 0 0;
+      opacity: 0.9;
+      font-size: 16px;
+    }
+    .content {
+      padding: 30px;
+    }
+    .summary {
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .summary h2 {
+      margin: 0 0 10px 0;
+      color: #1e293b;
+      font-size: 20px;
+    }
+    .summary p {
+      margin: 0;
+      color: #64748b;
+      font-size: 16px;
+    }
+    .user-section {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      overflow: hidden;
+      background: white;
+    }
+    .user-header {
+      background: #f8fafc;
+      padding: 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+    }
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin-right: 15px;
+      background: #667eea;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .user-info h3 {
+      margin: 0 0 5px 0;
+      color: #1e293b;
+      font-size: 18px;
+    }
+    .user-info p {
+      margin: 0;
+      color: #64748b;
+      font-size: 14px;
+    }
+    .user-content {
+      padding: 20px;
+    }
+    .content-item {
+      border-left: 3px solid #667eea;
+      padding-left: 15px;
+      margin-bottom: 20px;
+    }
+    .content-item:last-child {
+      margin-bottom: 0;
+    }
+    .content-type {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .content-type.blog {
+      background: #10b981;
+    }
+    .content-type.project {
+      background: #f59e0b;
+    }
+    .content-type.profile {
+      background: #8b5cf6;
+    }
+    .content-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0 0 8px 0;
+      text-decoration: none;
+    }
+    .content-title:hover {
+      color: #667eea;
+    }
+    .content-meta {
+      color: #64748b;
+      font-size: 14px;
+      margin: 0;
+    }
+    .content-excerpt {
+      color: #475569;
+      font-size: 14px;
+      margin: 8px 0 0 0;
+      line-height: 1.5;
+    }
+    .footer {
+      background: #f8fafc;
+      padding: 30px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+    }
+    .footer-actions {
+      margin: 20px 0;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 0 10px 10px 0;
+      font-size: 14px;
+    }
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+    .footer-text {
+      color: #64748b;
+      font-size: 14px;
+      margin: 20px 0 0 0;
+    }
+    .unsubscribe {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .unsubscribe a {
+      color: #64748b;
+      font-size: 12px;
+      text-decoration: none;
+    }
+    .unsubscribe a:hover {
+      color: #667eea;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      .header, .content, .footer {
+        padding: 20px;
+      }
+      .user-header {
+        padding: 15px;
+      }
+      .user-content {
+        padding: 15px;
+      }
+      .btn {
+        display: block;
+        margin: 10px 0;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>📧 Devv.me Digest</h1>
+      <p>Hey <%= @user.display_name %>, here's what's new from developers you follow!</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <% if @total_content_count > 0 %>
+        <!-- Summary -->
+        <div class="summary">
+          <h2>📊 This Week's Summary</h2>
+          <p><%= @total_content_count %> new update<%= 's' if @total_content_count != 1 %> from <%= @digest_data.keys.count %> developer<%= 's' if @digest_data.keys.count != 1 %> you follow</p>
+        </div>
+
+        <!-- User Content Sections -->
+        <% @digest_data.each do |username, user_content| %>
+          <% followed_user = user_content[:user] %>
+          <div class="user-section">
+            <div class="user-header">
+              <div class="user-avatar">
+                <%= followed_user.display_name.first.upcase %>
+              </div>
+              <div class="user-info">
+                <h3><%= followed_user.display_name %></h3>
+                <p>@<%= followed_user.username %></p>
+              </div>
+            </div>
+            
+            <div class="user-content">
+              <!-- Blog Posts -->
+              <% user_content[:blog_posts].each do |blog_post| %>
+                <div class="content-item">
+                  <span class="content-type blog">📝 Blog Post</span>
+                  <a href="<%= @profile_url %>/blog/<%= blog_post.slug %>" class="content-title">
+                    <%= blog_post.title %>
+                  </a>
+                  <p class="content-meta">
+                    <%= blog_post.reading_time %> min read • 
+                    Published <%= time_ago_in_words(blog_post.published_at) %> ago
+                  </p>
+                  <% if blog_post.excerpt.present? %>
+                    <p class="content-excerpt"><%= truncate(blog_post.excerpt, length: 120) %></p>
+                  <% end %>
+                </div>
+              <% end %>
+
+              <!-- Projects -->
+              <% user_content[:projects].each do |project| %>
+                <div class="content-item">
+                  <span class="content-type project">🚀 Project</span>
+                  <a href="<%= @profile_url %>/projects/<%= project.id %>" class="content-title">
+                    <%= project.title %>
+                  </a>
+                  <p class="content-meta">
+                    Updated <%= time_ago_in_words(project.updated_at) %> ago
+                    <% if project.technologies_used.any? %>
+                      • <%= project.technologies_used.first(3).join(', ') %>
+                    <% end %>
+                  </p>
+                  <% if project.description.present? %>
+                    <p class="content-excerpt"><%= truncate(project.description, length: 120) %></p>
+                  <% end %>
+                </div>
+              <% end %>
+
+              <!-- Profile Updates -->
+              <% user_content[:profile_updates].each do |update| %>
+                <div class="content-item">
+                  <span class="content-type profile">👤 Profile</span>
+                  <p class="content-title"><%= update %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <!-- Empty State -->
+        <div class="summary">
+          <h2>📭 No New Updates</h2>
+          <p>The developers you follow haven't published anything new this week. Check back next week!</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-actions">
+        <a href="<%= @profile_url %>" class="btn btn-primary">View All Updates</a>
+        <a href="<%= @preferences_url %>" class="btn btn-secondary">Manage Preferences</a>
+      </div>
+      
+      <p class="footer-text">
+        You're receiving this digest because you follow developers on Devv.me.<br>
+        <strong>Frequency:</strong> <%= @digest_preference.frequency.humanize %> • 
+        <strong>Next digest:</strong> <%= @digest_preference.next_send_at.strftime('%B %d, %Y at %I:%M %p') %>
+      </p>
+
+      <div class="unsubscribe">
+        <a href="<%= @unsubscribe_url %>">Unsubscribe from digest emails</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<% page_title("Digest Preferences") %>
+
+<div class="min-h-screen bg-gradient-to-br from-cream-50 via-primary-50 to-secondary-50 dark:from-charcoal-900 dark:via-charcoal-800 dark:to-secondary-900 transition-all duration-300">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-charcoal-900 dark:text-cream-50 mb-2">📧 Digest Preferences</h1>
+      <p class="text-charcoal-600 dark:text-charcoal-400">
+        Manage how and when you receive updates from developers you follow.
+      </p>
+    </div>
+
+    <!-- Current Status Card -->
+    <div class="bg-white dark:bg-charcoal-800 rounded-2xl shadow-lg border border-primary-100 dark:border-charcoal-700 mb-8 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-semibold text-charcoal-900 dark:text-cream-50 mb-2">Current Status</h2>
+          <div class="flex items-center space-x-4">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= @digest_preference.digest_enabled? ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' %>">
+              <%= @digest_preference.digest_enabled? ? '✓ Enabled' : '✗ Disabled' %>
+            </span>
+            <% if @digest_preference.digest_enabled? %>
+              <span class="text-charcoal-600 dark:text-charcoal-400">
+                Frequency: <strong><%= @digest_preference.frequency.humanize %></strong>
+              </span>
+              <% if @digest_preference.next_send_at %>
+                <span class="text-charcoal-600 dark:text-charcoal-400">
+                  Next digest: <strong><%= @digest_preference.next_send_at.strftime('%B %d, %Y at %I:%M %p') %></strong>
+                </span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-sm text-charcoal-500 dark:text-charcoal-400">Following</p>
+          <p class="text-2xl font-bold text-charcoal-900 dark:text-cream-50"><%= current_user.following.count %></p>
+          <p class="text-sm text-charcoal-500 dark:text-charcoal-400">developers</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preferences Form -->
+    <%= form_with model: [:digest_preferences, @digest_preference], local: true, class: "space-y-6" do |form| %>
+      <div class="bg-white dark:bg-charcoal-800 rounded-2xl shadow-lg border border-primary-100 dark:border-charcoal-700 p-6">
+        <h2 class="text-xl font-semibold text-charcoal-900 dark:text-cream-50 mb-6">Email Settings</h2>
+        
+        <!-- Enable/Disable -->
+        <div class="mb-6">
+          <%= form.label :enabled, class: "flex items-center cursor-pointer" do %>
+            <%= form.check_box :enabled, class: "w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" %>
+            <span class="ml-3 text-sm font-medium text-charcoal-900 dark:text-cream-50">
+              Enable digest emails
+            </span>
+          <% end %>
+          <p class="text-sm text-charcoal-500 dark:text-charcoal-400 ml-7">
+            Receive periodic emails with updates from developers you follow.
+          </p>
+        </div>
+
+        <!-- Frequency -->
+        <div class="mb-6">
+          <%= form.label :frequency, "Email Frequency", class: "block text-sm font-medium text-charcoal-900 dark:text-cream-50 mb-3" %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <% UserDigestPreference.frequencies.each do |key, value| %>
+              <label class="relative flex cursor-pointer">
+                <%= form.radio_button :frequency, key, class: "sr-only" %>
+                <div class="radio-card <%= 'checked' if @digest_preference.frequency == key %>">
+                  <div class="radio-content">
+                    <div class="radio-title"><%= key.humanize %></div>
+                    <div class="radio-description">
+                      <% case key %>
+                      <% when 'daily' %>
+                        Every day at 8 AM
+                      <% when 'weekly' %>
+                        Every Monday at 8 AM
+                      <% when 'biweekly' %>
+                        Every other Monday
+                      <% when 'monthly' %>
+                        First Monday of month
+                      <% when 'never' %>
+                        Disable all emails
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </label>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Content Types -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium text-charcoal-900 dark:text-cream-50 mb-4">Include in Digest</h3>
+          <div class="space-y-4">
+            <label class="flex items-center cursor-pointer">
+              <%= form.check_box :include_blog_posts, class: "w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" %>
+              <span class="ml-3">
+                <span class="text-sm font-medium text-charcoal-900 dark:text-cream-50">📝 Blog Posts</span>
+                <p class="text-sm text-charcoal-500 dark:text-charcoal-400">New blog posts from developers you follow</p>
+              </span>
+            </label>
+            
+            <label class="flex items-center cursor-pointer">
+              <%= form.check_box :include_projects, class: "w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" %>
+              <span class="ml-3">
+                <span class="text-sm font-medium text-charcoal-900 dark:text-cream-50">🚀 Projects</span>
+                <p class="text-sm text-charcoal-500 dark:text-charcoal-400">New and updated projects from developers you follow</p>
+              </span>
+            </label>
+            
+            <label class="flex items-center cursor-pointer">
+              <%= form.check_box :include_profile_updates, class: "w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" %>
+              <span class="ml-3">
+                <span class="text-sm font-medium text-charcoal-900 dark:text-cream-50">👤 Profile Updates</span>
+                <p class="text-sm text-charcoal-500 dark:text-charcoal-400">Profile changes and updates (optional)</p>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Time Preferences -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium text-charcoal-900 dark:text-cream-50 mb-4">Send Time</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <%= form.label :digest_time, "Time of Day", class: "block text-sm font-medium text-charcoal-900 dark:text-cream-50 mb-2" %>
+              <%= form.time_field :digest_time, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" %>
+              <p class="text-sm text-charcoal-500 dark:text-charcoal-400 mt-1">When to send digest emails (your local time)</p>
+            </div>
+            
+            <div>
+              <%= form.label :timezone, "Timezone", class: "block text-sm font-medium text-charcoal-900 dark:text-cream-50 mb-2" %>
+              <%= form.select :timezone, 
+                  ActiveSupport::TimeZone.all.map { |tz| [tz.to_s, tz.name] },
+                  { selected: @digest_preference.timezone },
+                  { class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" } %>
+              <p class="text-sm text-charcoal-500 dark:text-charcoal-400 mt-1">Your timezone for scheduling</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-end">
+          <%= form.submit "Save Preferences", class: "inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-800" %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Help Section -->
+    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-200 dark:border-blue-800 p-6">
+      <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">💡 How Digest Emails Work</h3>
+      <div class="space-y-2 text-blue-800 dark:text-blue-200">
+        <p>• <strong>Automatic Collection:</strong> We gather new content from developers you follow</p>
+        <p>• <strong>Smart Scheduling:</strong> Emails are sent at your preferred time and frequency</p>
+        <p>• <strong>No Spam:</strong> Only send emails when there's actually new content</p>
+        <p>• <strong>Easy Unsubscribe:</strong> You can disable digest emails anytime</p>
+        <p>• <strong>Content Control:</strong> Choose what types of content to include</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .radio-card {
+    @apply border-2 border-gray-200 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-primary-300 dark:border-gray-700 dark:hover:border-primary-600;
+  }
+  
+  .radio-card.checked {
+    @apply border-primary-500 bg-primary-50 dark:border-primary-400 dark:bg-primary-900/20;
+  }
+  
+  .radio-card input:checked + div {
+    @apply border-primary-500 bg-primary-50 dark:border-primary-400 dark:bg-primary-900/20;
+  }
+  
+  .radio-title {
+    @apply font-medium text-charcoal-900 dark:text-cream-50;
+  }
+  
+  .radio-description {
+    @apply text-sm text-charcoal-500 dark:text-charcoal-400 mt-1;
+  }
+</style>
