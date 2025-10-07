@@ -132,11 +132,19 @@ class PublicProfilesController < ApplicationController
       # Use a simple string-based ETag for unclaimed profiles
       response.etag = "#{@user.id}-#{@user.updated_at.to_i}-#{@user.invitation_sent_at&.to_i}"
     else
-      # Cache public profiles for 15 minutes
-      expires_in 15.minutes, public: true
+      # For authenticated users, include follow status in cache key to prevent stale follow buttons
+      if user_signed_in?
+        # Shorter cache for authenticated users to ensure follow button accuracy
+        expires_in 2.minutes, public: false
 
-      # Add ETag based on user updated_at timestamp
-      fresh_when(@user, public: true)
+        # Include current user's follow status in ETag
+        follow_status = current_user.following?(@user) ? 'following' : 'not_following'
+        response.etag = "#{@user.id}-#{@user.updated_at.to_i}-#{current_user.id}-#{follow_status}"
+      else
+        # Longer cache for anonymous users (they don't see follow buttons)
+        expires_in 15.minutes, public: true
+        fresh_when(@user, public: true)
+      end
     end
   end
 

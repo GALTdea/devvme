@@ -3,6 +3,13 @@ module CacheHelper
   def profile_cache_key(user, section = nil)
     timestamp = [user.updated_at, user.avatar.attached? ? user.avatar.blob.created_at : nil].compact.max
     key = "user-#{user.id}-#{timestamp.to_i}"
+
+    # Include current user's follow status for header section to prevent stale follow buttons
+    if section == 'header' && user_signed_in?
+      follow_status = current_user.following?(user) ? 'following' : 'not_following'
+      key += "-#{current_user.id}-#{follow_status}"
+    end
+
     key += "-#{section}" if section.present?
     key
   end

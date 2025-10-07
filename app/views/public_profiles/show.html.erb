@@ -88,7 +88,7 @@
     <% end %>
     
     <!-- Cached Profile Header -->
-    <% cache profile_cache_key(@user, 'header'), expires_in: 1.hour do %>
+    <% cache profile_cache_key(@user, 'header'), expires_in: 5.minutes do %>
       <%= render 'profile_header', user: @user %>
                 <% end %>
                 
