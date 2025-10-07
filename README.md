@@ -31,6 +31,14 @@ DevvMe is a modern, feature-rich platform that empowers developers to create stu
 - **Security First**: Comprehensive authentication with Devise and security validations
 - **SEO Friendly**: Friendly URLs with FriendlyId gem
 
+### Follow & Network Features
+- **Follow System**: Users can follow other developers to stay updated
+- **Followers/Following Lists**: View and manage network connections
+- **Email Digests**: Receive periodic updates from followed developers
+- **Customizable Preferences**: Choose email frequency, content types, and timing
+- **Real-time Updates**: Instant follow/unfollow with Turbo Streams
+- **Smart Scheduling**: Timezone-aware digest delivery
+
 ## 🛠 Technology Stack
 
 ### Backend
@@ -127,6 +135,8 @@ devvme_app/
 - Avatar uploads with Active Storage
 - Profile completion tracking
 - SEO-friendly URLs with FriendlyId
+- Follow relationships (followers/following)
+- Digest email preferences
 
 ### Project Model
 - Comprehensive project information
@@ -136,19 +146,50 @@ devvme_app/
 - Drag-and-drop reordering
 - URL validation and normalization
 
+### Blog Post Model
+- Rich content creation and management
+- Published/draft/archived states
+- View tracking and analytics
+- Featured posts support
+- Automatic excerpt generation
+- Reading time calculation
+
+### Follow Model
+- Self-referential many-to-many user relationships
+- Prevents self-follows and duplicates
+- Efficient queries with proper indexing
+- Supports follower/following lists
+
+### UserDigestPreference Model
+- Customizable email frequency (daily, weekly, biweekly, monthly)
+- Content type preferences (blog posts, projects, profile updates)
+- Timezone-aware scheduling
+- Smart next-send time calculation
+- Enable/disable master switch
+
 ## 🎨 UI Components
 
 ### Dashboard Features
-- **Statistics Cards**: Project counts, status distribution
-- **Recent Activity**: Latest project updates
+- **Statistics Cards**: Project counts, blog posts, views, status distribution
+- **Follow & Network Section**: Followers/following stats, digest settings
+- **Recent Activity**: Latest project and blog post updates
 - **Profile Completion**: Progress tracking
 - **Quick Actions**: Fast access to common tasks
+- **Smart Tips**: Contextual help based on user activity
 
 ### Project Management
 - **Interactive Forms**: Dynamic technology tagging
 - **Image Previews**: Real-time image upload previews
 - **Sortable Lists**: Drag-and-drop project reordering
 - **Status Indicators**: Visual project status management
+
+### Follow & Network Management
+- **Follow Buttons**: Real-time follow/unfollow with Turbo Streams
+- **Followers List**: Paginated list of followers with search
+- **Following List**: Manage who you follow
+- **Digest Preferences**: Comprehensive email settings page
+- **Network Stats**: Visual follower/following counts on profiles
+- **Smart Notifications**: Contextual tips and digest status
 
 ## 🔒 Security Features
 
@@ -182,6 +223,113 @@ bin/rails test:coverage
 - **Integration Tests**: User workflows and API endpoints
 - **System Tests**: End-to-end user interactions
 - **Security Tests**: Authentication and authorization
+
+## 📧 Testing Digest Emails
+
+The application uses `letter_opener` in development to automatically display emails in your browser.
+
+### Quick Test (Recommended)
+
+```bash
+# Step 1: Create test data (follow relationships and sample content)
+bin/rails digest:create_test_data
+
+# Step 2: Send a test digest email
+bin/rails digest:test
+```
+
+The email will automatically open in your browser with full HTML styling!
+
+### Manual Testing from Rails Console
+
+```bash
+bin/rails console
+```
+
+Then run:
+
+```ruby
+# Get a test user
+user = User.find_by(username: "your_username") || User.first
+
+# Make them follow someone
+other_user = User.where.not(id: user.id).first
+user.follow!(other_user) unless user.following?(other_user)
+
+# Create test content
+other_user.blog_posts.create!(
+  title: "Test Post #{Time.current.to_i}",
+  content: "Test content for digest",
+  excerpt: "Test excerpt",
+  published: true,
+  published_at: Time.current
+)
+
+# Generate and send digest
+digest_data = DigestGeneratorService.generate_digest_for_user(user)
+UserDigestMailer.weekly_digest(user, digest_data).deliver_now
+
+# Email opens automatically in browser!
+```
+
+### Test Specific User
+
+```bash
+# Send digest to a specific user by username
+bin/rails digest:send_to_user[john]
+
+# Or using environment variable
+USERNAME=john bin/rails digest:send_to_user
+```
+
+### Test Background Jobs
+
+```ruby
+# In Rails console
+SendUserDigestJob.perform_now(User.first.id, 'weekly')
+
+# Or test batch processing
+SendWeeklyDigestsJob.perform_now
+```
+
+### Viewing Sent Emails
+
+Emails are saved in `tmp/letter_opener/` and automatically open in your browser when sent in development mode.
+
+```bash
+# List all test emails
+ls -la tmp/letter_opener/
+
+# Open the latest email manually
+open tmp/letter_opener/*.html | tail -1
+```
+
+### Testing Different Digest Types
+
+```ruby
+# In Rails console
+user = User.first
+digest_data = DigestGeneratorService.generate_digest_for_user(user)
+
+# Test different frequencies
+UserDigestMailer.daily_digest(user, digest_data).deliver_now
+UserDigestMailer.weekly_digest(user, digest_data).deliver_now
+UserDigestMailer.monthly_digest(user, digest_data).deliver_now
+```
+
+### Production Email Testing
+
+In production, emails are sent via MailerSend. To test:
+
+```bash
+# Set development to use MailerSend
+MAILERSEND_DEVELOPMENT=true bin/rails console
+
+# Then send test email (will use real MailerSend API)
+user = User.first
+digest_data = DigestGeneratorService.generate_digest_for_user(user)
+UserDigestMailer.weekly_digest(user, digest_data).deliver_now
+```
 
 ## 🚀 Deployment
 
@@ -299,6 +447,46 @@ production:
 - Rebuild Tailwind CSS: `bin/rails assets:precompile`
 - Check for conflicting CSS rules
 - Verify Flowbite component imports
+
+**Digest emails not sending**
+- Check `tmp/letter_opener/` for development emails
+- Verify user has digest preferences created
+- Ensure user is following someone with content
+- Check logs for background job errors
+- Test manually: `bin/rails digest:test`
+
+## 🎯 Rake Tasks Reference
+
+### Digest Email Tasks
+
+```bash
+# Create test data for digest testing
+bin/rails digest:create_test_data
+
+# Send a test digest email
+bin/rails digest:test
+
+# Send digest to specific user
+bin/rails digest:send_to_user[username]
+USERNAME=username bin/rails digest:send_to_user
+```
+
+### Other Useful Tasks
+
+```bash
+# Database tasks
+bin/rails db:setup              # Setup database with seed data
+bin/rails db:migrate            # Run pending migrations
+bin/rails db:seed               # Load seed data
+
+# Test tasks
+bin/rails test                  # Run all tests
+bin/rails test:models           # Run model tests only
+bin/rails test:controllers      # Run controller tests only
+
+# Background jobs
+bin/rails jobs:work             # Process background jobs
+```
 
 ## 📄 License
 
