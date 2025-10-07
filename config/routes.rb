@@ -122,6 +122,10 @@ Rails.application.routes.draw do
   post ":username/follow", to: "follows#create", as: :follow_user, constraints: { username: /[a-zA-Z0-9_-]+/ }
   delete ":username/follow", to: "follows#destroy", as: :unfollow_user, constraints: { username: /[a-zA-Z0-9_-]+/ }
 
+  # Followers and following lists
+  get ":username/followers", to: "followers#index", as: :user_followers, constraints: { username: /[a-zA-Z0-9_-]+/ }
+  get ":username/following", to: "following#index", as: :user_following, constraints: { username: /[a-zA-Z0-9_-]+/ }
+
   # Invitation claiming routes - public access for profile claiming
   get "invitations/:token", to: "invitations#show", as: :invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
   get "invitations/:token/claim", to: "invitations#claim", as: :claim_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }

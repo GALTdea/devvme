@@ -110,6 +110,137 @@
       </div>
     </div>
 
+    <!-- Follow & Network Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Follow & Network</h2>
+          <%= link_to digest_preferences_path, class: "text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 flex items-center" do %>
+            <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Digest Settings
+          <% end %>
+        </div>
+
+        <!-- Network Stats Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Followers -->
+          <%= link_to user_followers_path(@user.username), class: "group block p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-lg border border-indigo-200 dark:border-indigo-700 hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5" do %>
+            <div class="flex items-center justify-between mb-2">
+              <div class="p-2 bg-indigo-100 dark:bg-indigo-800 rounded-lg">
+                <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20h6M3 20h5m7-9a4 4 0 100-8 4 4 0 000 8zm-6 0a4 4 0 100-8 4 4 0 000 8z" />
+                </svg>
+              </div>
+              <svg class="h-4 w-4 text-indigo-400 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+            <div class="text-2xl font-bold text-indigo-900 dark:text-indigo-100"><%= @user.followers.count %></div>
+            <div class="text-sm text-indigo-700 dark:text-indigo-300">Followers</div>
+          <% end %>
+
+          <!-- Following -->
+          <%= link_to user_following_path(@user.username), class: "group block p-4 bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/30 dark:to-teal-800/30 rounded-lg border border-teal-200 dark:border-teal-700 hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5" do %>
+            <div class="flex items-center justify-between mb-2">
+              <div class="p-2 bg-teal-100 dark:bg-teal-800 rounded-lg">
+                <svg class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8M3 7h8m0 0v8m0-8L3 15" />
+                </svg>
+              </div>
+              <svg class="h-4 w-4 text-teal-400 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+            <div class="text-2xl font-bold text-teal-900 dark:text-teal-100"><%= @user.following.count %></div>
+            <div class="text-sm text-teal-700 dark:text-teal-300">Following</div>
+          <% end %>
+
+          <!-- Email Digest Status -->
+          <% digest_pref = @user.digest_preference_or_create %>
+          <div class="group block p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-lg border border-purple-200 dark:border-purple-700">
+            <div class="flex items-center justify-between mb-2">
+              <div class="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
+                <svg class="h-5 w-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
+                </svg>
+              </div>
+              <% if digest_pref.digest_enabled? %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                  Active
+                </span>
+              <% else %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100">
+                  Off
+                </span>
+              <% end %>
+            </div>
+            <div class="text-lg font-semibold text-purple-900 dark:text-purple-100">
+              <% if digest_pref.digest_enabled? %>
+                <%= digest_pref.frequency.humanize %>
+              <% else %>
+                Disabled
+              <% end %>
+            </div>
+            <div class="text-sm text-purple-700 dark:text-purple-300">Email Digest</div>
+          </div>
+
+          <!-- Quick Explore -->
+          <%= link_to public_projects_path, class: "group block p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-lg border border-amber-200 dark:border-amber-700 hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5" do %>
+            <div class="flex items-center justify-between mb-2">
+              <div class="p-2 bg-amber-100 dark:bg-amber-800 rounded-lg">
+                <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+              </div>
+              <svg class="h-4 w-4 text-amber-400 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+            <div class="text-lg font-semibold text-amber-900 dark:text-amber-100">Explore</div>
+            <div class="text-sm text-amber-700 dark:text-amber-300">Find Developers</div>
+          <% end %>
+        </div>
+
+        <!-- Quick Tips -->
+        <% if @user.following.count == 0 %>
+          <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div class="flex items-start">
+              <svg class="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div class="ml-3 flex-1">
+                <h3 class="text-sm font-medium text-blue-900 dark:text-blue-100">Start Building Your Network</h3>
+                <p class="mt-1 text-sm text-blue-700 dark:text-blue-300">
+                  Follow other developers to receive digest emails with their latest blog posts and projects. 
+                  <%= link_to "Explore developers", public_projects_path, class: "font-medium underline hover:no-underline" %> to get started!
+                </p>
+              </div>
+            </div>
+          </div>
+        <% elsif digest_pref.enabled? && @user.following.any? %>
+          <div class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+            <div class="flex items-start">
+              <svg class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div class="ml-3 flex-1">
+                <h3 class="text-sm font-medium text-green-900 dark:text-green-100">Email Digest Active</h3>
+                <p class="mt-1 text-sm text-green-700 dark:text-green-300">
+                  You'll receive <%= digest_pref.frequency %> emails with updates from <%= pluralize(@user.following.count, 'developer') %> you follow.
+                  <% if digest_pref.next_send_at %>
+                    Next digest: <%= digest_pref.next_send_at.strftime('%B %d at %I:%M %p') %>
+                  <% end %>
+                </p>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
     <!-- Quick Actions -->
     <div class="mb-6">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>

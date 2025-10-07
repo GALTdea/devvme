@@ -41,7 +41,7 @@
     </div>
 
     <!-- Preferences Form -->
-    <%= form_with model: [:digest_preferences, @digest_preference], local: true, class: "space-y-6" do |form| %>
+    <%= form_with model: @digest_preference, url: digest_preferences_path, method: :patch, local: true, class: "space-y-6" do |form| %>
       <div class="bg-white dark:bg-charcoal-800 rounded-2xl shadow-lg border border-primary-100 dark:border-charcoal-700 p-6">
         <h2 class="text-xl font-semibold text-charcoal-900 dark:text-cream-50 mb-6">Email Settings</h2>
         

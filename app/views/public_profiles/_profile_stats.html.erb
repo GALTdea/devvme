@@ -64,7 +64,7 @@
   </div>
 
   <!-- Followers Count -->
-  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 p-6 group">
+  <%= link_to user_followers_path(user.username), class: "block bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 p-6 group transform hover:-translate-y-1" do %>
     <div class="flex items-center">
       <div class="flex-shrink-0 p-3 bg-indigo-100 dark:bg-indigo-900/50 rounded-xl group-hover:bg-indigo-200 dark:group-hover:bg-indigo-900/70 transition-colors">
         <svg class="h-8 w-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,14 +74,14 @@
       <div class="ml-5 w-0 flex-1">
         <dl>
           <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Followers</dt>
-          <dd class="text-2xl font-bold text-gray-900 dark:text-white"><%= user.followers.count %></dd>
+          <dd id="<%= dom_id(user, :followers_count) %>" class="text-2xl font-bold text-gray-900 dark:text-white"><%= user.followers.count %></dd>
         </dl>
       </div>
     </div>
-  </div>
+  <% end %>
 
   <!-- Following Count -->
-  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 p-6 group">
+  <%= link_to user_following_path(user.username), class: "block bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 p-6 group transform hover:-translate-y-1" do %>
     <div class="flex items-center">
       <div class="flex-shrink-0 p-3 bg-teal-100 dark:bg-teal-900/50 rounded-xl group-hover:bg-teal-200 dark:group-hover:bg-teal-900/70 transition-colors">
         <svg class="h-8 w-8 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -91,9 +91,9 @@
       <div class="ml-5 w-0 flex-1">
         <dl>
           <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Following</dt>
-          <dd class="text-2xl font-bold text-gray-900 dark:text-white"><%= user.following.count %></dd>
+          <dd id="<%= dom_id(user, :following_count) %>" class="text-2xl font-bold text-gray-900 dark:text-white"><%= user.following.count %></dd>
         </dl>
       </div>
     </div>
-  </div>
+  <% end %>
 </div>

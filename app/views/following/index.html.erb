@@ -1,0 +1,126 @@
+<% page_title("#{@user.display_name} is Following") %>
+
+<div class="min-h-screen bg-gradient-to-br from-cream-50 via-primary-50 to-secondary-50 dark:from-charcoal-900 dark:via-charcoal-800 dark:to-secondary-900 transition-all duration-300">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center space-x-4 mb-4">
+        <%= link_to public_profile_path(@user.username), class: "text-charcoal-600 dark:text-charcoal-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors" do %>
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        <% end %>
+        <div>
+          <h1 class="text-3xl font-bold text-charcoal-900 dark:text-cream-50">Following</h1>
+          <p class="text-charcoal-600 dark:text-charcoal-400">
+            <%= @user.display_name %> is following <%= @total_count %> developer<%= 's' unless @total_count == 1 %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Following List -->
+    <% if @following.any? %>
+      <div class="bg-white dark:bg-charcoal-800 rounded-2xl shadow-lg border border-primary-100 dark:border-charcoal-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+          <% @following.each do |followed_user| %>
+            <div class="p-6 hover:bg-gray-50 dark:hover:bg-charcoal-700 transition-colors">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <!-- Avatar -->
+                  <%= link_to public_profile_path(followed_user.username), class: "flex-shrink-0" do %>
+                    <% if followed_user.avatar.attached? %>
+                      <%= image_tag followed_user.avatar_thumbnail, class: "w-14 h-14 rounded-full object-cover border-2 border-primary-400" %>
+                    <% else %>
+                      <div class="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center border-2 border-primary-400">
+                        <span class="text-white text-xl font-bold"><%= followed_user.display_name.first.upcase %></span>
+                      </div>
+                    <% end %>
+                  <% end %>
+                  
+                  <!-- User Info -->
+                  <div>
+                    <%= link_to public_profile_path(followed_user.username), class: "hover:text-primary-600 dark:hover:text-primary-400 transition-colors" do %>
+                      <h3 class="text-lg font-semibold text-charcoal-900 dark:text-cream-50"><%= followed_user.display_name %></h3>
+                    <% end %>
+                    <p class="text-charcoal-600 dark:text-charcoal-400">@<%= followed_user.username %></p>
+                    <% if followed_user.bio.present? %>
+                      <p class="text-sm text-charcoal-500 dark:text-charcoal-400 mt-1 line-clamp-2"><%= truncate(followed_user.bio, length: 100) %></p>
+                    <% end %>
+                  </div>
+                </div>
+                
+                <!-- Follow Button -->
+                <% if user_signed_in? && current_user != followed_user %>
+                  <%= render 'public_profiles/follow_button', user: followed_user %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <% if @total_pages > 1 %>
+        <div class="mt-8 flex justify-center">
+          <nav class="flex items-center space-x-2">
+            <!-- Previous Button -->
+            <% if @current_page > 1 %>
+              <%= link_to user_following_path(@user.username, page: @current_page - 1), class: "px-4 py-2 bg-white dark:bg-charcoal-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-charcoal-700 transition-colors" do %>
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              <% end %>
+            <% else %>
+              <span class="px-4 py-2 bg-gray-100 dark:bg-charcoal-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-400 cursor-not-allowed">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </span>
+            <% end %>
+
+            <!-- Page Numbers -->
+            <% (1..@total_pages).each do |page| %>
+              <% if page == @current_page %>
+                <span class="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold"><%= page %></span>
+              <% elsif (page - @current_page).abs <= 2 || page == 1 || page == @total_pages %>
+                <%= link_to user_following_path(@user.username, page: page), class: "px-4 py-2 bg-white dark:bg-charcoal-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-charcoal-700 transition-colors" do %>
+                  <%= page %>
+                <% end %>
+              <% elsif (page - @current_page).abs == 3 %>
+                <span class="px-2 py-2">...</span>
+              <% end %>
+            <% end %>
+
+            <!-- Next Button -->
+            <% if @current_page < @total_pages %>
+              <%= link_to user_following_path(@user.username, page: @current_page + 1), class: "px-4 py-2 bg-white dark:bg-charcoal-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-charcoal-700 transition-colors" do %>
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              <% end %>
+            <% else %>
+              <span class="px-4 py-2 bg-gray-100 dark:bg-charcoal-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-400 cursor-not-allowed">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            <% end %>
+          </nav>
+        </div>
+      <% end %>
+    <% else %>
+      <!-- Empty State -->
+      <div class="bg-white dark:bg-charcoal-800 rounded-2xl shadow-lg border border-primary-100 dark:border-charcoal-700 p-12 text-center">
+        <svg class="mx-auto h-16 w-16 text-charcoal-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8M3 7h8m0 0v8m0-8L3 15" />
+        </svg>
+        <h3 class="text-xl font-semibold text-charcoal-900 dark:text-cream-50 mb-2">Not Following Anyone Yet</h3>
+        <p class="text-charcoal-500 dark:text-charcoal-400">
+          <%= @user.display_name %> isn't following any developers yet.
+        </p>
+      </div>
+    <% end %>
+  </div>
+</div>

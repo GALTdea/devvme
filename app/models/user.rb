@@ -172,7 +172,7 @@ class User < ApplicationRecord
   before_validation :set_pending_activation, on: :create
 
   # Create digest preferences for new users
-  after_create :create_digest_preference
+  after_create :build_and_save_digest_preference
 
   # Override FriendlyId should_generate_new_friendly_id? to regenerate slug when username changes
   def should_generate_new_friendly_id?
@@ -562,6 +562,11 @@ class User < ApplicationRecord
       .count
   end
 
+  # Digest preference helpers - must be public for views/services
+  def digest_preference_or_create
+    digest_preference || build_and_save_digest_preference
+  end
+
   private
 
   # Set new users to pending activation status (unless they're being invited)
@@ -635,14 +640,9 @@ class User < ApplicationRecord
     )
   end
 
-  # Digest preference helpers
-  def digest_preference_or_create
-    digest_preference || create_digest_preference!
-  end
-
   private
 
-  def create_digest_preference
-    build_digest_preference.save!
+  def build_and_save_digest_preference
+    build_digest_preference.tap(&:save!)
   end
 end
