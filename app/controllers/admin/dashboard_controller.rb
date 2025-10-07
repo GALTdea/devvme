@@ -149,6 +149,7 @@ class Admin::DashboardController < ApplicationController
   def total_views_in_period
     BlogPost.where("created_at > ?", @days.days.ago).sum(:views_count) +
     ProfileView.where("visited_at > ?", @days.days.ago).count
+    # ProjectView.where("visited_at > ?", @days.days.ago).count - TODO: Create this model to track project views.
   end
 
   def visitor_activity_stats(days)
