@@ -44,29 +44,17 @@ class SocialImagesController < ApplicationController
 
   # Serve main site social media image
   def main_image
-    # Generate or retrieve cached dynamic main social image
-    title = params[:title].presence || "Devv.me — Build a standout developer profile"
-    subtitle = params[:subtitle].presence || "Showcase projects, get discovered, and grow your developer brand."
+    # Serve a static branded image for the main site
+    main_image_path = Rails.root.join("public", "images", "main-social-image.png")
 
-    begin
-      generator = MainSocialImageGenerator.new(title: title, subtitle: subtitle)
-      image_path = generator.generate
-
-      file_type = image_path.to_s.end_with?(".svg") ? "image/svg+xml" : "image/png"
-      file_extension = image_path.to_s.end_with?(".svg") ? "svg" : "png"
-
-      send_file image_path,
-                type: file_type,
+    if File.exist?(main_image_path)
+      send_file main_image_path,
+                type: "image/png",
                 disposition: "inline",
-                filename: "devvme_main_social_image.#{file_extension}"
-    rescue => e
-      Rails.logger.error "Failed to generate main social image: #{e.message}"
-      fallback_path = Rails.root.join("public", "images", "main-social-image.png")
-      if File.exist?(fallback_path)
-        send_file fallback_path, type: "image/png", disposition: "inline", filename: "devvme_main_social_image.png"
-      else
-        head :not_found
-      end
+                filename: "devvme_main_social_image.png"
+    else
+      # Return 404 if image doesn't exist
+      head :not_found
     end
   end
 

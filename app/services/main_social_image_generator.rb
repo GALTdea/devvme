@@ -57,11 +57,8 @@ class MainSocialImageGenerator
   end
 
   def svg_markup
-    safe_title_lines = wrap_text(@title, max_chars_per_line: 22, max_lines: 2)
-    safe_subtitle_lines = wrap_text(@subtitle, max_chars_per_line: 38, max_lines: 3)
-
-    title_y = 280
-    subtitle_y = 345
+    safe_title_lines = wrap_text(@title, max_chars_per_line: 25, max_lines: 2)
+    safe_subtitle_lines = wrap_text(@subtitle, max_chars_per_line: 45, max_lines: 3)
 
     <<~SVG
       <svg width="#{CANVAS_WIDTH}" height="#{CANVAS_HEIGHT}" viewBox="0 0 #{CANVAS_WIDTH} #{CANVAS_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
@@ -85,24 +82,20 @@ class MainSocialImageGenerator
         </g>
 
         <!-- Card surface -->
-        <rect x="80" y="60" width="1040" height="510" rx="28" fill="rgba(255,255,255,0.9)" filter="url(#softShadow)" />
+        <rect x="80" y="60" width="1040" height="510" rx="28" fill="rgba(255,255,255,0.5)" filter="url(#softShadow)" />
 
         <!-- Brand chip -->
-        <rect x="120" y="110" width="140" height="40" rx="20" fill="#111827" opacity="0.88" />
-        <text x="190" y="137" text-anchor="middle" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="700">Devv.me</text>
+        <rect x="120" y="110" width="140" height="40" rx="20" fill="#111827" opacity="0.9" />
+        <text x="190" y="135" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="16" font-weight="700">Devv.me</text>
 
-        <!-- Title -->
-        <text x="160" y="#{title_y}" fill="#111827" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-size="84" font-weight="800">
-          #{tspans(safe_title_lines, 0)}
-        </text>
+        <!-- Title - rendered line by line for better control -->
+        #{render_title_lines(safe_title_lines)}
 
-        <!-- Subtitle -->
-        <text x="160" y="#{subtitle_y}" fill="#4B5563" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-size="32" font-weight="600">
-          #{tspans(safe_subtitle_lines, 40)}
-        </text>
+        <!-- Subtitle - rendered line by line for better control -->
+        #{render_subtitle_lines(safe_subtitle_lines)}
 
         <!-- Wordmark -->
-        <text x="1080" y="570" text-anchor="end" fill="#374151" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-size="20" font-weight="700">devv.me</text>
+        <text x="1080" y="570" text-anchor="end" fill="#374151" font-family="Arial, sans-serif" font-size="18" font-weight="700">devv.me</text>
       </svg>
     SVG
   end
@@ -128,6 +121,24 @@ class MainSocialImageGenerator
       lines[-1] = lines[-1].gsub(/.$/, '') + "…"
     end
     lines
+  end
+
+  def render_title_lines(lines)
+    return "" if lines.empty?
+
+    lines.map.with_index do |line, index|
+      y_position = 280 + (index * 80) # 80px line height for title
+      %(<text x="160" y="#{y_position}" fill="#111827" font-family="Arial, sans-serif" font-size="72" font-weight="800">#{ERB::Util.html_escape(line)}</text>)
+    end.join("\n        ")
+  end
+
+  def render_subtitle_lines(lines)
+    return "" if lines.empty?
+
+    lines.map.with_index do |line, index|
+      y_position = 380 + (index * 40) # 40px line height for subtitle
+      %(<text x="160" y="#{y_position}" fill="#4B5563" font-family="Arial, sans-serif" font-size="28" font-weight="600">#{ERB::Util.html_escape(line)}</text>)
+    end.join("\n        ")
   end
 
   def tspans(lines, line_height)
