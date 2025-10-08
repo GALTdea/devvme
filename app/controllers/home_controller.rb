@@ -14,6 +14,6 @@ class HomeController < ApplicationController
     @seo_title = "Devv.me — Build a standout developer profile"
     @seo_description = "Showcase projects, get discovered by peers and teams, and grow your developer brand. Create a beautiful portfolio in minutes with social‑ready links."
     @seo_url = root_url
-    @seo_image_url = main_social_image_url
+    @seo_image_url = main_social_image_url(host: request.base_url)
   end
 end
