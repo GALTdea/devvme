@@ -113,22 +113,34 @@ class SocialImageGeneratorService
     png_filename = "social_#{@user.id}#{version_suffix}.png"
     png_path = Rails.root.join("tmp", png_filename)
 
-        # Use libvips to convert SVG to PNG
-        # Use vips command for better SVG to PNG conversion (Hatchbox recommended)
-        # libvips preserves SVG colors and gradients more accurately
-        Rails.logger.info "Converting SVG to PNG with libvips"
-        conversion_result = system("vips copy #{svg_path} #{png_path}")
-        Rails.logger.info "libvips conversion result: #{conversion_result}"
+        # Try libvips first (if available), then fall back to ImageMagick
+        Rails.logger.info "Converting SVG to PNG"
+
+        # Check if libvips is available
+        if system("which vips > /dev/null 2>&1")
+          Rails.logger.info "Using libvips for conversion"
+          conversion_result = system("vips copy #{svg_path} #{png_path}")
+          Rails.logger.info "libvips conversion result: #{conversion_result}"
+        else
+          Rails.logger.info "libvips not available, using ImageMagick"
+          # Use ImageMagick with proper flags for color output
+          conversion_result = system("convert -background transparent -size 1200x630 -colorspace RGB -type TrueColor #{svg_path} #{png_path}")
+          Rails.logger.info "ImageMagick conversion result: #{conversion_result}"
+        end
 
     # Debug: Check if conversion worked
     if File.exist?(png_path)
       file_info = `file #{png_path}`.strip
-      Rails.logger.info "libvips conversion result: #{file_info}"
+      Rails.logger.info "Conversion result: #{file_info}"
 
           # If it's still grayscale or 1-bit, try alternative approach
           if file_info.include?("1-bit") || file_info.include?("grayscale")
-            Rails.logger.info "Retrying with different libvips options for color"
-            system("vips resize #{svg_path} #{png_path} 1.0")
+            Rails.logger.info "Retrying with different conversion options for color"
+            if system("which vips > /dev/null 2>&1")
+              system("vips resize #{svg_path} #{png_path} 1.0")
+            else
+              system("convert -background transparent -size 1200x630 -colorspace RGB -depth 8 -type TrueColorAlpha #{svg_path} #{png_path}")
+            end
           end
 
       # Clean up the SVG file only if PNG conversion succeeded
@@ -136,7 +148,7 @@ class SocialImageGeneratorService
       png_path
     else
       # Conversion failed, return SVG path and keep the SVG file
-      Rails.logger.warn "libvips conversion failed, returning SVG file"
+      Rails.logger.warn "Image conversion failed, returning SVG file"
       svg_path
     end
   end
