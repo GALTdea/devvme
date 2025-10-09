@@ -6,10 +6,10 @@ class SocialImageGeneratorService
     @user = user
   end
 
-  def generate_profile_image
+  def generate_profile_image(version = nil)
     # Generate a branded social media image for the user's profile
     # Always create the branded template for consistency across all users
-    create_branded_template_image
+    create_branded_template_image(version)
   end
 
   private
@@ -21,14 +21,20 @@ class SocialImageGeneratorService
     rails_blob_url(@user.avatar, host: "#{host_options[:host]}:#{host_options[:port]}")
   end
 
-  def create_branded_template_image
+  def create_branded_template_image(version = nil)
     # Create a branded template image for all users
-    create_branded_svg_image
+    create_branded_svg_image(version)
   end
 
-  def create_branded_svg_image
+  def create_branded_svg_image(version = nil)
     # Create a simple branded image using SVG and save as file
     # This creates a gradient background with the user's name and branding
+
+    # Check if we already have a cached image for this version
+    if version.present?
+      cached_image = get_cached_image_for_version(version)
+      return cached_image if cached_image && File.exist?(cached_image)
+    end
 
     name = @user.display_name
     username = @user.username
@@ -97,13 +103,14 @@ class SocialImageGeneratorService
       </svg>
     SVG
 
-    # Save SVG to file first
-    svg_filename = "social_#{@user.id}_#{Time.current.to_i}.svg"
+    # Generate version-specific filenames
+    version_suffix = version.present? ? "_#{version}" : "_#{Time.current.to_i}"
+    svg_filename = "social_#{@user.id}#{version_suffix}.svg"
     svg_path = Rails.root.join("tmp", svg_filename)
     File.write(svg_path, svg_content)
 
     # Convert SVG to PNG for better social media compatibility
-    png_filename = "social_#{@user.id}_#{Time.current.to_i}.png"
+    png_filename = "social_#{@user.id}#{version_suffix}.png"
     png_path = Rails.root.join("tmp", png_filename)
 
         # Use libvips to convert SVG to PNG
@@ -251,5 +258,18 @@ class SocialImageGeneratorService
     end
 
     links_html
+  end
+
+  def get_cached_image_for_version(version)
+    # Look for existing cached image for this user and version
+    cached_filename = "social_#{@user.id}_#{version}.png"
+    cached_path = Rails.root.join("tmp", cached_filename)
+
+    if File.exist?(cached_path)
+      Rails.logger.info "Found cached image for user #{@user.id}, version #{version}"
+      return cached_path
+    end
+
+    nil
   end
 end

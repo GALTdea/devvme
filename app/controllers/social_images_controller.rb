@@ -5,7 +5,8 @@ class SocialImagesController < ApplicationController
   # Serve social media images for profiles
   def profile_image
     username = params[:username]
-    Rails.logger.info "Looking for user with username: #{username}"
+    version = params[:v] # Get the version parameter
+    Rails.logger.info "Looking for user with username: #{username}, version: #{version}"
 
     begin
       user = User.friendly.find(username)
@@ -17,8 +18,8 @@ class SocialImagesController < ApplicationController
         return
       end
 
-      # Generate or retrieve cached social image
-      social_image_path = generate_social_image(user)
+      # Generate or retrieve cached social image for this specific version
+      social_image_path = generate_social_image(user, version)
 
       # Check if it's a URL or a file path
       if social_image_path.to_s.start_with?("http")
@@ -32,7 +33,7 @@ class SocialImagesController < ApplicationController
         send_file social_image_path,
                   type: file_type,
                   disposition: "inline",
-                  filename: "#{username}_social_image.#{file_extension}"
+                  filename: "#{username}_social_image_v#{version}.#{file_extension}"
       else
         render_not_found
       end
@@ -60,10 +61,10 @@ class SocialImagesController < ApplicationController
 
   private
 
-  def generate_social_image(user)
-    # Use the social image generator service
+  def generate_social_image(user, version = nil)
+    # Use the social image generator service with version
     service = SocialImageGeneratorService.new(user)
-    service.generate_profile_image
+    service.generate_profile_image(version)
   end
 
   def render_not_found
