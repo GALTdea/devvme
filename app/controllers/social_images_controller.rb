@@ -2,10 +2,10 @@ class SocialImagesController < ApplicationController
   # Skip authentication for public social images
   # No authentication needed for public social images
 
-  # Serve social media images for profiles
+  # Serve social media images for profiles with path-based versioning
   def profile_image
     username = params[:username]
-    version = params[:v] # Get the version parameter
+    version = params[:version] # Get the version parameter from path
     Rails.logger.info "Looking for user with username: #{username}, version: #{version}"
 
     begin
@@ -37,6 +37,28 @@ class SocialImagesController < ApplicationController
       else
         render_not_found
       end
+
+    rescue ActiveRecord::RecordNotFound
+      render_not_found
+    end
+  end
+
+  # Legacy method for social media images without version (redirects to current version)
+  def profile_image_legacy
+    username = params[:username]
+    Rails.logger.info "Legacy request for user with username: #{username}"
+
+    begin
+      user = User.friendly.find(username)
+
+      # Check if user profile is accessible
+      unless user.active?
+        render_not_found
+        return
+      end
+
+      # Redirect to the current version
+      redirect_to social_profile_image_path(username: username, version: user.social_image_cache_key), status: :moved_permanently
 
     rescue ActiveRecord::RecordNotFound
       render_not_found

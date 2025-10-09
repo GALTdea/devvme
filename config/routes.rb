@@ -115,8 +115,11 @@ Rails.application.routes.draw do
   # Main site social media image (must come before username route)
   get "social/main/image", to: "social_images#main_image", as: :main_social_image
 
-  # Social media images for profiles
-  get "social/:username/image", to: "social_images#profile_image", as: :social_profile_image, constraints: { username: /[a-zA-Z0-9_-]+/ }
+  # Social media images for profiles with path-based versioning
+  get "social/:username/:version/image", to: "social_images#profile_image", as: :social_profile_image, constraints: { username: /[a-zA-Z0-9_-]+/, version: /v\d+/ }
+
+  # Fallback route for social media images without version (defaults to current version)
+  get "social/:username/image", to: "social_images#profile_image_legacy", as: :social_profile_image_legacy, constraints: { username: /[a-zA-Z0-9_-]+/ }
 
   # Follow/unfollow routes for public profiles
   post ":username/follow", to: "follows#create", as: :follow_user, constraints: { username: /[a-zA-Z0-9_-]+/ }

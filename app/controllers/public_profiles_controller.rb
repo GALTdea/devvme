@@ -224,8 +224,8 @@ class PublicProfilesController < ApplicationController
     end
 
     # Social media image URL for sharing (branded image)
-    # Use version-based cache busting to force X/Twitter to refresh
-    @seo_avatar_url = social_profile_image_url(@user.username, v: @user.social_image_cache_key)
+    # Use path-based versioning for better Twitter cache busting
+    @seo_avatar_url = social_profile_image_url(@user.username, @user.social_image_cache_key)
 
     # Full profile URL
     @seo_profile_url = request.original_url
