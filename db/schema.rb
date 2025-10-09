@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_06_000000) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_09_191513) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -188,6 +188,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_06_000000) do
     t.string "invitation_token"
     t.datetime "invitation_sent_at"
     t.datetime "invitation_accepted_at"
+    t.integer "social_image_version", default: 1, null: false
     t.index ["account_status"], name: "index_users_on_account_status"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["invitation_accepted_at"], name: "index_users_on_invitation_accepted_at"

@@ -248,6 +248,16 @@ class User < ApplicationRecord
     full_name.present? ? full_name : username
   end
 
+  # Social image version management
+  def bump_social_image_version!
+    increment!(:social_image_version)
+    Rails.logger.info "Bumped social image version for #{username} to #{social_image_version}"
+  end
+
+  def social_image_cache_key
+    "v#{social_image_version}"
+  end
+
   # Extract Twitter handle from URL for display purposes
   def twitter_handle
     return nil if twitter_url.blank?
