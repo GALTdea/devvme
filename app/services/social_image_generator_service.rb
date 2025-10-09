@@ -186,31 +186,31 @@ class SocialImageGeneratorService
     if skills.empty?
       y_pos = 320
       fallback_html = ""
-      
+
       # Show job title if available
       if @user.job_title.present?
         fallback_html += "<text x=\"360\" y=\"#{y_pos}\" fill=\"#374151\" font-family=\"Arial, sans-serif\" font-size=\"18\" font-weight=\"600\">#{@user.job_title}</text>"
         y_pos += 30
       end
-      
+
       # Show bio if available (truncated)
       if @user.bio.present?
         bio_text = @user.bio.length > 60 ? @user.bio[0..57] + "..." : @user.bio
         fallback_html += "<text x=\"360\" y=\"#{y_pos}\" fill=\"#6B7280\" font-family=\"Arial, sans-serif\" font-size=\"16\" font-weight=\"400\">#{bio_text}</text>"
         y_pos += 25
       end
-      
+
       # Show location if available
       if @user.location.present?
         fallback_html += "<text x=\"360\" y=\"#{y_pos}\" fill=\"#9CA3AF\" font-family=\"Arial, sans-serif\" font-size=\"14\" font-weight=\"500\">📍 #{@user.location}</text>"
         y_pos += 25
       end
-      
+
       # If still no content, show a generic message
       if fallback_html.empty?
         fallback_html = "<text x=\"360\" y=\"#{y_pos}\" fill=\"#9CA3AF\" font-family=\"Arial, sans-serif\" font-size=\"16\" font-weight=\"500\">Full-stack Developer</text>"
       end
-      
+
       return fallback_html
     end
 
@@ -232,24 +232,24 @@ class SocialImageGeneratorService
     links_html = ""
     x_pos = 360
     y_pos = 450
-    
+
     # GitHub link
     if @user.github_url.present?
       links_html += "<text x=\"#{x_pos}\" y=\"#{y_pos}\" fill=\"#6B7280\" font-family=\"Arial, sans-serif\" font-size=\"14\" font-weight=\"500\">🔗 GitHub</text>"
       x_pos += 120
     end
-    
+
     # LinkedIn link
     if @user.linkedin_url.present?
       links_html += "<text x=\"#{x_pos}\" y=\"#{y_pos}\" fill=\"#6B7280\" font-family=\"Arial, sans-serif\" font-size=\"14\" font-weight=\"500\">💼 LinkedIn</text>"
       x_pos += 120
     end
-    
+
     # Website link
     if @user.website_url.present?
       links_html += "<text x=\"#{x_pos}\" y=\"#{y_pos}\" fill=\"#6B7280\" font-family=\"Arial, sans-serif\" font-size=\"14\" font-weight=\"500\">🌐 Website</text>"
     end
-    
+
     links_html
   end
 end
