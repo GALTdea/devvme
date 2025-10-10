@@ -30,10 +30,18 @@ class UserInvitationMailerTest < ActionMailer::TestCase
     assert_match @invited_user.username, email.html_part.body.to_s
     assert_match @admin.display_name, email.html_part.body.to_s
 
-    # Test claim URL is present
-    claim_url = "invitations/#{@invited_user.invitation_token}/claim"
-    assert_match claim_url, email.html_part.body.to_s
-    assert_match claim_url, email.text_part.body.to_s
+    # Test verify URL is present (new security flow)
+    verify_url = "invitations/#{@invited_user.invitation_token}/verify"
+    assert_match verify_url, email.html_part.body.to_s
+    assert_match verify_url, email.text_part.body.to_s
+
+    # Test access code is present
+    assert_match @invited_user.invitation_access_code, email.html_part.body.to_s
+    assert_match @invited_user.invitation_access_code, email.text_part.body.to_s
+
+    # Test security-related content
+    assert_match(/access code/i, email.html_part.body.to_s)
+    assert_match(/verify/i, email.html_part.body.to_s)
 
     # Test profile URL is present
     assert_match @invited_user.username, email.html_part.body.to_s
@@ -179,12 +187,28 @@ class UserInvitationMailerTest < ActionMailer::TestCase
 
   test "email handles missing fields gracefully" do
     # Test with user without email - this will cause issues in the mailer
-    user_without_email = User.new(username: "test", account_status: :invited)
+    user_without_email = User.new(
+      username: "test",
+      account_status: :invited,
+      invitation_token: "test_token_123",
+      invitation_access_code: "123456",
+      invitation_sent_at: Time.current
+    )
 
     # The mailer should handle missing invitation_sent_at gracefully
     # but will fail on missing email during delivery
     assert_raises(ArgumentError) do
       UserInvitationMailer.invitation_notification(user_without_email, @admin).deliver_now
     end
+  end
+
+  test "email includes access code security notice" do
+    email = UserInvitationMailer.invitation_notification(@invited_user, @admin)
+    email.deliver_now
+
+    # Test that security notice is present
+    assert_match(/Security Protected/i, email.html_part.body.to_s)
+    assert_match(/Keep.*private/i, email.html_part.body.to_s)
+    assert_match(/6-digit/i, email.text_part.body.to_s)
   end
 end
