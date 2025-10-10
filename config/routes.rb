@@ -131,6 +131,8 @@ Rails.application.routes.draw do
 
   # Invitation claiming routes - public access for profile claiming
   get "invitations/:token", to: "invitations#show", as: :invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
+  get "invitations/:token/verify", to: "invitations#verify", as: :verify_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
+  post "invitations/:token/verify", to: "invitations#verify_access_code", as: :verify_invitation_code, constraints: { token: /[a-zA-Z0-9_-]+/ }
   get "invitations/:token/claim", to: "invitations#claim", as: :claim_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
   patch "invitations/:token/claim", to: "invitations#update", as: :update_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
 

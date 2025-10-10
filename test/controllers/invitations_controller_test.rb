@@ -7,6 +7,15 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     @admin = users(:test_admin)
   end
 
+  # Helper method to verify access code (simulates successful verification)
+  # This makes an actual POST request to set up the session properly
+  def verify_access_code_for(user)
+    post verify_invitation_code_path(user.invitation_token), params: {
+      access_code: user.invitation_access_code
+    }
+    # Don't follow redirect - we want to test the redirect behavior separately
+  end
+
   test "should show invitation preview" do
     get invitation_path(@invited_user.invitation_token)
 
@@ -17,7 +26,10 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_match "Claim Your Profile", response.body
   end
 
-  test "should show claim form" do
+  test "should show claim form after verification" do
+    # First verify the access code
+    verify_access_code_for(@invited_user)
+
     get claim_invitation_path(@invited_user.invitation_token)
 
     assert_response :success
@@ -25,6 +37,13 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", update_invitation_path(@invited_user.invitation_token)
     assert_select "input[name='user[password]']"
     assert_select "input[name='user[password_confirmation]']"
+  end
+
+  test "should redirect to verification if accessing claim without verification" do
+    get claim_invitation_path(@invited_user.invitation_token)
+
+    assert_redirected_to verify_invitation_path(@invited_user.invitation_token)
+    assert_match "Please verify your access code", flash[:alert]
   end
 
   test "should redirect invalid token to root with error" do
@@ -55,6 +74,9 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should successfully claim invitation with new password" do
+    # First verify the access code
+    verify_access_code_for(@invited_user)
+
     assert_difference('User.where(account_status: :active).count', 1) do
       patch update_invitation_path(@invited_user.invitation_token), params: {
         user: {
@@ -77,6 +99,8 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should handle password validation errors" do
+    verify_access_code_for(@invited_user)
+
     patch update_invitation_path(@invited_user.invitation_token), params: {
       user: {
         password: "123", # Too short
@@ -93,6 +117,8 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should handle password confirmation mismatch" do
+    verify_access_code_for(@invited_user)
+
     patch update_invitation_path(@invited_user.invitation_token), params: {
       user: {
         password: "password123",
@@ -106,6 +132,8 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should handle missing password" do
+    verify_access_code_for(@invited_user)
+
     patch update_invitation_path(@invited_user.invitation_token), params: {
       user: {
         password: "",
@@ -119,6 +147,8 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update profile fields during claim" do
+    verify_access_code_for(@invited_user)
+
     patch update_invitation_path(@invited_user.invitation_token), params: {
       user: {
         password: "newpassword123",
@@ -154,6 +184,8 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should handle invalid existing user credentials" do
+    verify_access_code_for(@invited_user)
+
     patch update_invitation_path(@invited_user.invitation_token), params: {
       sign_in_existing: "true",
       user: {
@@ -180,6 +212,7 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   test "should allow signed in user to claim their own invitation" do
     # Sign in the invited user (simulating they already have some access)
     sign_in @invited_user
+    verify_access_code_for(@invited_user)
 
     get claim_invitation_path(@invited_user.invitation_token)
 
@@ -191,6 +224,7 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
 
   test "should handle profile completion for signed in user" do
     sign_in @invited_user
+    verify_access_code_for(@invited_user)
 
     patch update_invitation_path(@invited_user.invitation_token), params: {
       user: {
@@ -236,6 +270,8 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should handle skills array properly in form submission" do
+    verify_access_code_for(@invited_user)
+
     patch update_invitation_path(@invited_user.invitation_token), params: {
       user: {
         password: "newpassword123",
@@ -251,6 +287,8 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should track successful claim analytics" do
+    verify_access_code_for(@invited_user)
+
     # Capture log output to verify analytics tracking
     log_output = StringIO.new
     logger = Logger.new(log_output)
@@ -273,5 +311,44 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     ensure
       Rails.logger = original_logger
     end
+  end
+
+  # New tests for access code verification
+  test "should show verification page" do
+    get verify_invitation_path(@invited_user.invitation_token)
+
+    assert_response :success
+    assert_select "h1", /Verify Your Identity/
+    assert_select "input[name='access_code']"
+    assert_match @invited_user.display_name, response.body
+  end
+
+  test "should verify valid access code" do
+    post verify_invitation_code_path(@invited_user.invitation_token), params: {
+      access_code: @invited_user.invitation_access_code
+    }
+
+    assert_redirected_to claim_invitation_path(@invited_user.invitation_token)
+    assert_match "Access code verified", flash[:notice]
+    assert_equal @invited_user.invitation_token, session[:verified_invitation_token]
+  end
+
+  test "should reject invalid access code" do
+    post verify_invitation_code_path(@invited_user.invitation_token), params: {
+      access_code: "000000" # Wrong code
+    }
+
+    assert_response :success
+    assert_match "Invalid access code", flash[:alert]
+    assert_nil session[:verified_invitation_token]
+  end
+
+  test "should reject empty access code" do
+    post verify_invitation_code_path(@invited_user.invitation_token), params: {
+      access_code: ""
+    }
+
+    assert_response :success
+    assert_match "Invalid access code", flash[:alert]
   end
 end

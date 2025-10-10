@@ -159,12 +159,12 @@
 
     <!-- Action Buttons -->
     <div class="text-center space-y-4">
-      <%= link_to claim_invitation_path(@user.invitation_token), 
+      <%= link_to verify_invitation_path(@user.invitation_token), 
           class: "inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" do %>
         <svg class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v-2l-4.257-4.257A6 6 0 0117 9z" />
         </svg>
-        Claim Your Profile
+        Verify & Claim Your Profile
       <% end %>
       
       <div class="text-center">

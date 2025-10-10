@@ -287,6 +287,15 @@
         
         <p style="font-size: 16px; margin-bottom: 25px;"><%= @admin_name %> has created a professional developer profile for you on Devv.me. Your profile is already live and ready to be claimed!</p>
         
+        <!-- Access Code Section -->
+        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 3px solid #10b981; padding: 30px; border-radius: 12px; margin: 25px 0; text-align: center;">
+          <p style="margin: 0 0 10px 0; font-size: 14px; color: #065f46; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">🔐 Your Secure Access Code</p>
+          <div style="background: white; padding: 20px; border-radius: 8px; margin: 15px 0; display: inline-block; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+            <p style="margin: 0; font-size: 48px; font-weight: 800; color: #059669; letter-spacing: 8px; font-family: 'Courier New', monospace;"><%= @user.invitation_access_code %></p>
+          </div>
+          <p style="margin: 15px 0 0 0; font-size: 14px; color: #065f46;">You'll need this code to verify your identity when claiming your profile</p>
+        </div>
+
         <!-- Urgency Notice -->
         <% if @days_remaining <= 7 %>
           <div class="urgency-notice <%= 'high' if @days_remaining <= 3 %>">
@@ -328,13 +337,20 @@
         
         <!-- Call to Action Buttons -->
         <div style="text-align: center; margin: 30px 0;">
-          <a href="<%= @claim_url %>" class="cta-button" style="display: inline-block; margin: 10px;">
-            🔐 Claim Your Profile Now
+          <a href="<%= verify_invitation_url(@user.invitation_token, protocol: 'https', host: Rails.application.config.action_mailer.default_url_options[:host]) %>" class="cta-button" style="display: inline-block; margin: 10px;">
+            🔐 Verify & Claim Your Profile
           </a>
           <br>
           <a href="<%= @profile_url %>" class="cta-button secondary" style="display: inline-block; margin: 10px;">
             👀 Preview Your Profile
           </a>
+        </div>
+        
+        <!-- Security Notice -->
+        <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+          <p style="margin: 0; font-size: 14px; color: #1e40af;">
+            <strong>🔒 Security Protected:</strong> Keep your access code private. Only you should have access to it.
+          </p>
         </div>
         
         <!-- Social Proof -->

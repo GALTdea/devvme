@@ -1,6 +1,7 @@
 class InvitationsController < ApplicationController
-  before_action :find_user_by_token, only: [:show, :claim, :update]
-  before_action :validate_invitation, only: [:show, :claim, :update]
+  before_action :find_user_by_token, only: [:show, :verify, :verify_access_code, :claim, :update]
+  before_action :validate_invitation, only: [:show, :verify, :verify_access_code, :claim, :update]
+  before_action :require_verified_access, only: [:claim, :update]
 
   # GET /invitations/:token/claim
   def show
@@ -24,6 +25,52 @@ class InvitationsController < ApplicationController
 
     # Show invitation preview for anonymous users
     render :show
+  end
+
+  # GET /invitations/:token/verify
+  def verify
+    authorize @user, :claim?, policy_class: InvitationPolicy
+
+    # Show the access code verification form
+    @page_title = "Verify Your Identity - #{@user.display_name}"
+    @invitation_data = build_invitation_data
+
+    # If user is already signed in and it's their invitation
+    if user_signed_in? && current_user == @user
+      # Still require verification even if signed in
+      render :verify
+      return
+    end
+
+    # If user is signed in but it's not their invitation, show error
+    if user_signed_in? && current_user != @user
+      redirect_to root_path, alert: "You cannot claim another user's invitation."
+      return
+    end
+
+    # For anonymous users, show verification form
+    render :verify
+  end
+
+  # POST /invitations/:token/verify
+  def verify_access_code
+    authorize @user, :claim?, policy_class: InvitationPolicy
+
+    access_code = params[:access_code]&.strip
+
+    if @user.valid_access_code?(access_code)
+      # Store verification in session
+      session[:verified_invitation_token] = @user.invitation_token
+      session[:verified_at] = Time.current.to_i
+
+      # Redirect to claim form
+      redirect_to claim_invitation_path(@user.invitation_token), notice: "Access code verified! You can now complete your profile setup."
+    else
+      # Invalid access code
+      @invitation_data = build_invitation_data
+      flash.now[:alert] = "Invalid access code. Please check your invitation email for the correct 6-digit code."
+      render :verify
+    end
   end
 
   # GET /invitations/:token/claim
@@ -71,6 +118,28 @@ class InvitationsController < ApplicationController
   end
 
   private
+
+  def require_verified_access
+    # Check if access code has been verified in this session
+    verified_token = session[:verified_invitation_token]
+    verified_at = session[:verified_at]
+
+    # Verification is valid for 30 minutes
+    verification_expired = verified_at.nil? || Time.at(verified_at) < 30.minutes.ago
+
+    # If not verified or verification expired, redirect to verification page
+    if verified_token != @user.invitation_token || verification_expired
+      # Clear expired verification
+      session.delete(:verified_invitation_token)
+      session.delete(:verified_at)
+
+      redirect_to verify_invitation_path(@user.invitation_token),
+                  alert: "Please verify your access code to continue."
+      return false
+    end
+
+    true
+  end
 
   def find_user_by_token
     @user = User.find_by(invitation_token: params[:token])

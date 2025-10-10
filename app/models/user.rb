@@ -410,6 +410,7 @@ class User < ApplicationRecord
   # Invitation system methods
   def invite!(admin: nil, send_email: true)
     generate_invitation_token
+    generate_invitation_access_code
     update!(
       account_status: :invited,
       invitation_accepted_at: nil
@@ -463,6 +464,26 @@ class User < ApplicationRecord
     invitation_token == token &&
     invited? &&
     !invitation_expired?
+  end
+
+  def valid_access_code?(code)
+    return false if invitation_access_code.blank?
+    return false if code.blank?
+    # Compare the codes securely
+    ActiveSupport::SecurityUtils.secure_compare(
+      invitation_access_code.to_s,
+      code.to_s
+    )
+  end
+
+  def access_code_verified?
+    # Check if the session has verified the access code
+    # This will be set by the controller
+    @access_code_verified == true
+  end
+
+  def mark_access_code_verified!
+    @access_code_verified = true
   end
 
   # Override suspended? to also check account_status
@@ -591,6 +612,12 @@ class User < ApplicationRecord
       self.invitation_token = SecureRandom.urlsafe_base64(32)
       break unless User.exists?(invitation_token: invitation_token)
     end
+  end
+
+  # Generate 6-digit access code for invitation verification
+  def generate_invitation_access_code
+    # Generate a random 6-digit code
+    self.invitation_access_code = SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')
   end
 
   # Normalize URLs by adding https:// prefix if missing

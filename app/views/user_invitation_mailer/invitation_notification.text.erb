@@ -5,6 +5,12 @@ Hi <%= @user.display_name %>!
 
 <%= @admin_name %> has created a professional developer profile for you on Devv.me. Your profile is already live and ready to be claimed!
 
+🔐 YOUR SECURE ACCESS CODE: <%= @user.invitation_access_code %>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You'll need this 6-digit code to verify your identity when claiming your profile.
+Keep it private and don't share it with anyone.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 <% if @days_remaining <= 7 -%>
 ⏰ TIME SENSITIVE: Your invitation expires in <%= pluralize(@days_remaining, 'day') %>!
 
@@ -27,9 +33,11 @@ Hi <%= @user.display_name %>!
 - <%= @profile_completion[:completed_fields].length %> Sections Filled
 - <%= @days_remaining %> Days Remaining
 
-🔐 CLAIM YOUR PROFILE NOW: <%= @claim_url %>
+🔐 VERIFY & CLAIM YOUR PROFILE NOW: <%= verify_invitation_url(@user.invitation_token, protocol: 'https', host: Rails.application.config.action_mailer.default_url_options[:host]) %>
 
 👀 Preview Your Profile: <%= @profile_url %>
+
+🔒 SECURITY: Keep your access code (<%= @user.invitation_access_code %>) private!
 
 🌟 Join 1,000+ developers already showcasing their work on Devv.me
 
