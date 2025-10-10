@@ -27,6 +27,9 @@ class User < ApplicationRecord
   # Role system
   enum :role,{ user: 0, admin: 1, super_admin: 2 }
 
+  # Scopes
+  scope :featured, -> { where(featured: true) }
+
   # Account status system - tracks user activation state
   enum :account_status, {
     pending_activation: 0,  # User signed up but hasn't activated their account
@@ -370,6 +373,16 @@ class User < ApplicationRecord
 
   def update_last_login!
     update_column(:last_login_at, Time.current)
+  end
+
+  # Featured profile methods
+  def toggle_featured!(admin: nil)
+    new_featured_status = !featured
+    update!(
+      featured: new_featured_status,
+      featured_at: new_featured_status ? Time.current : nil
+    )
+    log_admin_activity(admin, new_featured_status ? 'feature_user' : 'unfeature_user') if admin
   end
 
   # Account status methods

@@ -218,6 +218,29 @@
               <% end %>
             <% end %>
 
+            <!-- Featured Profile Toggle (Super Admin Only) -->
+            <% if current_user.super_admin? %>
+              <div class="pt-4 border-t border-secondary-200 dark:border-secondary-700">
+                <% if @user.featured? %>
+                  <%= button_to "⭐ Unfeature User", toggle_featured_admin_user_path(@user), 
+                      method: :patch,
+                      data: { confirm: "Are you sure you want to remove this user from featured profiles?" },
+                      class: "w-full inline-flex justify-center items-center px-4 py-2 border border-amber-300 text-sm font-medium rounded-md text-amber-700 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:border-amber-600 dark:text-amber-400 dark:hover:bg-amber-900/30" %>
+                  <p class="mt-2 text-xs text-center text-secondary-500 dark:text-secondary-400">
+                    Featured since <%= @user.featured_at.strftime("%b %d, %Y") %>
+                  </p>
+                <% else %>
+                  <%= button_to "⭐ Feature User", toggle_featured_admin_user_path(@user), 
+                      method: :patch,
+                      data: { confirm: "Are you sure you want to feature this user on the homepage?" },
+                      class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500" %>
+                  <p class="mt-2 text-xs text-center text-secondary-500 dark:text-secondary-400">
+                    Feature this user on homepage
+                  </p>
+                <% end %>
+              </div>
+            <% end %>
+
             <!-- View Public Profile -->
             <%= link_to "View Public Profile", "/#{@user.friendly_id}", target: "_blank",
                 class: "w-full inline-flex justify-center items-center px-4 py-2 border border-secondary-300 text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 dark:bg-secondary-700 dark:border-secondary-600 dark:text-secondary-200 dark:hover:bg-secondary-600" %>

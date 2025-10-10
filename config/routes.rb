@@ -24,6 +24,7 @@ Rails.application.routes.draw do
         patch :demote
         patch :resend_invitation
         patch :generate_invitation_link
+        patch :toggle_featured
         delete :destroy
       end
       collection do

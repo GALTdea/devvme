@@ -3,6 +3,13 @@ class HomeController < ApplicationController
     # Redirect authenticated users to dashboard
     redirect_to dashboard_path if user_signed_in?
 
+    # Fetch featured users for homepage showcase
+    @featured_users = User.featured
+                         .where.not(username: nil)
+                         .where(account_status: [:active, :invited])
+                         .limit(10)
+                         .order("RANDOM()")
+
     # Prepare SEO data for social media cards
     prepare_seo_data
   end

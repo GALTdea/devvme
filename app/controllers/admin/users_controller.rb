@@ -1,6 +1,6 @@
 class Admin::UsersController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_user, only: [:show, :edit, :update, :destroy, :suspend, :unsuspend, :activate, :deactivate, :promote, :demote, :resend_invitation, :generate_invitation_link]
+  before_action :set_user, only: [:show, :edit, :update, :destroy, :suspend, :unsuspend, :activate, :deactivate, :promote, :demote, :resend_invitation, :generate_invitation_link, :toggle_featured]
 
   include Pagy::Backend
 
@@ -30,6 +30,11 @@ class Admin::UsersController < ApplicationController
       @users = @users.where(account_status: :deactivated)
     end
 
+    # Filter by featured status
+    if params[:featured] == 'true'
+      @users = @users.where(featured: true)
+    end
+
     if params[:search].present?
       search_term = "%#{params[:search]}%"
       @users = @users.where(
@@ -45,6 +50,7 @@ class Admin::UsersController < ApplicationController
     @suspended_users = User.where(account_status: :suspended).count
     @deactivated_users = User.where(account_status: :deactivated).count
     @admin_users = User.where(role: [:admin, :super_admin]).count
+    @featured_users_count = User.where(featured: true).count
   end
 
   def show
@@ -231,6 +237,14 @@ class Admin::UsersController < ApplicationController
     else
       redirect_to admin_user_path(@user), alert: 'Cannot generate invitation link for this user.'
     end
+  end
+
+  def toggle_featured
+    authorize [:admin, @user], :update?
+
+    @user.toggle_featured!(admin: current_user)
+    status = @user.featured? ? 'featured' : 'unfeatured'
+    redirect_to admin_user_path(@user), notice: "User has been #{status} successfully."
   end
 
   def bulk_suspend
