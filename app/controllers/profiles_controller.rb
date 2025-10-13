@@ -13,6 +13,11 @@ class ProfilesController < ApplicationController
 
   # Update user profile with validation and proper error handling
   def update
+    # Handle work preferences separately if present
+    if work_preferences_params.present?
+      @user.update_work_preferences(work_preferences_params)
+    end
+
     if @user.update(profile_params)
       redirect_to dashboard_path, notice: "Profile updated successfully!"
     else
@@ -37,7 +42,27 @@ class ProfilesController < ApplicationController
   # Strong parameters for profile updates
   # Only allows specific profile fields to be updated
   def profile_params
-    params.require(:user).permit(:username, :full_name, :bio, :github_url, :linkedin_url, :twitter_url, :website_url, :avatar, :job_title, :location, :headline, :contact_email, :skills_list)
+    params.require(:user).permit(
+      :username, :full_name, :bio, :github_url, :linkedin_url, :twitter_url,
+      :website_url, :avatar, :job_title, :location, :headline, :contact_email,
+      :skills_list, :open_for_work
+    )
+  end
+
+  # Strong parameters for work preferences
+  def work_preferences_params
+    return {} unless params[:user]&.[](:work_preferences).present?
+
+    prefs = params[:user][:work_preferences].permit(
+      :remote_preference,
+      :availability,
+      :preferred_roles,
+      :message,
+      work_types: []
+    )
+
+    # Convert to hash with string keys
+    prefs.to_h.stringify_keys
   end
 
   # Identify missing profile fields for completion page

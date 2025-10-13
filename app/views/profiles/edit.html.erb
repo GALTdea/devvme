@@ -14,7 +14,7 @@
     <!-- Profile Form -->
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
       <%= form_with model: @user, url: profile_path, method: :patch, local: true, 
-                    class: "space-y-6 p-6", data: { controller: "image-preview" } do |form| %>
+                    class: "space-y-6 p-6", data: { controller: "image-preview work-status" } do |form| %>
         
         <!-- Error Messages -->
         <% if @user.errors.any? %>
@@ -345,6 +345,135 @@
                   <%= @user.errors[:website_url].first %>
                 </div>
               <% end %>
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-gray-200 dark:border-gray-700">
+
+        <!-- Work Status Section -->
+        <div class="space-y-4">
+          <div class="flex items-start justify-between">
+            <div>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white">Work Status</h3>
+              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                Let potential employers know you're open to new opportunities
+              </p>
+            </div>
+            
+            <!-- Open for Work Toggle -->
+            <div class="flex items-center">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <%= form.check_box :open_for_work,
+                    data: { 
+                      work_status_target: "toggle",
+                      action: "change->work-status#togglePreferences"
+                    },
+                    class: "sr-only peer" %>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Open for Work</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Work Preferences (shown when open_for_work is true) -->
+          <div data-work-status-target="preferences" 
+               class="<%= @user.open_for_work ? '' : 'hidden' %> space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            
+            <!-- Work Types (Checkboxes) -->
+            <div>
+              <%= form.label :work_types, "Work Types", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3" %>
+              <div class="grid grid-cols-2 gap-3">
+                <% [
+                  { value: 'full_time', label: 'Full-time' },
+                  { value: 'part_time', label: 'Part-time' },
+                  { value: 'contract', label: 'Contract' },
+                  { value: 'freelance', label: 'Freelance' }
+                ].each do |work_type| %>
+                  <label class="flex items-center p-3 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                    <%= check_box_tag 'user[work_preferences][work_types][]', 
+                        work_type[:value],
+                        @user.work_types.include?(work_type[:value]),
+                        class: "w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600 focus:ring-2" %>
+                    <span class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                      <%= work_type[:label] %>
+                    </span>
+                  </label>
+                <% end %>
+              </div>
+              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Select all types of work you're interested in
+              </p>
+            </div>
+
+            <!-- Remote Preference -->
+            <div>
+              <%= form.label :remote_preference, "Remote Preference", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+              <%= select_tag 'user[work_preferences][remote_preference]',
+                  options_for_select([
+                    ['Select preference...', ''],
+                    ['Remote Only', 'remote_only'],
+                    ['Hybrid', 'hybrid'],
+                    ['On-site', 'on_site'],
+                    ['Flexible', 'flexible']
+                  ], @user.remote_preference),
+                  class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" %>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Your preferred work arrangement
+              </p>
+            </div>
+
+            <!-- Availability -->
+            <div>
+              <%= form.label :availability, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+              <%= select_tag 'user[work_preferences][availability]',
+                  options_for_select([
+                    ['Select availability...', ''],
+                    ['Available Immediately', 'immediate'],
+                    ['Available in 2 Weeks', '2_weeks'],
+                    ['Available in 1 Month', '1_month'],
+                    ['Available in 3+ Months', '3_months_plus']
+                  ], @user.availability),
+                  class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" %>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                When you can start a new position
+              </p>
+            </div>
+
+            <!-- Preferred Roles -->
+            <div>
+              <%= form.label :preferred_roles, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+              <%= text_field_tag 'user[work_preferences][preferred_roles]',
+                  @user.preferred_roles_list,
+                  placeholder: "e.g., Senior Rails Developer, Tech Lead, Full Stack Engineer",
+                  class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" %>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Comma-separated list of roles you're interested in
+              </p>
+            </div>
+
+            <!-- Message/Notes -->
+            <div>
+              <%= form.label :message, "Message (Optional)", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+              <%= text_area_tag 'user[work_preferences][message]',
+                  @user.work_status_message,
+                  rows: 3,
+                  placeholder: "e.g., Looking for remote opportunities in fintech or healthtech. Open to contract work.",
+                  class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" %>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                A brief message about what you're looking for (max 500 characters)
+              </p>
+            </div>
+
+            <!-- Info Banner -->
+            <div class="flex p-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-700 dark:text-blue-400" role="alert">
+              <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+              </svg>
+              <div>
+                <span class="font-medium">Work status visibility:</span>
+                <p class="mt-1">When enabled, your work status and preferences will be publicly visible on your profile to help potential employers reach you.</p>
+              </div>
             </div>
           </div>
         </div>
