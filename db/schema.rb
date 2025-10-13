@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_10_193917) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_13_185710) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -192,6 +192,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_193917) do
     t.string "invitation_access_code"
     t.boolean "featured", default: false
     t.datetime "featured_at"
+    t.boolean "open_for_work", default: false, null: false
+    t.jsonb "work_preferences", default: {}, null: false
     t.index ["account_status"], name: "index_users_on_account_status"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["featured"], name: "index_users_on_featured"

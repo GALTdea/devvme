@@ -140,6 +140,9 @@ class User < ApplicationRecord
   validate :avatar_format
   validate :resume_format
 
+  # Work preferences validations (optional - only validate if present)
+  validate :work_preferences_structure
+
   def avatar_format
     return unless avatar.attached?
 
@@ -165,6 +168,47 @@ class User < ApplicationRecord
     # Check file size - limit to 10MB
     if resume.byte_size > 10.megabytes
       errors.add(:resume, "must be less than 10MB")
+    end
+  end
+
+  def work_preferences_structure
+    return if work_preferences.blank? || work_preferences.empty?
+
+    # Validate remote_preference if present
+    if work_preferences['remote_preference'].present?
+      valid_remote_prefs = %w[remote_only hybrid on_site flexible]
+      unless valid_remote_prefs.include?(work_preferences['remote_preference'])
+        errors.add(:work_preferences, "remote preference must be one of: #{valid_remote_prefs.join(', ')}")
+      end
+    end
+
+    # Validate availability if present
+    if work_preferences['availability'].present?
+      valid_availabilities = %w[immediate 2_weeks 1_month 3_months_plus]
+      unless valid_availabilities.include?(work_preferences['availability'])
+        errors.add(:work_preferences, "availability must be one of: #{valid_availabilities.join(', ')}")
+      end
+    end
+
+    # Validate work_types if present
+    if work_preferences['work_types'].present?
+      valid_work_types = %w[full_time part_time contract freelance]
+      invalid_types = work_preferences['work_types'] - valid_work_types
+      unless invalid_types.empty?
+        errors.add(:work_preferences, "work types must be from: #{valid_work_types.join(', ')}")
+      end
+    end
+
+    # Validate message length if present
+    if work_preferences['message'].present? && work_preferences['message'].length > 500
+      errors.add(:work_preferences, "message must be less than 500 characters")
+    end
+
+    # Validate preferred_roles if present (ensure it's an array)
+    if work_preferences['preferred_roles'].present?
+      unless work_preferences['preferred_roles'].is_a?(Array)
+        errors.add(:work_preferences, "preferred roles must be an array")
+      end
     end
   end
 
@@ -609,6 +653,109 @@ class User < ApplicationRecord
   # Digest preference helpers - must be public for views/services
   def digest_preference_or_create
     digest_preference || build_and_save_digest_preference
+  end
+
+  # Work Status / Open for Work methods
+  # These methods help manage the user's availability status and work preferences
+
+  def open_to_work?
+    open_for_work == true
+  end
+
+  def work_status_message
+    return nil unless open_to_work?
+    work_preferences.dig('message') || 'Open to new opportunities'
+  end
+
+  def work_types
+    work_preferences['work_types'] || []
+  end
+
+  def remote_preference
+    work_preferences['remote_preference']
+  end
+
+  def availability
+    work_preferences['availability']
+  end
+
+  def preferred_roles
+    work_preferences['preferred_roles'] || []
+  end
+
+  def preferred_roles_list
+    return '' if preferred_roles.empty?
+    preferred_roles.is_a?(Array) ? preferred_roles.join(', ') : preferred_roles.to_s
+  end
+
+  # Human-readable labels for work preferences
+  def remote_preference_label
+    case remote_preference
+    when 'remote_only' then 'Remote Only'
+    when 'hybrid' then 'Hybrid'
+    when 'on_site' then 'On-site'
+    when 'flexible' then 'Flexible'
+    else 'Not specified'
+    end
+  end
+
+  def availability_label
+    case availability
+    when 'immediate' then 'Available Immediately'
+    when '2_weeks' then 'Available in 2 Weeks'
+    when '1_month' then 'Available in 1 Month'
+    when '3_months_plus' then 'Available in 3+ Months'
+    else 'Not specified'
+    end
+  end
+
+  def work_types_labels
+    return [] if work_types.empty?
+    work_types.map do |type|
+      case type
+      when 'full_time' then 'Full-time'
+      when 'part_time' then 'Part-time'
+      when 'contract' then 'Contract'
+      when 'freelance' then 'Freelance'
+      else type.titleize
+      end
+    end
+  end
+
+  # Update work preferences
+  def update_work_preferences(preferences_hash)
+    # Clean up the preferences hash to only include valid keys
+    cleaned_preferences = {}
+
+    # Handle work_types as array
+    if preferences_hash['work_types'].present?
+      cleaned_preferences['work_types'] = Array(preferences_hash['work_types']).reject(&:blank?)
+    end
+
+    # Handle preferred_roles - can be comma-separated string or array
+    if preferences_hash['preferred_roles'].present?
+      roles = preferences_hash['preferred_roles']
+      cleaned_preferences['preferred_roles'] = if roles.is_a?(String)
+        roles.split(',').map(&:strip).reject(&:blank?)
+      else
+        Array(roles).reject(&:blank?)
+      end
+    end
+
+    # Handle simple string fields
+    %w[remote_preference availability message].each do |field|
+      if preferences_hash[field].present?
+        cleaned_preferences[field] = preferences_hash[field]
+      end
+    end
+
+    # Merge with existing preferences
+    self.work_preferences = work_preferences.merge(cleaned_preferences)
+  end
+
+  # Toggle open for work status
+  def toggle_open_for_work!
+    update!(open_for_work: !open_for_work)
   end
 
   private
