@@ -46,60 +46,59 @@ class SocialImageGeneratorService
     svg_content = <<~SVG
       <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#f0fdf4;stop-opacity:1" />
-            <stop offset="50%" style="stop-color:#dcfce7;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#bbf7d0;stop-opacity:1" />
+          <!-- Gradient Hero Background -->
+          <linearGradient id="hero-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#14b8a6;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
           </linearGradient>
-          <linearGradient id="card" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#ffffff;stop-opacity:1" />
-          </linearGradient>
+
+          <!-- Badge gradients -->
           <linearGradient id="badge" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" style="stop-color:#a855f7;stop-opacity:1" />
             <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
           </linearGradient>
-          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.05"/>
+
+          <!-- Subtle pattern overlay -->
+          <pattern id="dots" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <circle cx="30" cy="30" r="1.5" fill="#ffffff" opacity="0.15"/>
+          </pattern>
+
+          <!-- Shadow for depth -->
+          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000000" flood-opacity="0.2"/>
           </filter>
         </defs>
 
-        <!-- Background -->
-        <rect width="1200" height="630" fill="url(#bg)"/>
-
-        <!-- Background pattern -->
-        <pattern id="dots" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-          <circle cx="30" cy="30" r="1" fill="#86efac" opacity="0.2"/>
-        </pattern>
+        <!-- Full Gradient Background -->
+        <rect width="1200" height="630" fill="url(#hero-bg)"/>
         <rect width="1200" height="630" fill="url(#dots)"/>
 
-        <!-- Main card with subtle shadow -->
-        <rect x="100" y="70" width="1000" height="490" rx="24" fill="url(#card)" filter="url(#shadow)" stroke="rgba(226,232,240,0.5)" stroke-width="1"/>
+        <!-- Left Side: Avatar with shadow -->
+        <g filter="url(#shadow)">
+          #{avatar_svg}
+        </g>
 
-        <!-- Avatar -->
-        #{avatar_svg}
+        <!-- Right Side: Content Area -->
+        <g>
+          <!-- Name -->
+          <text x="380" y="140" fill="#ffffff" font-family="Arial, sans-serif" font-size="52" font-weight="900" letter-spacing="-0.5">#{name}</text>
 
-        <!-- Badge with improved styling -->
-        <rect x="340" y="110" width="200" height="36" rx="18" fill="url(#badge)"/>
-        <text x="440" y="134" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="700">DEVELOPER PROFILE</text>
+          <!-- Job Title -->
+          #{job_title_svg}
 
-        <!-- Name with better contrast -->
-        <text x="340" y="210" fill="#1F2937" font-family="Arial, sans-serif" font-size="48" font-weight="800">#{name}</text>
+          <!-- Available for Hire Badge -->
+          #{badge_svg}
 
-        <!-- Username with better styling -->
-        <text x="340" y="250" fill="#6B7280" font-family="Arial, sans-serif" font-size="24" font-weight="600">@#{username}</text>
+          <!-- Work Info Section -->
+          #{work_info_section}
 
-        <!-- Tagline with better visibility -->
-        <text x="340" y="290" fill="#374151" font-family="Arial, sans-serif" font-size="20" font-weight="600">A developer profile worth sharing</text>
+          <!-- Skills -->
+          #{gradient_skills_svg(skills)}
 
-        <!-- Skills -->
-        #{skills_svg(skills)}
-
-        <!-- Social Links -->
-        #{social_links_svg}
-
-        <!-- Branding with better visibility -->
-        <text x="1080" y="570" text-anchor="end" fill="#334155" font-family="Arial, sans-serif" font-size="18" font-weight="700">devv.me</text>
+          <!-- Footer -->
+          #{footer_svg}
+        </g>
       </svg>
     SVG
 
@@ -163,16 +162,27 @@ class SocialImageGeneratorService
 
             Rails.logger.info "Processing avatar for user #{@user.id}: #{avatar_mime_type}, #{avatar_data.length} bytes"
 
-            <<~SVG
+            # Left-aligned avatar for split-panel layout
+            avatar_html = <<~SVG
               <defs>
                 <clipPath id="avatar-clip">
-                  <rect x="140" y="110" width="160" height="160" rx="20"/>
+                  <circle cx="190" cy="270" r="90"/>
                 </clipPath>
               </defs>
-              <rect x="140" y="110" width="160" height="160" rx="20" fill="#f0fdf4"/>
-              <image x="140" y="110" width="160" height="160" href="data:#{avatar_mime_type};base64,#{avatar_base64}" clip-path="url(#avatar-clip)"/>
-              <rect x="140" y="110" width="160" height="160" rx="20" fill="none" stroke="#a855f7" stroke-width="3"/>
+              <!-- White ring for contrast -->
+              <circle cx="190" cy="270" r="95" fill="white" opacity="0.3"/>
+              <!-- Avatar image -->
+              <image x="100" y="180" width="180" height="180" href="data:#{avatar_mime_type};base64,#{avatar_base64}" clip-path="url(#avatar-clip)"/>
+              <!-- Border ring -->
+              <circle cx="190" cy="270" r="90" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="4"/>
             SVG
+
+            # Add LinkedIn-style #OPENTOWORK banner if user is open for work
+            if @user.open_to_work?
+              avatar_html += open_to_work_banner_svg
+            end
+
+            avatar_html
           rescue => e
             Rails.logger.error "Failed to process avatar for user #{@user.id}: #{e.message}"
             Rails.logger.error e.backtrace.join("\n")
@@ -185,19 +195,42 @@ class SocialImageGeneratorService
         end
       end
 
-      def default_avatar_svg
+      # LinkedIn-style #OPENTOWORK banner at bottom of circular avatar (left-aligned)
+      def open_to_work_banner_svg
         <<~SVG
+          <!-- #OPENTOWORK Banner (LinkedIn style) - curved for circle -->
+          <!-- Green curved banner background -->
+          <ellipse cx="190" cy="355" rx="85" ry="23" fill="#16a34a"/>
+
+          <!-- #OPENTOWORK text - positioned directly (no textPath for better compatibility) -->
+          <text x="190" y="360" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="0.5">#OPENTOWORK</text>
+        SVG
+      end
+
+      def default_avatar_svg
+        avatar_html = <<~SVG
           <defs>
             <linearGradient id="avatar-bg" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" style="stop-color:#a855f7;stop-opacity:1" />
               <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
             </linearGradient>
           </defs>
-          <rect x="140" y="110" width="160" height="160" rx="20" fill="url(#avatar-bg)"/>
-          <circle cx="220" cy="190" r="50" fill="rgba(255,255,255,0.2)"/>
-          <text x="220" y="210" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="60" font-weight="bold">👨‍💻</text>
-          <rect x="140" y="110" width="160" height="160" rx="20" fill="none" stroke="#ffffff" stroke-width="3"/>
+          <!-- White ring for contrast -->
+          <circle cx="190" cy="270" r="95" fill="white" opacity="0.3"/>
+          <!-- Avatar background circle -->
+          <circle cx="190" cy="270" r="90" fill="url(#avatar-bg)"/>
+          <!-- Icon -->
+          <text x="190" y="300" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="70" font-weight="bold">👨‍💻</text>
+          <!-- Border ring -->
+          <circle cx="190" cy="270" r="90" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="4"/>
         SVG
+
+        # Add LinkedIn-style #OPENTOWORK banner if user is open for work
+        if @user.open_to_work?
+          avatar_html += open_to_work_banner_svg
+        end
+
+        avatar_html
       end
 
   def skills_svg(skills)
@@ -270,6 +303,141 @@ class SocialImageGeneratorService
     end
 
     links_html
+  end
+
+  def job_title_svg
+    # Show job title if available, otherwise show first preferred role
+    title_text = if @user.job_title.present?
+      @user.job_title
+    elsif @user.preferred_roles.any?
+      @user.preferred_roles.first
+    else
+      "Developer"
+    end
+
+    <<~SVG
+      <text x="380" y="185" fill="rgba(255,255,255,0.95)" font-family="Arial, sans-serif" font-size="28" font-weight="600">#{title_text}</text>
+    SVG
+  end
+
+  def badge_svg
+    if @user.open_to_work?
+      # Green "AVAILABLE FOR HIRE" badge on right side
+      <<~SVG
+        <defs>
+          <linearGradient id="open-badge" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#16a34a;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#15803d;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect x="380" y="220" width="260" height="46" rx="23" fill="url(#open-badge)" opacity="0.95"/>
+        <text x="510" y="251" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="0.5">⚡ AVAILABLE FOR HIRE</text>
+      SVG
+    else
+      ""  # No badge for regular profiles
+    end
+  end
+
+  def work_info_section
+    return "" unless @user.open_to_work?
+
+    info_parts = []
+
+    # Remote preference
+    if @user.remote_preference.present?
+      info_parts << "🎯 #{@user.remote_preference_label}"
+    end
+
+    # Availability
+    if @user.availability.present?
+      info_parts << "📅 #{@user.availability_label}"
+    end
+
+    # Work types (escape & for XML)
+    if @user.work_types.any?
+      types = @user.work_types_labels.first(2).join(" &amp; ")
+      info_parts << "💼 #{types}"
+    end
+
+    html = ""
+    y_pos = 310
+
+    info_parts.each do |part|
+      html += %(<text x="380" y="#{y_pos}" fill="rgba(255,255,255,0.95)" font-family="Arial, sans-serif" font-size="21" font-weight="600">#{part}</text>)
+      y_pos += 35
+    end
+
+    html
+  end
+
+  def gradient_skills_svg(skills)
+    return "" if skills.empty?
+
+    html = ""
+    html += %(<text x="380" y="450" fill="rgba(255,255,255,0.85)" font-family="Arial, sans-serif" font-size="16" font-weight="600">💻 SKILLS</text>)
+
+    y_pos = 490
+    x_pos = 380
+
+    # Show up to 6 skills, 3 per row
+    skills.first(6).each_with_index do |skill, index|
+      # Move to second row after 3 skills
+      if index == 3
+        y_pos += 50
+        x_pos = 380
+      end
+
+      width = skill.length * 10 + 25
+      html += <<~SVG
+        <rect x="#{x_pos}" y="#{y_pos}" width="#{width}" height="36" rx="18" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+        <text x="#{x_pos + width/2}" y="#{y_pos + 23}" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="15" font-weight="700">#{skill}</text>
+      SVG
+      x_pos += width + 12
+    end
+
+    html
+  end
+
+  def footer_svg
+    <<~SVG
+      <!-- Divider line -->
+      <line x1="100" y1="590" x2="1100" y2="590" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+
+      <!-- CTA and branding -->
+      <text x="100" y="620" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="18" font-weight="600">👉 Get in touch at devv.me/#{@user.username}</text>
+      <text x="1070" y="620" text-anchor="end" fill="rgba(255,255,255,0.95)" font-family="Arial, sans-serif" font-size="24" font-weight="900">devv.me</text>
+    SVG
+  end
+
+  def tagline_text
+    if @user.open_to_work?
+      # Generate compelling tagline for open to work profiles
+      parts = []
+
+      # Add availability
+      if @user.availability.present?
+        parts << @user.availability_label
+      else
+        parts << "Open to opportunities"
+      end
+
+      # Add remote preference
+      if @user.remote_preference.present?
+        parts << @user.remote_preference_label
+      end
+
+      # Add work types if available
+      if @user.work_types.any?
+        work_types = @user.work_types_labels.first(2).join(" & ")
+        parts << work_types
+      end
+
+      # Join parts with bullet points
+      parts.first(2).join(" • ")
+    else
+      # Default tagline for regular profiles
+      "A developer profile worth sharing"
+    end
   end
 
   def get_cached_image_for_version(version)
