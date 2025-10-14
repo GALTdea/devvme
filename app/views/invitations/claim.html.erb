@@ -34,34 +34,6 @@
       </div>
     </div>
 
-    <!-- Alternative: Sign in to existing account (for users not signed in) -->
-    <% unless user_signed_in? %>
-      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-2xl p-6 mb-8">
-        <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-200 mb-2">Already have an account?</h3>
-        <p class="text-blue-800 dark:text-blue-300 text-sm mb-4">
-          If you already have a Devv.me account with this email address, sign in instead.
-        </p>
-        
-        <%= form_with url: update_invitation_path(@user.invitation_token), method: :patch, local: true, class: "space-y-4" do |signin_form| %>
-          <div class="grid md:grid-cols-2 gap-4">
-            <%= signin_form.email_field "user[email]", value: @user.email, 
-                class: "px-4 py-3 border border-blue-300 dark:border-blue-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-blue-900/30 dark:text-blue-100",
-                placeholder: "Your email" %>
-            <%= signin_form.password_field "user[password]", 
-                class: "px-4 py-3 border border-blue-300 dark:border-blue-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-blue-900/30 dark:text-blue-100",
-                placeholder: "Your password" %>
-          </div>
-          
-          <%= signin_form.hidden_field :sign_in_existing, value: "true" %>
-          
-          <div>
-            <%= signin_form.submit "Sign In to Existing Account", 
-                class: "inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors" %>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-
     <%= form_with model: @user, url: update_invitation_path(@user.invitation_token), method: :patch, local: true, class: "space-y-8" do |form| %>
       
       <!-- Account Setup Section -->
