@@ -27,15 +27,17 @@ class InvitationPolicy < ApplicationPolicy
     true
   end
 
-  # Process invitation claim
+  # Process invitation claim or profile completion
   def update?
+    # If user is signed in, they can update their own profile
+    # This covers profile completion after account activation
+    if user.present?
+      return user.id == record.id
+    end
+
+    # For anonymous users, check invitation status
     return false unless record&.invited?
     return false if record&.invitation_expired?
-
-    # If user is signed in, they can only claim their own invitation
-    if user.present?
-      return record.email == user.email
-    end
 
     # Anonymous users can process claim
     true

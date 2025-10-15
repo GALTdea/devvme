@@ -1,7 +1,8 @@
 class InvitationsController < ApplicationController
-  before_action :find_user_by_token, only: [:show, :verify, :verify_access_code, :claim, :update]
-  before_action :validate_invitation, only: [:show, :verify, :verify_access_code, :claim, :update]
-  before_action :require_verified_access, only: [:claim, :update]
+  before_action :find_user_by_token, only: [:show, :verify, :verify_access_code, :claim, :activate_account, :complete_profile, :update]
+  before_action :validate_invitation, only: [:show, :verify, :verify_access_code, :claim, :activate_account, :complete_profile], unless: :account_already_active?
+  before_action :require_verified_access, only: [:claim, :activate_account]
+  before_action :require_signed_in, only: [:complete_profile, :update]
 
   # GET /invitations/:token/claim
   def show
@@ -97,27 +98,102 @@ class InvitationsController < ApplicationController
     render :claim
   end
 
-  # PATCH/PUT /invitations/:token/claim
+  # POST /invitations/:token/activate_account
+  def activate_account
+    authorize @user, :update?, policy_class: InvitationPolicy
+
+    # Process only the password setup (Step 1)
+    password = params[:user][:password]
+    password_confirmation = params[:user][:password_confirmation]
+
+    # Validate password
+    if password.blank?
+      @invitation_data = build_invitation_data
+      flash.now[:alert] = "Password is required."
+      render :claim
+      return
+    end
+
+    if password.length < 6
+      @invitation_data = build_invitation_data
+      flash.now[:alert] = "Password must be at least 6 characters long."
+      render :claim
+      return
+    end
+
+    if password != password_confirmation
+      @invitation_data = build_invitation_data
+      flash.now[:alert] = "Password confirmation doesn't match."
+      render :claim
+      return
+    end
+
+    # Update user with password only
+    if @user.update(password: password, password_confirmation: password_confirmation)
+      # Activate account
+      if @user.claim_invitation!
+        # Sign in the user
+        sign_in(@user)
+
+        # Redirect to profile completion page
+        redirect_to complete_profile_invitation_path(@user.invitation_token), notice: "🎉 Account activated! Now let's complete your profile."
+      else
+        @invitation_data = build_invitation_data
+        flash.now[:alert] = "There was an error activating your account. Please try again."
+        render :claim
+      end
+    else
+      @invitation_data = build_invitation_data
+      flash.now[:alert] = "Please fix the errors below."
+      render :claim
+    end
+  end
+
+  # GET /invitations/:token/complete_profile
+  def complete_profile
+    # Show the profile completion form (Step 2)
+    @page_title = "Complete Your Profile - #{@user.display_name}"
+    @invitation_data = build_invitation_data
+
+    render :complete_profile
+  end
+
+  # PATCH/PUT /invitations/:token/update_profile
   def update
     authorize @user, :update?, policy_class: InvitationPolicy
 
-    # Process the claim form submission
-    @invitation_data = build_invitation_data
+    # Update profile information
+    if @user.update(profile_update_params)
+      track_successful_claim('profile_completion')
 
-    # Handle different claim scenarios
-    if user_signed_in? && current_user == @user
-      # User is already signed in, just update profile and activate
-      handle_profile_completion
-    elsif params[:sign_in_existing].present?
-      # User wants to sign in to existing account
-      handle_existing_user_signin
+      # Send welcome email
+      begin
+        UserWelcomeMailer.welcome_notification(@user).deliver_later
+      rescue => e
+        Rails.logger.error "Failed to send welcome email to #{@user.email}: #{e.message}"
+      end
+
+      redirect_to dashboard_path, notice: "🎉 Welcome to Devv.me! Your profile is now complete and ready to showcase your work."
     else
-      # User is claiming for the first time, set password and activate
-      handle_new_user_claim
+      @invitation_data = build_invitation_data
+      flash.now[:alert] = "Please fix the errors below."
+      render :complete_profile
     end
   end
 
   private
+
+  def require_signed_in
+    unless user_signed_in? && current_user == @user
+      redirect_to claim_invitation_path(@user.invitation_token), alert: "Please activate your account first."
+      return false
+    end
+    true
+  end
+
+  def account_already_active?
+    @user && @user.active?
+  end
 
   def require_verified_access
     # Check if access code has been verified in this session
@@ -191,106 +267,11 @@ class InvitationsController < ApplicationController
     }
   end
 
-  def handle_profile_completion
-    # User is already signed in, just update any profile changes and activate
-    if @user.update(profile_update_params)
-      if @user.claim_invitation!
-        track_successful_claim('profile_completion')
-        redirect_to dashboard_path, notice: "🎉 Welcome to Devv.me! Your profile is now active and ready to showcase your work."
-      else
-        flash.now[:alert] = "There was an error activating your profile. Please try again."
-        render :claim
-      end
-    else
-      flash.now[:alert] = "Please fix the errors below."
-      render :claim
-    end
-  end
-
-  def handle_existing_user_signin
-    # User wants to sign in to an existing account
-    email = params[:user][:email]
-    password = params[:user][:password]
-
-    # Find user by email
-    existing_user = User.find_by(email: email)
-
-    if existing_user && existing_user.valid_password?(password)
-      # Check if this is the same user as the invitation
-      if existing_user == @user
-        # Same user, sign them in and proceed with claim
-        sign_in(existing_user)
-        handle_profile_completion
-      else
-        # Different user - this shouldn't happen normally
-        flash.now[:alert] = "This invitation is for a different email address."
-        render :claim
-      end
-    else
-      flash.now[:alert] = "Invalid email or password."
-      render :claim
-    end
-  end
-
-  def handle_new_user_claim
-    # User is claiming for the first time, set password and activate
-    password = params[:user][:password]
-    password_confirmation = params[:user][:password_confirmation]
-
-    # Validate password
-    if password.blank?
-      flash.now[:alert] = "Password is required."
-      render :claim
-      return
-    end
-
-    if password.length < 6
-      flash.now[:alert] = "Password must be at least 6 characters long."
-      render :claim
-      return
-    end
-
-    if password != password_confirmation
-      flash.now[:alert] = "Password confirmation doesn't match."
-      render :claim
-      return
-    end
-
-    # Update user with password and profile changes
-    user_params = profile_update_params.merge(
-      password: password,
-      password_confirmation: password_confirmation
-    )
-
-    if @user.update(user_params)
-      if @user.claim_invitation!
-        # Sign in the user
-        sign_in(@user)
-        track_successful_claim('new_user_claim')
-
-        # Send welcome email
-        begin
-          UserWelcomeMailer.welcome_notification(@user).deliver_later
-        rescue => e
-          Rails.logger.error "Failed to send welcome email to #{@user.email}: #{e.message}"
-        end
-
-        redirect_to dashboard_path, notice: "🎉 Welcome to Devv.me! Your profile is now active. Check your email for next steps."
-      else
-        flash.now[:alert] = "There was an error activating your profile. Please try again."
-        render :claim
-      end
-    else
-      flash.now[:alert] = "Please fix the errors below."
-      render :claim
-    end
-  end
-
   def profile_update_params
     params.require(:user).permit(
       :full_name, :bio, :headline, :job_title, :location, :phone,
       :github_url, :linkedin_url, :website_url, :twitter_url, :contact_email,
-      skills: []
+      :skills_list
     )
   end
 

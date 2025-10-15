@@ -135,7 +135,9 @@ Rails.application.routes.draw do
   get "invitations/:token/verify", to: "invitations#verify", as: :verify_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
   post "invitations/:token/verify", to: "invitations#verify_access_code", as: :verify_invitation_code, constraints: { token: /[a-zA-Z0-9_-]+/ }
   get "invitations/:token/claim", to: "invitations#claim", as: :claim_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
-  patch "invitations/:token/claim", to: "invitations#update", as: :update_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
+  post "invitations/:token/activate_account", to: "invitations#activate_account", as: :activate_invitation_account, constraints: { token: /[a-zA-Z0-9_-]+/ }
+  get "invitations/:token/complete_profile", to: "invitations#complete_profile", as: :complete_profile_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
+  patch "invitations/:token/complete_profile", to: "invitations#update", as: :update_invitation, constraints: { token: /[a-zA-Z0-9_-]+/ }
 
   # Public profile routes - for sharing and visitor access
   # Uses username with FriendlyId for clean URLs like /gustavo
