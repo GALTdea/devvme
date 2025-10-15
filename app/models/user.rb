@@ -39,6 +39,13 @@ class User < ApplicationRecord
     deactivated: 4         # User has deactivated their own account
   }
 
+  # Social card type system - controls which social media preview card to show
+  enum :social_card_type, {
+    automatic: 'automatic',      # Default: choose based on open_for_work status
+    open_to_work: 'open_to_work', # Force open to work card
+    professional: 'professional'  # Force professional card
+  }
+
   # Active Storage associations
   has_one_attached :avatar
   has_one_attached :resume
@@ -302,7 +309,7 @@ class User < ApplicationRecord
   end
 
   def social_image_cache_key
-    "v#{social_image_version}"
+    "v#{social_image_version}_#{social_card_type}_#{open_for_work?}"
   end
 
   # Extract Twitter handle from URL for display purposes
@@ -660,6 +667,17 @@ class User < ApplicationRecord
 
   def open_to_work?
     open_for_work == true
+  end
+
+  def should_show_open_to_work_card?
+    case social_card_type
+    when 'open_to_work'
+      true
+    when 'professional'
+      false
+    when 'automatic'
+      open_for_work?
+    end
   end
 
   def work_status_message
