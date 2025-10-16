@@ -222,6 +222,9 @@ class User < ApplicationRecord
   # Create digest preferences for new users
   after_create :build_and_save_digest_preference
 
+  # Bump social image version when open_for_work status changes
+  after_update :bump_social_image_version_if_work_status_changed
+
   # Override FriendlyId should_generate_new_friendly_id? to regenerate slug when username changes
   def should_generate_new_friendly_id?
     username_changed? || super
@@ -752,15 +755,36 @@ class User < ApplicationRecord
     end
 
     # Merge with existing preferences
+    old_preferences = work_preferences.dup
     self.work_preferences = work_preferences.merge(cleaned_preferences)
+
+    # Bump social image version if work preferences actually changed
+    if work_preferences != old_preferences
+      bump_social_image_version!
+      Rails.logger.info "Bumped social image version for #{username} due to work preferences change"
+    end
   end
 
   # Toggle open for work status
   def toggle_open_for_work!
     update!(open_for_work: !open_for_work)
+
+    # Bump social image version if status actually changed
+    if saved_change_to_open_for_work?
+      bump_social_image_version!
+      Rails.logger.info "Bumped social image version for #{username} due to open_for_work status change"
+    end
   end
 
   private
+
+  # Bump social image version when work status changes
+  def bump_social_image_version_if_work_status_changed
+    if saved_change_to_open_for_work?
+      bump_social_image_version!
+      Rails.logger.info "Bumped social image version for #{username} due to open_for_work status change"
+    end
+  end
 
   # Set new users to pending activation status (unless they're being invited)
   def set_pending_activation
