@@ -2,11 +2,64 @@ class SocialImagesController < ApplicationController
   # Skip authentication for public social images
   # No authentication needed for public social images
 
+  # Serve clean social media card URLs with HTML pages for Twitter Cards
+  def profile_card
+    username = params[:username]
+    card_type = params[:type] || "auto"
+    Rails.logger.info "Social card HTML request for user: #{username}, card_type: #{card_type}"
+
+    begin
+      @user = User.friendly.find(username)
+
+      # Check if user profile is accessible
+      unless @user.active?
+        render_not_found
+        return
+      end
+
+      # Generate social image URL for the card
+      @social_image_url = social_profile_image_url(
+        username: @user.username,
+        version: @user.social_image_cache_key,
+        type: card_type
+      )
+
+      # Set up Twitter Card data
+      @card_type = card_type
+      @profile_url = public_profile_url(@user.friendly_id)
+
+      # Generate card-specific title and description
+      case card_type
+      when "hire", "open_to_work"
+        @card_title = "#{@user.display_name} - Open to Work"
+        @card_description = @user.work_status_message.presence || "Available for new opportunities"
+      when "professional"
+        @card_title = "#{@user.display_name} - Professional Profile"
+        @card_description = @user.bio.presence || "Developer profile and portfolio"
+      else # auto
+        if @user.open_to_work?
+          @card_title = "#{@user.display_name} - Open to Work"
+          @card_description = @user.work_status_message.presence || "Available for new opportunities"
+        else
+          @card_title = "#{@user.display_name} - Professional Profile"
+          @card_description = @user.bio.presence || "Developer profile and portfolio"
+        end
+      end
+
+      # Render HTML page with Twitter Card meta tags
+      render layout: false
+
+    rescue ActiveRecord::RecordNotFound
+      render_not_found
+    end
+  end
+
   # Serve social media images for profiles with path-based versioning
   def profile_image
     username = params[:username]
     version = params[:version] # Get the version parameter from path
-    Rails.logger.info "Looking for user with username: #{username}, version: #{version}"
+    card_type = params[:type] || "auto" # Get the card type parameter, default to 'auto'
+    Rails.logger.info "Looking for user with username: #{username}, version: #{version}, card_type: #{card_type}"
 
     begin
       user = User.friendly.find(username)
@@ -18,8 +71,8 @@ class SocialImagesController < ApplicationController
         return
       end
 
-      # Generate or retrieve cached social image for this specific version
-      social_image_path = generate_social_image(user, version)
+      # Generate or retrieve cached social image for this specific version and card type
+      social_image_path = generate_social_image(user, version, card_type)
 
       # Check if it's a URL or a file path
       if social_image_path.to_s.start_with?("http")
@@ -83,9 +136,9 @@ class SocialImagesController < ApplicationController
 
   private
 
-  def generate_social_image(user, version = nil)
-    # Use the social image generator service with version
-    service = SocialImageGeneratorService.new(user)
+  def generate_social_image(user, version = nil, card_type = "auto")
+    # Use the social image generator service with version and card type
+    service = SocialImageGeneratorService.new(user, card_type)
     service.generate_profile_image(version)
   end
 

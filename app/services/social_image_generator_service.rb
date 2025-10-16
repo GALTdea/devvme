@@ -2,8 +2,9 @@ class SocialImageGeneratorService
   include Rails.application.routes.url_helpers
   require "base64"
 
-  def initialize(user)
+  def initialize(user, card_type = "auto")
     @user = user
+    @card_type = card_type
   end
 
   def generate_profile_image(version = nil)
@@ -22,13 +23,28 @@ class SocialImageGeneratorService
   end
 
   def create_branded_template_image(version = nil)
-    # Create a branded template image for all users
-    create_branded_svg_image(version)
+    # Create a branded template image based on the requested card type
+    case @card_type
+    when "hire", "open_to_work"
+      create_open_to_work_svg_image(version)
+    when "professional"
+      create_professional_svg_image(version)
+    when "auto"
+      # Auto mode: show open to work card if user is open for work, otherwise professional
+      if @user.open_to_work?
+        create_open_to_work_svg_image(version)
+      else
+        create_professional_svg_image(version)
+      end
+    else
+      # Default to professional card
+      create_professional_svg_image(version)
+    end
   end
 
-  def create_branded_svg_image(version = nil)
-    # Create a simple branded image using SVG and save as file
-    # This creates a gradient background with the user's name and branding
+  def create_open_to_work_svg_image(version = nil)
+    # Create an open to work branded image using SVG and save as file
+    # This creates a gradient background with the user's name, work status, and branding
 
     # Check if we already have a cached image for this version
     if version.present?
@@ -152,6 +168,109 @@ class SocialImageGeneratorService
     end
   end
 
+  def create_professional_svg_image(version = nil)
+    # Create a professional branded image using SVG and save as file
+    # This creates a clean, professional card focused on showcasing the user's work and skills
+
+    # Check if we already have a cached image for this version
+    if version.present?
+      cached_image = get_cached_image_for_version(version)
+      return cached_image if cached_image && File.exist?(cached_image)
+    end
+
+    name = @user.display_name
+    username = @user.username
+    skills = @user.skills&.first(6) || []
+    job_title = @user.job_title
+    bio = @user.bio
+    location = @user.location
+
+    svg_content = <<~SVG
+      <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Professional Gradient Background -->
+          <linearGradient id="professional-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#334155;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#475569;stop-opacity:1" />
+          </linearGradient>
+
+          <!-- Professional pattern overlay -->
+          <pattern id="professional-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+            <circle cx="20" cy="20" r="1" fill="#ffffff" opacity="0.1"/>
+          </pattern>
+
+          <!-- Shadow for depth -->
+          <filter id="professional-shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
+          </filter>
+        </defs>
+
+        <!-- Professional Background -->
+        <rect width="1200" height="630" fill="url(#professional-bg)"/>
+        <rect width="1200" height="630" fill="url(#professional-dots)"/>
+
+        <!-- Left Side: Avatar with shadow -->
+        <g filter="url(#professional-shadow)">
+          #{professional_avatar_svg}
+        </g>
+
+        <!-- Right Side: Content Area -->
+        <g>
+          <!-- Name -->
+          <text x="380" y="140" fill="#ffffff" font-family="Arial, sans-serif" font-size="52" font-weight="900" letter-spacing="-0.5">#{name}</text>
+
+          <!-- Job Title -->
+          #{professional_job_title_svg}
+
+          <!-- Professional Badge -->
+          #{professional_badge_svg}
+
+          <!-- Bio/Location Section -->
+          #{professional_info_section}
+
+          <!-- Skills -->
+          #{professional_skills_svg(skills)}
+
+          <!-- Footer -->
+          #{professional_footer_svg}
+        </g>
+      </svg>
+    SVG
+
+    # Generate version-specific filenames
+    version_suffix = version.present? ? "_#{version}" : "_#{Time.current.to_i}"
+    svg_filename = "social_professional_#{@user.id}#{version_suffix}.svg"
+    svg_path = Rails.root.join("tmp", svg_filename)
+    File.write(svg_path, svg_content)
+
+    # Convert SVG to PNG for better social media compatibility
+    png_filename = "social_professional_#{@user.id}#{version_suffix}.png"
+    png_path = Rails.root.join("tmp", png_filename)
+
+    # Try libvips first (if available), then fall back to ImageMagick
+    if system("which vips > /dev/null 2>&1")
+      # Use libvips for conversion (faster and better quality)
+      system("vips copy #{svg_path} #{png_path}")
+    elsif system("which convert > /dev/null 2>&1")
+      # Fall back to ImageMagick
+      system("convert #{svg_path} #{png_path}")
+    else
+      Rails.logger.warn "Neither libvips nor ImageMagick found, keeping SVG file"
+    end
+
+    # Return PNG if conversion succeeded, otherwise return SVG
+    if File.exist?(png_path) && File.size(png_path) > 0
+      # Clean up SVG file
+      File.delete(svg_path) if File.exist?(svg_path)
+      png_path
+    else
+      # Conversion failed, return SVG path and keep the SVG file
+      Rails.logger.warn "Image conversion failed, returning SVG file"
+      svg_path
+    end
+  end
+
       def avatar_svg
         if @user.avatar.attached?
           # Convert avatar to base64 for embedding in SVG
@@ -177,8 +296,8 @@ class SocialImageGeneratorService
               <circle cx="190" cy="270" r="90" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="4"/>
             SVG
 
-            # Add LinkedIn-style #OPENTOWORK banner if user is open for work
-            if @user.open_to_work?
+            # Add LinkedIn-style #OPENTOWORK banner if this is an open to work card
+            if should_show_open_to_work_banner?
               avatar_html += open_to_work_banner_svg
             end
 
@@ -225,8 +344,8 @@ class SocialImageGeneratorService
           <circle cx="190" cy="270" r="90" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="4"/>
         SVG
 
-        # Add LinkedIn-style #OPENTOWORK banner if user is open for work
-        if @user.open_to_work?
+        # Add LinkedIn-style #OPENTOWORK banner if this is an open to work card
+        if should_show_open_to_work_banner?
           avatar_html += open_to_work_banner_svg
         end
 
@@ -321,7 +440,7 @@ class SocialImageGeneratorService
   end
 
   def badge_svg
-    if @user.open_to_work?
+    if should_show_open_to_work_banner?
       # Green "AVAILABLE FOR HIRE" badge on right side
       <<~SVG
         <defs>
@@ -339,7 +458,7 @@ class SocialImageGeneratorService
   end
 
   def work_info_section
-    return "" unless @user.open_to_work?
+    return "" unless should_show_open_to_work_banner?
 
     info_parts = []
 
@@ -410,7 +529,7 @@ class SocialImageGeneratorService
   end
 
   def tagline_text
-    if @user.open_to_work?
+    if should_show_open_to_work_banner?
       # Generate compelling tagline for open to work profiles
       parts = []
 
@@ -451,5 +570,145 @@ class SocialImageGeneratorService
     end
 
     nil
+  end
+
+  # Helper method to determine if we should show open to work banner
+  def should_show_open_to_work_banner?
+    case @card_type
+    when "hire", "open_to_work"
+      true
+    when "professional"
+      false
+    when "auto"
+      @user.open_to_work?
+    else
+      false
+    end
+  end
+
+  # Professional card helper methods
+  def professional_avatar_svg
+    if @user.avatar.attached?
+      # Convert avatar to base64 for embedding in SVG
+      begin
+        avatar_data = @user.avatar.download
+        avatar_base64 = Base64.strict_encode64(avatar_data)
+        avatar_mime_type = @user.avatar.content_type
+
+        <<~SVG
+          <!-- Avatar with professional styling -->
+          <defs>
+            <clipPath id="professional-avatar-clip">
+              <circle cx="190" cy="270" r="90"/>
+            </clipPath>
+          </defs>
+          <circle cx="190" cy="270" r="90" fill="rgba(255,255,255,0.1)"/>
+          <image x="100" y="180" width="180" height="180" href="data:#{avatar_mime_type};base64,#{avatar_base64}" clip-path="url(#professional-avatar-clip)"/>
+          <!-- Professional border ring -->
+          <circle cx="190" cy="270" r="90" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+        SVG
+      rescue => e
+        Rails.logger.error "Failed to process avatar for user #{@user.id}: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        professional_default_avatar_svg
+      end
+    else
+      professional_default_avatar_svg
+    end
+  end
+
+  def professional_default_avatar_svg
+    <<~SVG
+      <!-- Default professional avatar -->
+      <circle cx="190" cy="270" r="90" fill="rgba(255,255,255,0.1)"/>
+      <text x="190" y="300" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="70" font-weight="bold">👨‍💼</text>
+      <!-- Professional border ring -->
+      <circle cx="190" cy="270" r="90" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+    SVG
+  end
+
+  def professional_job_title_svg
+    title_text = @user.job_title.presence || @user.preferred_roles.first || "Developer"
+
+    <<~SVG
+      <text x="380" y="185" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="28" font-weight="600">#{title_text}</text>
+    SVG
+  end
+
+  def professional_badge_svg
+    # Professional badge - subtle and clean
+    <<~SVG
+      <defs>
+        <linearGradient id="professional-badge" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#64748b;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#475569;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect x="380" y="210" width="280" height="35" rx="17" fill="url(#professional-badge)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+      <text x="510" y="231" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="0.5">💼 PROFESSIONAL</text>
+    SVG
+  end
+
+  def professional_info_section
+    info_parts = []
+
+    # Location
+    if @user.location.present?
+      info_parts << "📍 #{@user.location}"
+    end
+
+    # Bio (truncated)
+    if @user.bio.present?
+      truncated_bio = @user.bio.length > 80 ? "#{@user.bio[0..77]}..." : @user.bio
+      info_parts << "💬 #{truncated_bio}"
+    end
+
+    html = ""
+    y_pos = 280
+
+    info_parts.each do |part|
+      html += %(<text x="380" y="#{y_pos}" fill="rgba(255,255,255,0.85)" font-family="Arial, sans-serif" font-size="18" font-weight="500">#{part}</text>)
+      y_pos += 30
+    end
+
+    html
+  end
+
+  def professional_skills_svg(skills)
+    return "" if skills.empty?
+
+    html = ""
+    html += %(<text x="380" y="380" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="20" font-weight="600">🛠️ SKILLS & EXPERTISE</text>)
+
+    y_pos = 420
+    x_pos = 380
+
+    # Show up to 6 skills, 3 per row
+    skills.first(6).each_with_index do |skill, index|
+      if index > 0 && index % 3 == 0
+        y_pos += 45
+        x_pos = 380
+      end
+
+      width = skill.length * 9 + 20
+      html += <<~SVG
+        <rect x="#{x_pos}" y="#{y_pos}" width="#{width}" height="30" rx="15" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+        <text x="#{x_pos + width/2}" y="#{y_pos + 20}" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="600">#{skill}</text>
+      SVG
+      x_pos += width + 15
+    end
+
+    html
+  end
+
+  def professional_footer_svg
+    <<~SVG
+      <!-- Divider line -->
+      <line x1="100" y1="550" x2="1100" y2="550" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+
+      <!-- CTA and branding -->
+      <text x="100" y="580" fill="rgba(255,255,255,0.8)" font-family="Arial, sans-serif" font-size="18" font-weight="600">👉 View full profile at devv.me/#{@user.username}</text>
+      <text x="1070" y="580" text-anchor="end" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="24" font-weight="900">devv.me</text>
+    SVG
   end
 end

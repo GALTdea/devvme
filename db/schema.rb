@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_15_202905) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_13_185710) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -194,7 +194,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_15_202905) do
     t.datetime "featured_at"
     t.boolean "open_for_work", default: false, null: false
     t.jsonb "work_preferences", default: {}, null: false
-    t.string "social_card_type", default: "professional", null: false
     t.index ["account_status"], name: "index_users_on_account_status"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["featured"], name: "index_users_on_featured"
@@ -206,7 +205,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_15_202905) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
     t.index ["slug"], name: "index_users_on_slug", unique: true
-    t.index ["social_card_type"], name: "index_users_on_social_card_type"
     t.index ["suspended_at"], name: "index_users_on_suspended_at"
     t.index ["username"], name: "index_users_on_username", unique: true
   end

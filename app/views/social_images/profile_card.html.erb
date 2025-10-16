@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= @card_title %></title>
+  
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@devvme">
+  <meta name="twitter:creator" content="@devvme">
+  <meta name="twitter:title" content="<%= @card_title %>">
+  <meta name="twitter:description" content="<%= @card_description %>">
+  <meta name="twitter:image" content="<%= @social_image_url %>">
+  
+  <!-- Open Graph Meta Tags (for Facebook, LinkedIn, etc.) -->
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="<%= @card_title %>">
+  <meta property="og:description" content="<%= @card_description %>">
+  <meta property="og:image" content="<%= @social_image_url %>">
+  <meta property="og:url" content="<%= request.original_url %>">
+  <meta property="og:site_name" content="devv.me">
+  
+  <!-- Additional Meta Tags -->
+  <meta name="description" content="<%= @card_description %>">
+  <meta name="author" content="<%= @user.display_name %>">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/icon.png">
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .card-container {
+      text-align: center;
+      max-width: 600px;
+      margin: 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .card-image {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 16px 16px 0 0;
+    }
+    
+    .card-content {
+      padding: 30px;
+    }
+    
+    .card-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a202c;
+      margin: 0 0 12px 0;
+    }
+    
+    .card-description {
+      font-size: 16px;
+      color: #4a5568;
+      margin: 0 0 24px 0;
+      line-height: 1.5;
+    }
+    
+    .visit-profile-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .visit-profile-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+      color: white;
+      text-decoration: none;
+    }
+    
+    .branding {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #718096;
+    }
+    
+    .branding a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .branding a:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 640px) {
+      .card-container {
+        margin: 10px;
+      }
+      
+      .card-content {
+        padding: 20px;
+      }
+      
+      .card-title {
+        font-size: 24px;
+      }
+      
+      .card-description {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card-container">
+    <img src="<%= @social_image_url %>" alt="<%= @card_title %>" class="card-image">
+    <div class="card-content">
+      <h1 class="card-title"><%= @card_title %></h1>
+      <p class="card-description"><%= @card_description %></p>
+      <a href="<%= @profile_url %>" class="visit-profile-btn">
+        View Full Profile
+      </a>
+      <div class="branding">
+        Powered by <a href="https://devv.me" target="_blank">devv.me</a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Redirect to profile after 5 seconds for better UX -->
+  <script>
+    setTimeout(function() {
+      window.location.href = '<%= @profile_url %>';
+    }, 5000);
+  </script>
+</body>
+</html>
