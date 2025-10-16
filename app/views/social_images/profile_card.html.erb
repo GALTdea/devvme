@@ -157,11 +157,10 @@
     </div>
   </div>
   
-  <!-- Redirect to profile after 5 seconds for better UX -->
+  <!-- Redirect to profile immediately -->
   <script>
-    setTimeout(function() {
-      window.location.href = '<%= @profile_url %>';
-    }, 5000);
+    // Redirect immediately when page loads
+    window.location.href = '<%= @profile_url %>';
   </script>
 </body>
 </html>
