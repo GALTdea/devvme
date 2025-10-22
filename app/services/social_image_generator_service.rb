@@ -23,23 +23,243 @@ class SocialImageGeneratorService
   end
 
   def create_branded_template_image(version = nil)
-    # Create a branded template image based on the requested card type
+    # Create a single dynamic social card with content based on card_type parameter
+    generate_dynamic_social_card(version)
+  end
+
+  def generate_dynamic_social_card(version = nil)
+    # Generate a single social card with dynamic content based on card_type parameter
+    # Always use the same filename pattern: social_{user_id}_{version}.png
+
+    # Check if we already have a cached image for this version
+    if version.present?
+      cached_image = get_cached_image_for_version(version)
+      return cached_image if cached_image && File.exist?(cached_image)
+    end
+
+    name = @user.display_name
+    username = @user.username
+    skills = @user.skills&.first(6) || []
+    job_title = @user.job_title
+    bio = @user.bio
+    location = @user.location
+
+    # Determine the effective card type (handle auto mode)
+    effective_card_type = determine_effective_card_type
+
+    # Generate dynamic SVG content based on card type
+    svg_content = generate_dynamic_svg_content(name, username, skills, job_title, bio, location, effective_card_type)
+
+    # Generate version-specific filenames (always use standard pattern)
+    version_suffix = version.present? ? "_#{version}" : "_#{Time.current.to_i}"
+    svg_filename = "social_#{@user.id}#{version_suffix}.svg"
+    svg_path = Rails.root.join("tmp", svg_filename)
+    File.write(svg_path, svg_content)
+
+    # Convert SVG to PNG for better social media compatibility
+    png_filename = "social_#{@user.id}#{version_suffix}.png"
+    png_path = Rails.root.join("tmp", png_filename)
+
+    # Try libvips first (if available), then fall back to ImageMagick
+    if system("which vips > /dev/null 2>&1")
+      # Use libvips for conversion (faster and better quality)
+      system("vips copy #{svg_path} #{png_path}")
+    else
+      # Fall back to ImageMagick
+      system("convert #{svg_path} #{png_path}")
+    end
+
+    # Clean up the SVG file
+    File.delete(svg_path) if File.exist?(svg_path)
+
+    Rails.logger.info "Generated dynamic social card for #{@user.username} (#{effective_card_type}): #{png_filename}"
+    png_path
+  end
+
+  def determine_effective_card_type
+    # Determine the effective card type based on the requested type and user status
     case @card_type
     when "hire", "open_to_work"
-      create_open_to_work_svg_image(version)
+      "hire"
     when "professional"
-      create_professional_svg_image(version)
+      "professional"
     when "auto"
-      # Auto mode: show open to work card if user is open for work, otherwise professional
-      if @user.open_to_work?
-        create_open_to_work_svg_image(version)
-      else
-        create_professional_svg_image(version)
-      end
+      # Auto mode: show hire card if user is open for work, otherwise professional
+      @user.open_to_work? ? "hire" : "professional"
     else
       # Default to professional card
-      create_professional_svg_image(version)
+      "professional"
     end
+  end
+
+  def generate_dynamic_svg_content(name, username, skills, job_title, bio, location, card_type)
+    # Generate SVG content with dynamic styling based on card_type
+    case card_type
+    when "hire"
+      generate_hire_svg_content(name, username, skills, job_title, bio, location)
+    when "professional"
+      create_professional_svg_content(name, username, skills, job_title, bio, location)
+    else
+      create_professional_svg_content(name, username, skills, job_title, bio, location)
+    end
+  end
+
+  def generate_hire_svg_content(name, username, skills, job_title, bio, location)
+    # Generate hire/open to work card SVG content
+    <<~SVG
+      <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Hire Card Gradient Background -->
+          <linearGradient id="hire-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#1e293b;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#334155;stop-opacity:1" />
+          </linearGradient>
+
+          <!-- Hire pattern overlay -->
+          <pattern id="hire-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+            <circle cx="20" cy="20" r="1" fill="#22c55e" opacity="0.2"/>
+          </pattern>
+
+          <!-- Shadow for depth -->
+          <filter id="hire-shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
+          </filter>
+        </defs>
+
+        <!-- Hire Background -->
+        <rect width="1200" height="630" fill="url(#hire-bg)"/>
+        <rect width="1200" height="630" fill="url(#hire-dots)"/>
+
+        <!-- Left Side: Avatar with shadow -->
+        <g filter="url(#hire-shadow)">
+          #{hire_avatar_svg}
+        </g>
+
+        <!-- Right Side: Content Area -->
+        <g>
+          <!-- Name -->
+          <text x="380" y="140" fill="#ffffff" font-family="Arial, sans-serif" font-size="52" font-weight="900" letter-spacing="-0.5">#{name}</text>
+
+          <!-- Job Title -->
+          #{hire_job_title_svg}
+
+          <!-- Hire Badge -->
+          #{hire_badge_svg}
+
+          <!-- Bio/Location Section -->
+          #{hire_info_section}
+
+          <!-- Skills -->
+          #{hire_skills_svg(skills)}
+
+          <!-- Footer -->
+          #{hire_footer_svg}
+        </g>
+      </svg>
+    SVG
+  end
+
+  # Hire card helper methods
+  def hire_avatar_svg
+    if @user.avatar.attached?
+      # Convert avatar to base64 for embedding in SVG
+      begin
+        avatar_data = @user.avatar.download
+        avatar_mime_type = @user.avatar.content_type
+        avatar_base64 = Base64.encode64(avatar_data).gsub(/\n/, "")
+
+        <<~SVG
+          <!-- Avatar with hire styling -->
+          <defs>
+            <clipPath id="hire-avatar-clip">
+              <circle cx="190" cy="270" r="90"/>
+            </clipPath>
+          </defs>
+          <image x="100" y="180" width="180" height="180" href="data:#{avatar_mime_type};base64,#{avatar_base64}" clip-path="url(#hire-avatar-clip)"/>
+          <!-- Green border ring for hire card -->
+          <circle cx="190" cy="270" r="90" fill="none" stroke="rgba(34,197,94,0.8)" stroke-width="4"/>
+        SVG
+      rescue => e
+        Rails.logger.error "Failed to process avatar for user #{@user.id}: #{e.message}"
+        hire_default_avatar_svg
+      end
+    else
+      hire_default_avatar_svg
+    end
+  end
+
+  def hire_default_avatar_svg
+    <<~SVG
+      <!-- Default hire avatar -->
+      <circle cx="190" cy="270" r="90" fill="rgba(34,197,94,0.2)"/>
+      <!-- Green border ring for hire card -->
+      <circle cx="190" cy="270" r="90" fill="none" stroke="rgba(34,197,94,0.8)" stroke-width="4"/>
+    SVG
+  end
+
+  def hire_job_title_svg
+    title_text = @user.job_title.presence || @user.preferred_roles.first || "Developer"
+
+    <<~SVG
+      <text x="380" y="185" fill="rgba(255,255,255,0.95)" font-family="Arial, sans-serif" font-size="28" font-weight="600">#{title_text}</text>
+    SVG
+  end
+
+  def hire_badge_svg
+    # Green "AVAILABLE FOR HIRE" badge
+    <<~SVG
+      <defs>
+        <linearGradient id="hire-badge" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#22c55e;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#16a34a;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect x="380" y="220" width="280" height="46" rx="23" fill="url(#hire-badge)" opacity="0.95"/>
+      <text x="510" y="251" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="0.5">⚡ AVAILABLE FOR HIRE</text>
+    SVG
+  end
+
+  def hire_info_section
+    info_lines = []
+    info_lines << @user.bio if @user.bio.presence
+    info_lines << @user.location if @user.location.present?
+
+    info_text = info_lines.join(" • ")
+
+    <<~SVG
+      <text x="380" y="300" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="20" font-weight="500">#{info_text}</text>
+    SVG
+  end
+
+  def hire_skills_svg(skills)
+    return "" if skills.empty?
+
+    y_pos = 350
+    x_pos = 380
+    html = ""
+
+    skills.each_with_index do |skill, index|
+      width = skill.length * 9 + 20
+      html += <<~SVG
+        <rect x="#{x_pos}" y="#{y_pos}" width="#{width}" height="30" rx="15" fill="rgba(34,197,94,0.2)" stroke="rgba(34,197,94,0.5)" stroke-width="1"/>
+        <text x="#{x_pos + width/2}" y="#{y_pos + 20}" text-anchor="middle" fill="#22c55e" font-family="Arial, sans-serif" font-size="14" font-weight="600">#{skill}</text>
+      SVG
+      x_pos += width + 15
+    end
+
+    html
+  end
+
+  def hire_footer_svg
+    <<~SVG
+      <!-- Divider line -->
+      <line x1="100" y1="550" x2="1100" y2="550" stroke="rgba(34,197,94,0.3)" stroke-width="2"/>
+
+      <!-- CTA and branding -->
+      <text x="100" y="580" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="18" font-weight="600">👉 Get in touch at devv.me/#{@user.username}</text>
+      <text x="1070" y="580" text-anchor="end" fill="rgba(255,255,255,0.95)" font-family="Arial, sans-serif" font-size="24" font-weight="900">devv.me</text>
+    SVG
   end
 
   def create_open_to_work_svg_image(version = nil)
@@ -92,7 +312,7 @@ class SocialImageGeneratorService
 
         <!-- Left Side: Avatar with shadow -->
         <g filter="url(#shadow)">
-          #{avatar_svg}
+        #{avatar_svg}
         </g>
 
         <!-- Right Side: Content Area -->
@@ -109,7 +329,7 @@ class SocialImageGeneratorService
           <!-- Work Info Section -->
           #{work_info_section}
 
-          <!-- Skills -->
+        <!-- Skills -->
           #{gradient_skills_svg(skills)}
 
           <!-- Footer -->
@@ -185,58 +405,7 @@ class SocialImageGeneratorService
     bio = @user.bio
     location = @user.location
 
-    svg_content = <<~SVG
-      <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <!-- Professional Gradient Background -->
-          <linearGradient id="professional-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
-            <stop offset="50%" style="stop-color:#334155;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#475569;stop-opacity:1" />
-          </linearGradient>
-
-          <!-- Professional pattern overlay -->
-          <pattern id="professional-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-            <circle cx="20" cy="20" r="1" fill="#ffffff" opacity="0.1"/>
-          </pattern>
-
-          <!-- Shadow for depth -->
-          <filter id="professional-shadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
-          </filter>
-        </defs>
-
-        <!-- Professional Background -->
-        <rect width="1200" height="630" fill="url(#professional-bg)"/>
-        <rect width="1200" height="630" fill="url(#professional-dots)"/>
-
-        <!-- Left Side: Avatar with shadow -->
-        <g filter="url(#professional-shadow)">
-          #{professional_avatar_svg}
-        </g>
-
-        <!-- Right Side: Content Area -->
-        <g>
-          <!-- Name -->
-          <text x="380" y="140" fill="#ffffff" font-family="Arial, sans-serif" font-size="52" font-weight="900" letter-spacing="-0.5">#{name}</text>
-
-          <!-- Job Title -->
-          #{professional_job_title_svg}
-
-          <!-- Professional Badge -->
-          #{professional_badge_svg}
-
-          <!-- Bio/Location Section -->
-          #{professional_info_section}
-
-          <!-- Skills -->
-          #{professional_skills_svg(skills)}
-
-          <!-- Footer -->
-          #{professional_footer_svg}
-        </g>
-      </svg>
-    SVG
+    svg_content = create_professional_svg_content(name, username, skills, job_title, bio, location)
 
     # Generate version-specific filenames
     version_suffix = version.present? ? "_#{version}" : "_#{Time.current.to_i}"
@@ -709,6 +878,61 @@ class SocialImageGeneratorService
       <!-- CTA and branding -->
       <text x="100" y="580" fill="rgba(255,255,255,0.8)" font-family="Arial, sans-serif" font-size="18" font-weight="600">👉 View full profile at devv.me/#{@user.username}</text>
       <text x="1070" y="580" text-anchor="end" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="24" font-weight="900">devv.me</text>
+    SVG
+  end
+
+  def create_professional_svg_content(name, username, skills, job_title, bio, location)
+    <<~SVG
+      <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Professional Gradient Background -->
+          <linearGradient id="professional-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#334155;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#475569;stop-opacity:1" />
+          </linearGradient>
+
+          <!-- Professional pattern overlay -->
+          <pattern id="professional-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+            <circle cx="20" cy="20" r="1" fill="#ffffff" opacity="0.1"/>
+          </pattern>
+
+          <!-- Shadow for depth -->
+          <filter id="professional-shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
+          </filter>
+        </defs>
+
+        <!-- Professional Background -->
+        <rect width="1200" height="630" fill="url(#professional-bg)"/>
+        <rect width="1200" height="630" fill="url(#professional-dots)"/>
+
+        <!-- Left Side: Avatar with shadow -->
+        <g filter="url(#professional-shadow)">
+          #{professional_avatar_svg}
+        </g>
+
+        <!-- Right Side: Content Area -->
+        <g>
+          <!-- Name -->
+          <text x="380" y="140" fill="#ffffff" font-family="Arial, sans-serif" font-size="52" font-weight="900" letter-spacing="-0.5">#{name}</text>
+
+          <!-- Job Title -->
+          #{professional_job_title_svg}
+
+          <!-- Professional Badge -->
+          #{professional_badge_svg}
+
+          <!-- Bio/Location Section -->
+          #{professional_info_section}
+
+          <!-- Skills -->
+          #{professional_skills_svg(skills)}
+
+          <!-- Footer -->
+          #{professional_footer_svg}
+        </g>
+      </svg>
     SVG
   end
 end
