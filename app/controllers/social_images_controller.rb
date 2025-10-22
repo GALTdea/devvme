@@ -28,22 +28,19 @@ class SocialImagesController < ApplicationController
       @card_type = card_type
       @profile_url = public_profile_url(@user.friendly_id)
 
-      # Generate card-specific title and description
-      case card_type
-      when "hire", "open_to_work"
+      # Generate card-specific title and description based on effective card type
+      effective_card_type = determine_effective_card_type(card_type)
+
+      case effective_card_type
+      when "hire"
         @card_title = "#{@user.display_name} - Open to Work"
         @card_description = @user.work_status_message.presence || "Available for new opportunities"
       when "professional"
         @card_title = "#{@user.display_name} - Professional Profile"
         @card_description = @user.bio.presence || "Developer profile and portfolio"
-      else # auto
-        if @user.open_to_work?
-          @card_title = "#{@user.display_name} - Open to Work"
-          @card_description = @user.work_status_message.presence || "Available for new opportunities"
-        else
-          @card_title = "#{@user.display_name} - Professional Profile"
-          @card_description = @user.bio.presence || "Developer profile and portfolio"
-        end
+      else
+        @card_title = "#{@user.display_name} - Professional Profile"
+        @card_description = @user.bio.presence || "Developer profile and portfolio"
       end
 
       # Render HTML page with Twitter Card meta tags
@@ -86,7 +83,7 @@ class SocialImagesController < ApplicationController
         send_file social_image_path,
                   type: file_type,
                   disposition: "inline",
-                  filename: "#{username}_social_image_v#{version}.#{file_extension}"
+                  filename: generate_download_filename(username, version, card_type, file_extension)
       else
         render_not_found
       end
@@ -140,6 +137,27 @@ class SocialImagesController < ApplicationController
     # Use the social image generator service with version and card type
     service = SocialImageGeneratorService.new(user, card_type)
     service.generate_profile_image(version)
+  end
+
+  def generate_download_filename(username, version, card_type, file_extension)
+    # Use single filename pattern for all card types (dynamic content)
+    "#{username}_social_image_v#{version}.#{file_extension}"
+  end
+
+  def determine_effective_card_type(card_type)
+    # Determine the effective card type based on the requested type and user status
+    case card_type
+    when "hire", "open_to_work"
+      "hire"
+    when "professional"
+      "professional"
+    when "auto"
+      # Auto mode: show hire card if user is open for work, otherwise professional
+      @user.open_to_work? ? "hire" : "professional"
+    else
+      # Default to professional card
+      "professional"
+    end
   end
 
   def render_not_found
