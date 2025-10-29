@@ -39,9 +39,9 @@ class SocialImageGeneratorService
 
     name = @user.display_name
     username = @user.username
-    skills = @user.skills&.first(6) || []
+    skills = @user.skills&.first(4) || []  # Show only 3-4 skills to avoid clutter
     job_title = @user.job_title
-    bio = @user.bio
+    bio = truncate_bio(@user.bio)  # Truncate bio intelligently
     location = @user.location
 
     # Determine the effective card type (handle auto mode)
@@ -85,7 +85,7 @@ class SocialImageGeneratorService
       "professional"
     when "auto"
       # Auto mode: show hire card if user is open for work, otherwise professional
-      @user.open_to_work? ? "hire" : "professional"
+      @user.open_for_work? ? "hire" : "professional"
     else
       # Default to professional card
       "professional"
@@ -105,30 +105,39 @@ class SocialImageGeneratorService
   end
 
   def generate_hire_svg_content(name, username, skills, job_title, bio, location)
-    # Generate hire/open to work card SVG content
+    # Generate hire/open to work card SVG content with improved styling
     <<~SVG
       <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <!-- Hire Card Gradient Background -->
+          <!-- Enhanced Hire Card Gradient Background -->
           <linearGradient id="hire-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
-            <stop offset="50%" style="stop-color:#1e293b;stop-opacity:1" />
+            <stop offset="0%" style="stop-color:#0a1628;stop-opacity:1" />
+            <stop offset="35%" style="stop-color:#0f172a;stop-opacity:1" />
+            <stop offset="65%" style="stop-color:#1e293b;stop-opacity:1" />
             <stop offset="100%" style="stop-color:#334155;stop-opacity:1" />
           </linearGradient>
 
-          <!-- Hire pattern overlay -->
-          <pattern id="hire-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-            <circle cx="20" cy="20" r="1" fill="#22c55e" opacity="0.2"/>
+          <!-- Enhanced gradient accents -->
+          <linearGradient id="hire-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#22c55e;stop-opacity:0.1" />
+            <stop offset="50%" style="stop-color:#06b6d4;stop-opacity:0.15" />
+            <stop offset="100%" style="stop-color:#22c55e;stop-opacity:0.1" />
+          </linearGradient>
+
+          <!-- Hire pattern overlay - more subtle -->
+          <pattern id="hire-dots" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <circle cx="30" cy="30" r="1.5" fill="#22c55e" opacity="0.15"/>
           </pattern>
 
           <!-- Shadow for depth -->
           <filter id="hire-shadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
+            <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000000" flood-opacity="0.35"/>
           </filter>
         </defs>
 
-        <!-- Hire Background -->
+        <!-- Enhanced Hire Background -->
         <rect width="1200" height="630" fill="url(#hire-bg)"/>
+        <rect width="1200" height="100" y="0" fill="url(#hire-accent)"/>
         <rect width="1200" height="630" fill="url(#hire-dots)"/>
 
         <!-- Left Side: Avatar with shadow -->
@@ -138,16 +147,16 @@ class SocialImageGeneratorService
 
         <!-- Right Side: Content Area -->
         <g>
-          <!-- Name -->
-          <text x="380" y="140" fill="#ffffff" font-family="Arial, sans-serif" font-size="52" font-weight="900" letter-spacing="-0.5">#{name}</text>
+          <!-- Name with larger font -->
+          <text x="380" y="145" fill="#ffffff" font-family="Arial, sans-serif" font-size="58" font-weight="900" letter-spacing="-1">#{name}</text>
 
           <!-- Job Title -->
           #{hire_job_title_svg}
 
-          <!-- Hire Badge -->
-          #{hire_badge_svg}
+          <!-- Headline -->
+          #{hire_headline_svg}
 
-          <!-- Bio/Location Section -->
+          <!-- Bio/Location Section with improved styling -->
           #{hire_info_section}
 
           <!-- Skills -->
@@ -162,6 +171,8 @@ class SocialImageGeneratorService
 
   # Hire card helper methods
   def hire_avatar_svg
+    avatar_svg_content = ""
+
     if @user.avatar.attached?
       # Convert avatar to base64 for embedding in SVG
       begin
@@ -169,7 +180,7 @@ class SocialImageGeneratorService
         avatar_mime_type = @user.avatar.content_type
         avatar_base64 = Base64.encode64(avatar_data).gsub(/\n/, "")
 
-        <<~SVG
+        avatar_svg_content = <<~SVG
           <!-- Avatar with hire styling -->
           <defs>
             <clipPath id="hire-avatar-clip">
@@ -182,14 +193,17 @@ class SocialImageGeneratorService
         SVG
       rescue => e
         Rails.logger.error "Failed to process avatar for user #{@user.id}: #{e.message}"
-        hire_default_avatar_svg
+        avatar_svg_content = hire_default_avatar_svg_content
       end
     else
-      hire_default_avatar_svg
+      avatar_svg_content = hire_default_avatar_svg_content
     end
+
+    # Add the hire badge below the avatar
+    avatar_svg_content + hire_badge_below_avatar_svg
   end
 
-  def hire_default_avatar_svg
+  def hire_default_avatar_svg_content
     <<~SVG
       <!-- Default hire avatar -->
       <circle cx="190" cy="270" r="90" fill="rgba(34,197,94,0.2)"/>
@@ -198,16 +212,45 @@ class SocialImageGeneratorService
     SVG
   end
 
+  def hire_default_avatar_svg
+    hire_default_avatar_svg_content
+  end
+
+  def hire_badge_below_avatar_svg
+    <<~SVG
+      <!-- AVAILABLE FOR HIRE badge below avatar -->
+      <defs>
+        <linearGradient id="hire-badge-left" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#22c55e;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#16a34a;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect x="55" y="380" width="270" height="45" rx="22" fill="url(#hire-badge-left)" opacity="0.95"/>
+      <text x="190" y="407" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="0.6">⚡ AVAILABLE FOR HIRE</text>
+    SVG
+  end
+
   def hire_job_title_svg
     title_text = @user.job_title.presence || @user.preferred_roles.first || "Developer"
 
     <<~SVG
-      <text x="380" y="185" fill="rgba(255,255,255,0.95)" font-family="Arial, sans-serif" font-size="28" font-weight="600">#{title_text}</text>
+      <text x="380" y="195" fill="rgba(255,255,255,0.95)" font-family="Arial, sans-serif" font-size="32" font-weight="600">#{escape_xml(title_text)}</text>
+    SVG
+  end
+
+  def hire_headline_svg
+    return "" unless @user.headline.present?
+
+    # Truncate headline if too long
+    headline_text = truncate_bio(@user.headline, 60)
+
+    <<~SVG
+      <text x="380" y="225" fill="rgba(255,255,255,0.8)" font-family="Arial, sans-serif" font-size="22" font-weight="500" font-style="italic">#{escape_xml(headline_text)}</text>
     SVG
   end
 
   def hire_badge_svg
-    # Green "AVAILABLE FOR HIRE" badge
+    # Green "AVAILABLE FOR HIRE" badge with larger font
     <<~SVG
       <defs>
         <linearGradient id="hire-badge" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -215,37 +258,84 @@ class SocialImageGeneratorService
           <stop offset="100%" style="stop-color:#16a34a;stop-opacity:1" />
         </linearGradient>
       </defs>
-      <rect x="380" y="220" width="280" height="46" rx="23" fill="url(#hire-badge)" opacity="0.95"/>
-      <text x="510" y="251" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="0.5">⚡ AVAILABLE FOR HIRE</text>
+      <rect x="380" y="225" width="320" height="50" rx="25" fill="url(#hire-badge)" opacity="0.95"/>
+      <text x="540" y="260" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="800" letter-spacing="0.8">⚡ AVAILABLE FOR HIRE</text>
     SVG
   end
 
   def hire_info_section
-    info_lines = []
-    info_lines << @user.bio if @user.bio.presence
-    info_lines << @user.location if @user.location.present?
+    # Get bio and location separately for multi-line display
+    bio_text = truncate_bio(@user.bio, 70)  # Truncate to fit on card width
+    location_text = @user.location.present? ? "📍 #{@user.location}" : ""
 
-    info_text = info_lines.join(" • ")
+    # Calculate available width (1200 - 380 - 100 for right padding)
+    available_width = 720
+
+    # Break bio into multiple lines if needed
+    bio_lines = wrap_text(bio_text, available_width, 24) if bio_text.present?
+    location_lines = wrap_text(location_text, available_width, 24) if location_text.present?
+
+    # Adjust starting position based on whether headline exists
+    # Add more spacing when headline is present
+    start_y = @user.headline.present? ? 265 : 280
+
+    html = ""
+    y_pos = start_y
+
+    # Display bio on multiple lines
+    if bio_lines
+      bio_lines.each do |line|
+        html += %(<tspan x="380" dy="#{y_pos == start_y ? '0' : '30'}">#{escape_xml(line)}</tspan>)
+        y_pos += 30
+      end
+    end
+
+    # Add location if available
+    if location_lines
+      location_lines.each do |line|
+        html += %(<tspan x="380" dy="32">#{escape_xml(line)}</tspan>)
+      end
+    end
 
     <<~SVG
-      <text x="380" y="300" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="20" font-weight="500">#{info_text}</text>
+      <text x="380" y="#{start_y}" fill="rgba(255,255,255,0.95)" font-family="Arial, sans-serif" font-size="24" font-weight="500">#{html}</text>
     SVG
+  end
+
+  def wrap_text(text, max_width, font_size)
+    # Simple word wrap algorithm - approximate character width
+    chars_per_line = (max_width / (font_size * 0.6)).to_i
+    words = text.split(' ')
+    lines = []
+    current_line = []
+
+    words.each do |word|
+      if (current_line + [word]).join(' ').length <= chars_per_line
+        current_line << word
+      else
+        lines << current_line.join(' ') unless current_line.empty?
+        current_line = [word]
+      end
+    end
+
+    lines << current_line.join(' ') unless current_line.empty?
+    lines
   end
 
   def hire_skills_svg(skills)
     return "" if skills.empty?
 
-    y_pos = 350
+    y_pos = 365  # Adjusted spacing
     x_pos = 380
     html = ""
 
     skills.each_with_index do |skill, index|
-      width = skill.length * 9 + 20
+      width = skill.length * 12 + 24  # Larger width for better readability
       html += <<~SVG
-        <rect x="#{x_pos}" y="#{y_pos}" width="#{width}" height="30" rx="15" fill="rgba(34,197,94,0.2)" stroke="rgba(34,197,94,0.5)" stroke-width="1"/>
-        <text x="#{x_pos + width/2}" y="#{y_pos + 20}" text-anchor="middle" fill="#22c55e" font-family="Arial, sans-serif" font-size="14" font-weight="600">#{skill}</text>
+        <rect x="#{x_pos}" y="#{y_pos}" width="#{width}" height="36" rx="18" fill="rgba(34,197,94,0.2)" stroke="rgba(34,197,94,0.5)" stroke-width="1.5"/>
+        <text x="#{x_pos + width/2}" y="#{y_pos + 24}" text-anchor="middle" fill="#22c55e" font-family="Arial, sans-serif" font-size="16" font-weight="600">#{skill}</text>
       SVG
-      x_pos += width + 15
+      x_pos += width + 18  # More spacing between skills
     end
 
     html
@@ -728,6 +818,25 @@ class SocialImageGeneratorService
     end
   end
 
+  def truncate_bio(bio_text, max_chars = 120)
+    return "" unless bio_text.present?
+
+    # Remove any HTML tags and normalize whitespace
+    clean_bio = bio_text.strip.gsub(/<[^>]*>/, "").squeeze(" ")
+
+    # Truncate if too long and add ellipsis
+    if clean_bio.length > max_chars
+      clean_bio = clean_bio[0...max_chars].strip + "..."
+    end
+
+    clean_bio
+  end
+
+  def escape_xml(text)
+    return "" unless text.present?
+    text.to_s.gsub(/&/, "&amp;").gsub(/</, "&lt;").gsub(/>/, "&gt;")
+  end
+
   def get_cached_image_for_version(version)
     # Look for existing cached image for this user and version
     cached_filename = "social_#{@user.id}_#{version}.png"
@@ -747,9 +856,9 @@ class SocialImageGeneratorService
     when "hire", "open_to_work"
       true
     when "professional"
-      false
+      @user.open_for_work?
     when "auto"
-      @user.open_to_work?
+      @user.open_for_work?
     else
       false
     end
@@ -800,54 +909,76 @@ class SocialImageGeneratorService
     title_text = @user.job_title.presence || @user.preferred_roles.first || "Developer"
 
     <<~SVG
-      <text x="380" y="185" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="28" font-weight="600">#{title_text}</text>
+      <text x="380" y="185" fill="rgba(255,255,255,0.95)" font-family="Arial, sans-serif" font-size="34" font-weight="700">#{title_text}</text>
     SVG
   end
 
   def professional_badge_svg
-    # Professional badge - subtle and clean
-    <<~SVG
-      <defs>
-        <linearGradient id="professional-badge" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#64748b;stop-opacity:1" />
-          <stop offset="100%" style="stop-color:#475569;stop-opacity:1" />
-        </linearGradient>
-      </defs>
-      <rect x="380" y="210" width="280" height="35" rx="17" fill="url(#professional-badge)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-      <text x="510" y="231" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="0.5">💼 PROFESSIONAL</text>
-    SVG
+    if should_show_open_to_work_banner?
+      <<~SVG
+        <defs>
+          <linearGradient id="open-badge-prof" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#16a34a;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#15803d;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect x="380" y="210" width="320" height="40" rx="20" fill="url(#open-badge-prof)" opacity="0.95"/>
+        <text x="540" y="236" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="0.6">⚡ AVAILABLE FOR HIRE</text>
+      SVG
+    else
+      # Professional badge - subtle and clean
+      <<~SVG
+        <defs>
+          <linearGradient id="professional-badge" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#64748b;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#475569;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect x="380" y="210" width="320" height="40" rx="20" fill="url(#professional-badge)" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+        <text x="540" y="236" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="0.6">💼 PROFESSIONAL</text>
+      SVG
+    end
   end
 
   def professional_info_section
-    info_parts = []
+    # Get bio and location separately for multi-line display
+    bio_text = @user.bio.present? ? truncate_bio(@user.bio, 70) : nil
+    location_text = @user.location.present? ? "📍 #{@user.location}" : nil
 
-    # Location
-    if @user.location.present?
-      info_parts << "📍 #{@user.location}"
-    end
+    available_width = 720  # 1200 - 380 - 100 for right padding
 
-    # Bio (truncated)
-    if @user.bio.present?
-      truncated_bio = @user.bio.length > 80 ? "#{@user.bio[0..77]}..." : @user.bio
-      info_parts << "💬 #{truncated_bio}"
-    end
+    # Break into multiple lines if needed
+    location_lines = wrap_text(location_text, available_width, 20) if location_text
+    bio_lines = wrap_text("💬 #{bio_text}", available_width, 20) if bio_text
 
     html = ""
     y_pos = 280
 
-    info_parts.each do |part|
-      html += %(<text x="380" y="#{y_pos}" fill="rgba(255,255,255,0.85)" font-family="Arial, sans-serif" font-size="18" font-weight="500">#{part}</text>)
-      y_pos += 30
+    # Display location
+    if location_lines
+      location_lines.each_with_index do |line, idx|
+        html += %(<tspan x="380" dy="#{idx == 0 ? '0' : '28'}">#{escape_xml(line)}</tspan>)
+      end
+      y_pos += location_lines.length * 28
     end
 
-    html
+    # Display bio with proper spacing
+    if bio_lines
+      bio_lines.each_with_index do |line, idx|
+        html += %(<tspan x="380" dy="#{idx == 0 ? '32' : '28'}">#{escape_xml(line)}</tspan>)
+      end
+    end
+
+    <<~SVG
+      <text x="380" y="280" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="20" font-weight="600">#{html}</text>
+    SVG
   end
 
   def professional_skills_svg(skills)
     return "" if skills.empty?
 
     html = ""
-    html += %(<text x="380" y="380" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="20" font-weight="600">🛠️ SKILLS & EXPERTISE</text>)
+    html += %(<text x="380" y="380" fill="rgba(255,255,255,0.95)" font-family="Arial, sans-serif" font-size="22" font-weight="700">🛠️ SKILLS &amp; EXPERTISE</text>)
 
     y_pos = 420
     x_pos = 380
@@ -855,16 +986,16 @@ class SocialImageGeneratorService
     # Show up to 6 skills, 3 per row
     skills.first(6).each_with_index do |skill, index|
       if index > 0 && index % 3 == 0
-        y_pos += 45
+        y_pos += 50
         x_pos = 380
       end
 
-      width = skill.length * 9 + 20
+      width = skill.length * 10 + 28
       html += <<~SVG
-        <rect x="#{x_pos}" y="#{y_pos}" width="#{width}" height="30" rx="15" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-        <text x="#{x_pos + width/2}" y="#{y_pos + 20}" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="600">#{skill}</text>
+        <rect x="#{x_pos}" y="#{y_pos}" width="#{width}" height="34" rx="17" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.28)" stroke-width="1"/>
+        <text x="#{x_pos + width/2}" y="#{y_pos + 22}" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="700">#{skill}</text>
       SVG
-      x_pos += width + 15
+      x_pos += width + 18
     end
 
     html
@@ -887,14 +1018,14 @@ class SocialImageGeneratorService
         <defs>
           <!-- Professional Gradient Background -->
           <linearGradient id="professional-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
-            <stop offset="50%" style="stop-color:#334155;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#475569;stop-opacity:1" />
+            <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+            <stop offset="55%" style="stop-color:#1e293b;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#334155;stop-opacity:1" />
           </linearGradient>
 
           <!-- Professional pattern overlay -->
-          <pattern id="professional-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-            <circle cx="20" cy="20" r="1" fill="#ffffff" opacity="0.1"/>
+          <pattern id="professional-dots" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
+            <circle cx="24" cy="24" r="1" fill="#ffffff" opacity="0.08"/>
           </pattern>
 
           <!-- Shadow for depth -->
@@ -915,7 +1046,7 @@ class SocialImageGeneratorService
         <!-- Right Side: Content Area -->
         <g>
           <!-- Name -->
-          <text x="380" y="140" fill="#ffffff" font-family="Arial, sans-serif" font-size="52" font-weight="900" letter-spacing="-0.5">#{name}</text>
+          <text x="380" y="140" fill="#ffffff" font-family="Arial, sans-serif" font-size="64" font-weight="900" letter-spacing="-0.5">#{name}</text>
 
           <!-- Job Title -->
           #{professional_job_title_svg}
