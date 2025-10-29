@@ -11,8 +11,8 @@ class SocialImagesController < ApplicationController
     begin
       @user = User.friendly.find(username)
 
-      # Check if user profile is accessible
-      unless @user.active?
+      # Check if user profile is accessible (allow both active and invited users)
+      unless @user.active? || @user.invited?
         render_not_found
         return
       end
@@ -62,8 +62,8 @@ class SocialImagesController < ApplicationController
       user = User.friendly.find(username)
       Rails.logger.info "Found user: #{user.inspect}"
 
-      # Check if user profile is accessible
-      unless user.active?
+      # Check if user profile is accessible (allow both active and invited users)
+      unless user.active? || user.invited?
         render_not_found
         return
       end
@@ -101,8 +101,8 @@ class SocialImagesController < ApplicationController
     begin
       user = User.friendly.find(username)
 
-      # Check if user profile is accessible
-      unless user.active?
+      # Check if user profile is accessible (allow both active and invited users)
+      unless user.active? || user.invited?
         render_not_found
         return
       end
