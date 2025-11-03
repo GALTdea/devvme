@@ -117,10 +117,10 @@
             
             <!-- Traditional Job/Location Info -->
             <% if user.job_title.present? || user.location.present? %>
-              <div class="flex flex-wrap items-center gap-4 text-charcoal-500 dark:text-charcoal-400">
+              <div class="flex flex-wrap items-center gap-4 text-base text-charcoal-600 dark:text-charcoal-400 mt-1">
                 <% if user.job_title.present? %>
                   <div class="flex items-center">
-                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-4 h-4 mr-2 text-charcoal-400 dark:text-charcoal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8zM16 10h.01M8 10h.01" />
                     </svg>
                     <%= user.job_title %>
@@ -128,7 +128,7 @@
                 <% end %>
                 <% if user.location.present? %>
                   <div class="flex items-center">
-                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-4 h-4 mr-2 text-charcoal-400 dark:text-charcoal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -214,8 +214,6 @@
                 </div>
               </div>
             <% end %>
-            
-            
           </div>
         </div>
         
@@ -232,8 +230,8 @@
         <% if user.bio.present? %>
           <div class="mb-6">
             <p class="text-charcoal-700 dark:text-charcoal-300 text-lg leading-relaxed">
-            <%= simple_format(user.bio, {}, wrapper_tag: "span") %>
-          </p>
+              <%= simple_format(user.bio, {}, wrapper_tag: "span") %>
+            </p>
           </div>
         <% else %>
           <div class="mb-6">
@@ -387,7 +385,7 @@
               </svg>
               <span class="font-semibold">Skills</span>
             </div>
-            <div class="flex flex-wrap gap-1 ml-7">
+            <div class="flex flex-wrap gap-2">
               <% user.skills.each do |skill| %>
                 <span class="inline-flex items-center px-3 py-1.5 rounded text-sm font-mono font-medium bg-accent-100 text-accent-700 dark:bg-accent-900/30 dark:text-accent-300">
                   <%= skill %>
