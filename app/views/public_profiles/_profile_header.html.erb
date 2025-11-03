@@ -115,30 +115,6 @@
               <% end %>
             </div>
             
-            <!-- Currently Coding In -->
-            <% if user.skills.present? && user.skills.any? %>
-              <div class="mb-4">
-                <div class="flex items-center text-sm text-charcoal-600 dark:text-charcoal-400 mb-2">
-                  <svg class="w-4 h-4 mr-2 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                  </svg>
-                  <span class="font-medium">Currently coding in:</span>
-                </div>
-                <div class="flex flex-wrap gap-1 ml-6">
-                  <% user.skills.first(4).each do |skill| %>
-                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-mono font-medium bg-accent-100 text-accent-700 dark:bg-accent-900/30 dark:text-accent-300">
-                      <%= skill %>
-                    </span>
-                  <% end %>
-                  <% if user.skills.length > 4 %>
-                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-charcoal-500 dark:text-charcoal-400">
-                      +<%= user.skills.length - 4 %> more
-                    </span>
-                  <% end %>
-                </div>
-              </div>
-            <% end %>
-            
             <!-- Traditional Job/Location Info -->
             <% if user.job_title.present? || user.location.present? %>
               <div class="flex flex-wrap items-center gap-4 text-charcoal-500 dark:text-charcoal-400">
@@ -405,22 +381,15 @@
         <!-- Skills -->
         <% if user.skills.present? && user.skills.any? %>
           <div class="mb-6">
-            <h3 class="text-lg font-semibold text-charcoal-900 dark:text-cream-50 mb-3 flex items-center">
+            <div class="flex items-center text-lg text-charcoal-600 dark:text-charcoal-400 mb-3">
               <svg class="w-5 h-5 mr-2 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               </svg>
-              Tech Stack
-            </h3>
-            <div class="flex flex-wrap gap-2">
-              <% user.skills.each_with_index do |skill, index| %>
-                <% color_classes = [
-                  "bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300 border-primary-200 dark:border-primary-700",
-                  "bg-secondary-100 text-secondary-800 dark:bg-secondary-900/30 dark:text-secondary-300 border-secondary-200 dark:border-secondary-700",
-                  "bg-accent-100 text-accent-800 dark:bg-accent-900/30 dark:text-accent-300 border-accent-200 dark:border-accent-700",
-                  "bg-warning-100 text-warning-800 dark:bg-warning-900/30 dark:text-warning-300 border-warning-200 dark:border-warning-700",
-                  "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300 border-pink-200 dark:border-pink-700"
-                ] %>
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-mono font-medium border <%= color_classes[index % color_classes.length] %> hover:scale-105 transition-transform cursor-default">
+              <span class="font-semibold">Skills</span>
+            </div>
+            <div class="flex flex-wrap gap-1 ml-7">
+              <% user.skills.each do |skill| %>
+                <span class="inline-flex items-center px-3 py-1.5 rounded text-sm font-mono font-medium bg-accent-100 text-accent-700 dark:bg-accent-900/30 dark:text-accent-300">
                   <%= skill %>
                 </span>
               <% end %>
