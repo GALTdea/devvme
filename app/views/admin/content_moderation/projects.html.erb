@@ -188,16 +188,16 @@
                   <%= project.created_at.strftime("%b %d, %Y") %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary-500 dark:text-secondary-400">
-                  <% if project.technologies.any? %>
+                  <% if project.technologies_used.any? %>
                     <div class="flex flex-wrap gap-1">
-                      <% project.technologies.limit(3).each do |tech| %>
+                      <% project.technologies_used.first(3).each do |tech| %>
                         <span class="inline-flex items-center px-2 py-1 rounded text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                           <%= tech %>
                         </span>
                       <% end %>
-                      <% if project.technologies.count > 3 %>
+                      <% if project.technologies_used.size > 3 %>
                         <span class="text-xs text-secondary-400 dark:text-secondary-500">
-                          +<%= project.technologies.count - 3 %> more
+                          +<%= project.technologies_used.size - 3 %> more
                         </span>
                       <% end %>
                     </div>
