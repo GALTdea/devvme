@@ -244,7 +244,18 @@ class Admin::UsersController < ApplicationController
 
     @user.toggle_featured!(admin: current_user)
     status = @user.featured? ? 'featured' : 'unfeatured'
-    redirect_to admin_user_path(@user), notice: "User has been #{status} successfully."
+
+    # Redirect back to index if coming from there, preserving filters
+    if params[:from_index].present?
+      redirect_to admin_users_path(
+        search: params[:search],
+        role: params[:role],
+        status: params[:status],
+        featured: params[:featured]
+      ), notice: "#{@user.display_name} has been #{status} successfully."
+    else
+      redirect_to admin_user_path(@user), notice: "User has been #{status} successfully."
+    end
   end
 
   def bulk_suspend
