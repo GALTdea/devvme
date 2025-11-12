@@ -186,6 +186,7 @@
           <div>
             <%= form.label :headline, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
             <%= form.text_field :headline, 
+                placeholder: "Example: I'm Joe Masilotti, the Hotwire Native guy!",
                 class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm #{'border-red-300 focus:border-red-500 focus:ring-red-500' if @user.errors[:headline].any?}" %>
             <% if @user.errors[:headline].any? %>
               <div class="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -193,7 +194,7 @@
               </div>
             <% else %>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                A short, compelling description of what you do
+                Your elevator pitch! This appears prominently at the top of your profile. Make it memorable and compelling - think of it as the first impression that captures who you are and what you do. Keep it concise but impactful.
               </p>
             <% end %>
           </div>
