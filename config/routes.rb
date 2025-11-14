@@ -1,8 +1,18 @@
 Rails.application.routes.draw do
+  # Waiting list routes
+  get "waiting-list", to: "waiting_list#new", as: :waiting_list
+  post "waiting-list", to: "waiting_list#create"
+  get "waiting-list/success", to: "waiting_list#success", as: :waiting_list_success
   get "limited_access/pending_activation"
   get "limited_access/suspended"
   get "limited_access/deactivated"
   namespace :admin do
+    resources :waiting_list, only: [:index, :show] do
+      member do
+        patch :approve
+        patch :decline
+      end
+    end
     get "blog_analytics/index"
     get "analytics/index"
     get "analytics/registration_trends"

@@ -1,0 +1,2 @@
+module WaitingListHelper
+end

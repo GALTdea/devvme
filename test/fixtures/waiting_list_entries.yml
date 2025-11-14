@@ -1,0 +1,27 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  email: entry_one@example.com
+  full_name: Entry One
+  status: 0 # pending
+  position: 1
+  source: direct
+  metadata: {}
+
+two:
+  email: entry_two@example.com
+  full_name: Entry Two
+  status: 1 # invited
+  position: 2
+  source: homepage
+  metadata: {}
+  notified_at: <%= 1.day.ago %>
+
+three:
+  email: entry_three@example.com
+  full_name: Entry Three
+  status: 2 # converted
+  position: 3
+  source: direct
+  metadata: {}
+  converted_at: <%= 1.day.ago %>

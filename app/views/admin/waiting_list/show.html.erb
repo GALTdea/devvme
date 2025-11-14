@@ -1,0 +1,192 @@
+<% content_for :title, "Waiting List Entry - #{@waiting_list_entry.email} - Admin" %>
+
+<div class="min-h-screen bg-secondary-50 dark:bg-secondary-900">
+  <!-- Header -->
+  <%= admin_page_header("Waiting List Entry", "View and manage waiting list entry details") do %>
+    <div class="flex items-center space-x-3">
+      <%= link_to admin_waiting_list_index_path, class: "inline-flex items-center px-4 py-2 border border-secondary-300 shadow-sm text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 dark:bg-secondary-700 dark:border-secondary-600 dark:text-secondary-200 dark:hover:bg-secondary-600" do %>
+        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to List
+      <% end %>
+      
+      <% if @waiting_list_entry.pending? %>
+        <%= button_to approve_admin_waiting_list_path(@waiting_list_entry), 
+            method: :patch,
+            data: { turbo_confirm: "Approve and invite #{@waiting_list_entry.email}?" },
+            class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Approve & Invite
+        <% end %>
+        
+        <%= button_to decline_admin_waiting_list_path(@waiting_list_entry),
+            method: :patch,
+            data: { turbo_confirm: "Decline #{@waiting_list_entry.email}?" },
+            class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Decline
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Breadcrumbs -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <%= admin_breadcrumbs(
+      { text: "Admin Dashboard", path: admin_root_path },
+      { text: "Waiting List", path: admin_waiting_list_index_path },
+      { text: @waiting_list_entry.email, path: admin_waiting_list_path(@waiting_list_entry) }
+    ) %>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Main Card -->
+    <div class="bg-white dark:bg-secondary-800 shadow rounded-lg overflow-hidden">
+      <!-- Status Banner -->
+      <div class="px-6 py-4 border-b border-secondary-200 dark:border-secondary-700 
+                  <%= case @waiting_list_entry.status
+                      when 'pending' then 'bg-amber-50 dark:bg-amber-900/20'
+                      when 'invited' then 'bg-purple-50 dark:bg-purple-900/20'
+                      when 'converted' then 'bg-green-50 dark:bg-green-900/20'
+                      when 'declined' then 'bg-red-50 dark:bg-red-900/20'
+                      end %>">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <% case @waiting_list_entry.status %>
+            <% when 'pending' %>
+              <div class="w-10 h-10 bg-amber-600 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-amber-900 dark:text-amber-100">Pending Approval</h3>
+                <p class="text-sm text-amber-700 dark:text-amber-300">This entry is awaiting admin approval</p>
+              </div>
+            <% when 'invited' %>
+              <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-purple-900 dark:text-purple-100">Invitation Sent</h3>
+                <p class="text-sm text-purple-700 dark:text-purple-300">User has been invited and is waiting to claim their account</p>
+              </div>
+            <% when 'converted' %>
+              <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-green-900 dark:text-green-100">Successfully Converted</h3>
+                <p class="text-sm text-green-700 dark:text-green-300">User has claimed their account</p>
+              </div>
+            <% when 'declined' %>
+              <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-red-900 dark:text-red-100">Declined</h3>
+                <p class="text-sm text-red-700 dark:text-red-300">This entry has been declined by an admin</p>
+              </div>
+            <% end %>
+          </div>
+          
+          <% if @waiting_list_entry.position %>
+            <div class="text-right">
+              <p class="text-xs text-secondary-500 dark:text-secondary-400">Position in Queue</p>
+              <p class="text-2xl font-bold text-secondary-900 dark:text-white">#<%= @waiting_list_entry.position %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Entry Details -->
+      <div class="px-6 py-6">
+        <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <div>
+            <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Email</dt>
+            <dd class="mt-1 text-sm text-secondary-900 dark:text-white"><%= @waiting_list_entry.email %></dd>
+          </div>
+
+          <div>
+            <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Full Name</dt>
+            <dd class="mt-1 text-sm text-secondary-900 dark:text-white"><%= @waiting_list_entry.full_name.presence || 'Not provided' %></dd>
+          </div>
+
+          <div>
+            <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Source</dt>
+            <dd class="mt-1 text-sm text-secondary-900 dark:text-white"><%= @waiting_list_entry.source.presence || 'direct' %></dd>
+          </div>
+
+          <div>
+            <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Signed Up</dt>
+            <dd class="mt-1 text-sm text-secondary-900 dark:text-white">
+              <%= @waiting_list_entry.created_at.strftime('%B %d, %Y at %I:%M %p') %>
+              <span class="text-secondary-500 dark:text-secondary-400">(<%= time_ago_in_words(@waiting_list_entry.created_at) %> ago)</span>
+            </dd>
+          </div>
+
+          <% if @waiting_list_entry.notified_at %>
+            <div>
+              <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Invitation Sent</dt>
+              <dd class="mt-1 text-sm text-secondary-900 dark:text-white">
+                <%= @waiting_list_entry.notified_at.strftime('%B %d, %Y at %I:%M %p') %>
+              </dd>
+            </div>
+          <% end %>
+
+          <% if @waiting_list_entry.converted_at %>
+            <div>
+              <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Converted At</dt>
+              <dd class="mt-1 text-sm text-secondary-900 dark:text-white">
+                <%= @waiting_list_entry.converted_at.strftime('%B %d, %Y at %I:%M %p') %>
+              </dd>
+            </div>
+          <% end %>
+
+          <% if @waiting_list_entry.user.present? %>
+            <div class="sm:col-span-2">
+              <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400 mb-2">Associated User</dt>
+              <dd class="mt-1">
+                <div class="flex items-center p-4 bg-secondary-50 dark:bg-secondary-900 rounded-lg">
+                  <div class="flex-shrink-0 h-10 w-10 bg-primary-600 rounded-full flex items-center justify-center">
+                    <span class="text-white font-medium"><%= @waiting_list_entry.user.username.first.upcase %></span>
+                  </div>
+                  <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-secondary-900 dark:text-white"><%= @waiting_list_entry.user.username %></p>
+                    <p class="text-sm text-secondary-500 dark:text-secondary-400"><%= @waiting_list_entry.user.email %></p>
+                  </div>
+                  <%= link_to admin_user_path(@waiting_list_entry.user), class: "ml-4 inline-flex items-center px-3 py-1.5 border border-secondary-300 dark:border-secondary-600 shadow-sm text-xs font-medium rounded text-secondary-700 dark:text-secondary-200 bg-white dark:bg-secondary-700 hover:bg-secondary-50 dark:hover:bg-secondary-600" do %>
+                    View User
+                    <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  <% end %>
+                </div>
+              </dd>
+            </div>
+          <% end %>
+
+          <% if @waiting_list_entry.metadata.present? && @waiting_list_entry.metadata.any? %>
+            <div class="sm:col-span-2">
+              <dt class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Additional Metadata</dt>
+              <dd class="mt-1">
+                <pre class="text-xs bg-secondary-50 dark:bg-secondary-900 p-4 rounded-lg overflow-x-auto text-secondary-900 dark:text-white"><%= JSON.pretty_generate(@waiting_list_entry.metadata) %></pre>
+              </dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
