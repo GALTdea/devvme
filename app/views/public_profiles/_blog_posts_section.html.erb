@@ -9,7 +9,7 @@
         Latest Blog Posts
       </h2>
       <% if user.blog_posts.published.count > 3 %>
-        <%= link_to public_blog_index_path, 
+        <%= link_to public_blog_index_path(author: user.username), 
             class: "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors no-print" do %>
           View All →
         <% end %>

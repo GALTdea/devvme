@@ -8,8 +8,16 @@
         </svg>
         Featured Projects
     </h2>
-      <div class="text-sm text-gray-500 dark:text-gray-400">
-        <%= projects.count %> of <%= user.published_projects_count %> projects
+      <div class="flex items-center gap-4">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          <%= projects.count %> of <%= user.published_projects_count %> projects
+        </div>
+        <% if user.published_projects_count > 6 %>
+          <%= link_to public_projects_path(author: user.username), 
+              class: "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors no-print" do %>
+            View All →
+          <% end %>
+        <% end %>
       </div>
   </div>
 

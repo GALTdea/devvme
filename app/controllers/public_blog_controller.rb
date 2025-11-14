@@ -10,6 +10,14 @@ class PublicBlogController < ApplicationController
   def index
     @blog_posts = BlogPost.published_posts.includes(:user)
 
+    # Filter by author
+    if params[:author].present?
+      @author = User.find_by(username: params[:author])
+      if @author
+        @blog_posts = @blog_posts.where(user: @author)
+      end
+    end
+
     # Search functionality
     if params[:search].present?
       search_term = "%#{params[:search]}%"
@@ -23,7 +31,7 @@ class PublicBlogController < ApplicationController
     @pagy, @blog_posts = pagy(@blog_posts, limit: 12)
 
     # Stats for header
-    @total_posts = BlogPost.published_posts.count
+    @total_posts = @author ? @author.blog_posts.published.count : BlogPost.published_posts.count
   end
 
   # GET /blog/:id

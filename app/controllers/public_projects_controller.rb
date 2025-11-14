@@ -12,6 +12,14 @@ class PublicProjectsController < ApplicationController
                       .includes(:user, thumbnail_attachment: :blob)
                       .order(created_at: :desc)
 
+    # Filter by author (exact username match)
+    if params[:author].present?
+      @author = User.find_by(username: params[:author])
+      if @author
+        @projects = @projects.where(user: @author)
+      end
+    end
+
     # Search functionality
     if params[:search].present?
       search_term = "%#{params[:search]}%"
@@ -26,7 +34,7 @@ class PublicProjectsController < ApplicationController
       @projects = @projects.where("technologies_used::text ILIKE ?", "%\"#{params[:technology]}\"%")
     end
 
-    # Filter by user
+    # Filter by user (partial match for search)
     if params[:user].present?
       @projects = @projects.joins(:user).where("users.username ILIKE ?", "%#{params[:user]}%")
     end
@@ -35,7 +43,7 @@ class PublicProjectsController < ApplicationController
     @pagy, @projects = pagy(@projects, limit: 12)
 
     # Stats for header
-    @total_projects = Project.published.count
+    @total_projects = @author ? @author.projects.published.count : Project.published.count
     @total_users = User.joins(:projects).where(projects: { status: :published }).distinct.count
   end
 
