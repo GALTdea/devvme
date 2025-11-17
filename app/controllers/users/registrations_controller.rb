@@ -50,7 +50,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
   end
 
   def registration_enabled?
-    !Rails.env.production? || ENV['DISABLE_REGISTRATION'].blank?
+    # Registration is enabled if DISABLE_REGISTRATION is NOT set (blank)
+    # If DISABLE_REGISTRATION is set to any value, registration is disabled
+    ENV['DISABLE_REGISTRATION'].blank?
   end
 
   def track_visitor_conversion(user)
