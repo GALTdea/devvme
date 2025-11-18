@@ -405,10 +405,10 @@ module ApplicationHelper
 
   # Registration control helper
   def registration_enabled?
-      !Rails.env.production? || ENV["DISABLE_REGISTRATION"].blank?
+      #!Rails.env.production? || ENV["DISABLE_REGISTRATION"].blank?
 
     # If DISABLE_REGISTRATION is set to any value, registration is disabled
-    # ENV["DISABLE_REGISTRATION"].blank?
+    ENV["DISABLE_REGISTRATION"].blank?
   end
 
 

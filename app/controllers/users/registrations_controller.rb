@@ -52,6 +52,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def registration_enabled?
     # Registration is enabled if DISABLE_REGISTRATION is NOT set (blank)
     # If DISABLE_REGISTRATION is set to any value, registration is disabled
+
+    # To force disable registration for testing/demo, uncomment the next line:
+    # return false
+
     ENV['DISABLE_REGISTRATION'].blank?
   end
 
