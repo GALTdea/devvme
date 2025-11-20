@@ -98,6 +98,10 @@ Rails.application.routes.draw do
     registrations: 'users/registrations'
   }
 
+  # Profile completion routes (Step 2 of registration)
+  get 'users/complete_profile', to: 'users/registrations#complete_profile', as: :complete_profile_registration
+  patch 'users/complete_profile', to: 'users/registrations#update_profile', as: :update_profile_registration
+
   # Redirect already authenticated users to dashboard instead of root
   authenticated :user do
     root "dashboard#index", as: :authenticated_root

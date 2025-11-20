@@ -2,8 +2,10 @@
 
 class Users::RegistrationsController < Devise::RegistrationsController
   before_action :check_registration_enabled, only: [:new, :create]
+  before_action :authenticate_user!, only: [:complete_profile, :update_profile]
+  before_action :set_user_for_profile_completion, only: [:complete_profile, :update_profile]
 
-  # Override create action to set users to pending_activation by default
+  # Override create action to only require minimal fields (username, email, password)
   def create
     build_resource(sign_up_params)
 
@@ -18,10 +20,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
       # Send welcome email
       send_welcome_email(resource)
 
-      # Sign in the user and redirect to dashboard
+      # Sign in the user and redirect to profile completion
       sign_in(resource)
       set_flash_message! :notice, :signed_up
-      redirect_to dashboard_path
+      redirect_to complete_profile_registration_path, notice: "Welcome! Complete your profile to get started (optional)."
     else
       clean_up_passwords resource
       set_minimum_password_length
@@ -29,16 +31,36 @@ class Users::RegistrationsController < Devise::RegistrationsController
     end
   end
 
-  protected
-
-  # Override after_sign_up_path to redirect to dashboard
-  def after_sign_up_path_for(resource)
-    dashboard_path
+  # Show profile completion form (Step 2)
+  def complete_profile
+    # User is already authenticated and set via before_action
   end
 
-  # Override after_inactive_sign_up_path to redirect to dashboard
+  # Update profile with optional information (Step 2)
+  def update_profile
+    if @user.update(profile_completion_params)
+      redirect_to dashboard_path, notice: "🎉 Profile updated successfully! Welcome to Devv.me."
+    else
+      flash.now[:alert] = "Please fix the errors below."
+      render :complete_profile, status: :unprocessable_entity
+    end
+  end
+
+  protected
+
+  # Override after_sign_up_path to redirect to profile completion
+  def after_sign_up_path_for(resource)
+    complete_profile_registration_path
+  end
+
+  # Override after_inactive_sign_up_path to redirect to profile completion
   def after_inactive_sign_up_path_for(resource)
-    dashboard_path
+    complete_profile_registration_path
+  end
+
+  # Override sign_up_params to only permit minimal fields
+  def sign_up_params
+    params.require(:user).permit(:username, :email, :password, :password_confirmation)
   end
 
   private
@@ -57,6 +79,19 @@ class Users::RegistrationsController < Devise::RegistrationsController
     # return false
 
     ENV['DISABLE_REGISTRATION'].blank?
+  end
+
+  def set_user_for_profile_completion
+    @user = current_user
+  end
+
+  # Permit all optional profile fields for completion step
+  def profile_completion_params
+    params.require(:user).permit(
+      :full_name, :bio, :github_url, :linkedin_url, :twitter_url,
+      :website_url, :avatar, :job_title, :location, :headline,
+      :contact_email, :skills_list
+    )
   end
 
   def track_visitor_conversion(user)
