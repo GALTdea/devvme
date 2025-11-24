@@ -4,6 +4,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
   before_action :check_registration_enabled, only: [:new, :create]
   before_action :authenticate_user!, only: [:complete_profile, :update_profile]
   before_action :set_user_for_profile_completion, only: [:complete_profile, :update_profile]
+  # Skip pending activation check for profile completion - users should be able to complete their profile
+  skip_before_action :check_pending_activation, only: [:complete_profile, :update_profile]
+  skip_before_action :check_limited_access, only: [:complete_profile, :update_profile]
 
   # Override create action to only require minimal fields (username, email, password)
   def create

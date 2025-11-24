@@ -38,11 +38,9 @@ class ApplicationController < ActionController::Base
 
   # Override Devise's after_sign_in_path_for to redirect based on account status
   def after_sign_in_path_for(resource)
-    if resource.pending_activation?
-      pending_activation_path
-    else
-      dashboard_path
-    end
+    # Allow pending_activation users to access dashboard
+    # They can see their own profile and dashboard even if not activated yet
+    dashboard_path
   end
 
   # Override Devise's after_sign_up_path_for to redirect based on account status
@@ -50,11 +48,9 @@ class ApplicationController < ActionController::Base
     # Track visitor conversion
     track_visitor_conversion(resource)
 
-    if resource.pending_activation?
-      pending_activation_path
-    else
-      dashboard_path
-    end
+    # Allow pending_activation users to access dashboard and profile completion
+    # They can see their own profile and dashboard even if not activated yet
+    dashboard_path
   end
 
   # Admin authorization methods
@@ -108,14 +104,19 @@ class ApplicationController < ActionController::Base
     return if should_skip_pending_check?
 
     if current_user.pending_activation?
-      # Add flash message if not already present
+      # Allow pending_activation users to access dashboard, profile, and profile completion
+      # They can see their own profile and dashboard even if not activated yet
+      # Only redirect to pending_activation if they're trying to access restricted areas
+      # (like admin or other protected resources)
+
+      # Don't redirect if they're on dashboard, profile, or profile completion
+      allowed_paths = [dashboard_path, profile_path, edit_profile_path, "/users/complete_profile"]
+      return if allowed_paths.include?(request.path) || request.path.start_with?("/#{current_user.friendly_id}")
+
+      # For other restricted areas, show a warning but don't force redirect
+      # The pending_activation page is informational, not mandatory
       unless flash[:warning]
         flash[:warning] = "Your account is pending activation. You will receive an email notification once your account is activated by an administrator."
-      end
-
-      # Redirect to pending activation page unless already there
-      unless request.path == pending_activation_path
-        redirect_to pending_activation_path
       end
     end
   end
@@ -211,6 +212,9 @@ class ApplicationController < ActionController::Base
     # Known routes that are accessible (defined before username route in routes.rb)
     known_public_routes = %w[/blog /explore /dashboard /beta /pending_activation /suspended /deactivated /sitemap.xml]
     return true if known_public_routes.include?(request.path) || request.path.start_with?("/blog/", "/explore/", "/beta/")
+
+    # Allow profile completion path for newly registered users
+    return true if request.path == "/users/complete_profile"
 
     # Allow users to view public profile pages (/:username routes)
     # This allows pending_activation users to view their own profile and other public profiles
