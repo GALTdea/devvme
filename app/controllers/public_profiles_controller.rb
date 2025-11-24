@@ -9,10 +9,11 @@ class PublicProfilesController < ApplicationController
   # Display public user profile page that can be shared with visitors
   # Accessible at /:username (e.g., /gustavo)
   def show
-    # Redirect authenticated users to their private profile page
+    # Redirect authenticated active users to their private profile page
     # unless they explicitly want to preview their public profile
     # Exception: Don't redirect for unclaimed profiles since the user can't access dashboard
-    if user_signed_in? && @user == current_user && !params[:preview] && !@unclaimed_profile
+    # Exception: Don't redirect pending_activation users (they should see their public profile)
+    if user_signed_in? && @user == current_user && !params[:preview] && !@unclaimed_profile && current_user.active?
       redirect_to profile_path
       return
     end
@@ -52,24 +53,16 @@ class PublicProfilesController < ApplicationController
     # Allow access if user is active
     return if @user.active?
 
+    # Allow access if user is pending_activation
+    # Pending activation users can view their own profile and other public profiles like active users
+    return if @user.pending_activation?
+
     # Allow public access to invited users (unclaimed profiles)
     # These profiles are publicly visible but marked as unclaimed
     if @user.invited?
       # Set unclaimed profile flag for views
       @unclaimed_profile = true
       return
-    end
-
-    # Redirect pending activation users to their limited access page
-    if @user.pending_activation?
-      if user_signed_in? && current_user == @user
-        redirect_to pending_activation_path
-        return
-      else
-        # Show 404 for pending users to unauthorized users
-        render file: "#{Rails.root}/public/404-profile.html", status: :not_found, layout: false
-        return
-      end
     end
 
     # Redirect suspended users to their limited access page

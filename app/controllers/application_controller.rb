@@ -208,6 +208,22 @@ class ApplicationController < ActionController::Base
     return true if request.path == root_path # Allow access to home page
     return true if request.path.start_with?("/public") # Allow access to public pages
 
+    # Known routes that are accessible (defined before username route in routes.rb)
+    known_public_routes = %w[/blog /explore /dashboard /beta /pending_activation /suspended /deactivated /sitemap.xml]
+    return true if known_public_routes.include?(request.path) || request.path.start_with?("/blog/", "/explore/", "/beta/")
+
+    # Allow users to view public profile pages (/:username routes)
+    # This allows pending_activation users to view their own profile and other public profiles
+    # The username pattern matches: [a-zA-Z0-9_-]+ and must be a single segment path
+    # Check if path matches username pattern (single segment that looks like a username)
+    if request.path.match?(%r{^/[a-zA-Z0-9_-]+$})
+      # Exclude known single-segment routes that are not usernames
+      excluded_single_segment_routes = %w[/blog /explore /dashboard /beta /pending_activation /suspended /deactivated /sitemap.xml /up]
+      return true unless excluded_single_segment_routes.include?(request.path)
+      # If it's a username-like path and not excluded, allow it (will route to PublicProfilesController)
+      return true
+    end
+
     # Allow deactivated users to view their own public profile
     if user_signed_in? && current_user.deactivated? && request.path == "/#{current_user.friendly_id}"
       return true
