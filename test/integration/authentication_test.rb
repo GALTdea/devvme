@@ -34,7 +34,8 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_select "#alert-success", text: /Welcome! You have signed up successfully/
 
     # User should be signed in (check for user dropdown)
-    assert_select "button[data-dropdown-toggle='user-dropdown']"
+    assert_select "li[data-controller='dropdown']"
+    assert_select "button[data-action*='dropdown#toggle']"
   end
 
   test "user cannot sign up with invalid email" do
@@ -149,7 +150,8 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_select "#alert-success", text: /Signed in successfully/
 
     # User should be signed in (check for user dropdown instead of hidden sign out link)
-    assert_select "button[data-dropdown-toggle='user-dropdown']"
+    assert_select "li[data-controller='dropdown']"
+    assert_select "button[data-action*='dropdown#toggle']"
     assert_select "h1", text: /Welcome back/ # Dashboard page content
   end
 
@@ -211,7 +213,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
 
     # User should be signed out
     assert_select "a[href='#{new_user_session_path}']", text: /Sign In/
-    assert_select "button[data-dropdown-toggle='user-dropdown']", count: 0
+    assert_select "li[data-controller='dropdown']", count: 0
   end
 
   test "signed out user cannot access protected pages" do

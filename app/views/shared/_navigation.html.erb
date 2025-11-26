@@ -42,10 +42,10 @@
           <% end %>
           
           <!-- User dropdown -->
-          <li class="relative">
+          <li class="relative" data-controller="dropdown">
             <button type="button" 
                     class="flex items-center justify-between w-full py-2 px-3 text-secondary-900 rounded hover:bg-secondary-100 md:hover:bg-transparent md:border-0 md:hover:text-primary-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-primary-500 dark:focus:text-white dark:border-secondary-700 dark:hover:bg-secondary-700 md:dark:hover:bg-transparent"
-                    data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
+                    data-action="click->dropdown#toggle">
               <div class="flex items-center space-x-2">
                 <% if current_user.avatar.attached? %>
                   <%= image_tag current_user.avatar_thumbnail, 
@@ -64,7 +64,7 @@
             </button>
             
             <!-- Dropdown menu -->
-            <div id="user-dropdown" class="z-10 hidden font-normal bg-white divide-y divide-secondary-100 rounded-lg shadow w-44 dark:bg-secondary-700 dark:divide-secondary-600">
+            <div data-dropdown-target="menu" class="z-10 hidden font-normal bg-white divide-y divide-secondary-100 rounded-lg shadow w-44 dark:bg-secondary-700 dark:divide-secondary-600 absolute right-0 mt-2">
               <div class="px-4 py-3 text-sm text-secondary-900 dark:text-white">
                 <div class="font-medium truncate"><%= current_user.email %></div>
               </div>
