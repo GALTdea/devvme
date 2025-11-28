@@ -4,12 +4,13 @@ class BlogPost < ApplicationRecord
 
   # Associations
   belongs_to :user
+  has_rich_text :content_html  # Rich text content for Trix editor
 
   # Validations
   validates :title, presence: true, length: { maximum: 255 }
-  validates :content, presence: true
   validates :slug, presence: true, uniqueness: true
   validate :published_at_presence_when_published
+  validate :content_presence_based_on_editor_mode
 
   # Scopes
   scope :published, -> { where(published: true, archived: false) }
@@ -26,6 +27,7 @@ class BlogPost < ApplicationRecord
 
   # Callbacks
   before_validation :set_published_at, if: :published_changed?
+  before_validation :set_default_editor_mode
   before_save :generate_excerpt_if_blank
 
   # Class methods
@@ -48,12 +50,27 @@ class BlogPost < ApplicationRecord
 
   def reading_time
     # Estimate reading time based on average 200 words per minute
-    word_count = content.split.size
-    (word_count / 200.0).ceil
+    words = word_count
+    (words / 200.0).ceil
   end
 
   def word_count
-    content.split.size
+    text_content = if editor_mode == 'rich_text' && content_html.present?
+      # Strip HTML tags and count words
+      ActionController::Base.helpers.strip_tags(content_html.to_s)
+    else
+      content.to_s
+    end
+    text_content.split.size
+  end
+
+  # Get the actual content based on editor mode
+  def display_content
+    if editor_mode == 'rich_text' && content_html.present?
+      content_html.to_s
+    else
+      content
+    end
   end
 
   def to_param
@@ -96,13 +113,25 @@ class BlogPost < ApplicationRecord
     end
   end
 
+  def set_default_editor_mode
+    self.editor_mode ||= 'markdown'
+  end
+
   def generate_excerpt_if_blank
     return if excerpt.present?
 
-    # Remove markdown syntax for excerpt
-    plain_text = content.gsub(/[#*`_\[\]()!]/, "")
-                       .gsub(/\n+/, " ")
-                       .strip
+    # Get plain text based on editor mode
+    if editor_mode == 'rich_text' && content_html.present?
+      # Strip HTML tags for rich text content
+      plain_text = ActionController::Base.helpers.strip_tags(content_html.to_s)
+                                         .gsub(/\n+/, " ")
+                                         .strip
+    else
+      # Remove markdown syntax for markdown content
+      plain_text = content.to_s.gsub(/[#*`_\[\]()!]/, "")
+                          .gsub(/\n+/, " ")
+                          .strip
+    end
 
     # Take first 150 characters and ensure we don't cut off mid-word
     if plain_text.length > 150
@@ -115,6 +144,18 @@ class BlogPost < ApplicationRecord
   def published_at_presence_when_published
     if published && published_at.blank?
       errors.add(:published_at, "can't be blank when post is published")
+    end
+  end
+
+  def content_presence_based_on_editor_mode
+    if editor_mode == 'rich_text'
+      if content_html.blank?
+        errors.add(:content_html, "can't be blank")
+      end
+    else
+      if content.blank?
+        errors.add(:content, "can't be blank")
+      end
     end
   end
 

@@ -22,6 +22,8 @@ class BlogPostsController < ApplicationController
     # Search functionality
     if params[:search].present?
       search_term = "%#{params[:search]}%"
+      # Search in title, content (markdown), and excerpt
+      # Note: Rich text content search can be added later if needed
       @blog_posts = @blog_posts.where(
         "title ILIKE ? OR content ILIKE ? OR excerpt ILIKE ?",
         search_term, search_term, search_term
@@ -156,10 +158,10 @@ class BlogPostsController < ApplicationController
   end
 
   def blog_post_params
-    params.require(:blog_post).permit(:title, :content, :excerpt, :published, :published_at, :featured)
+    params.require(:blog_post).permit(:title, :content, :excerpt, :published, :published_at, :featured, :editor_mode, :content_html)
   end
 
   def autosave_params
-    params.require(:blog_post).permit(:title, :content, :excerpt)
+    params.require(:blog_post).permit(:title, :content, :excerpt, :editor_mode, :content_html)
   end
 end
