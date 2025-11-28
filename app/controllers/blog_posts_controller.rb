@@ -22,12 +22,14 @@ class BlogPostsController < ApplicationController
     # Search functionality
     if params[:search].present?
       search_term = "%#{params[:search]}%"
-      # Search in title, content (markdown), and excerpt
-      # Note: Rich text content search can be added later if needed
-      @blog_posts = @blog_posts.where(
-        "title ILIKE ? OR content ILIKE ? OR excerpt ILIKE ?",
-        search_term, search_term, search_term
-      )
+      # Search in title, content (markdown), excerpt, and rich text content
+      @blog_posts = @blog_posts
+        .left_joins("LEFT JOIN action_text_rich_texts ON action_text_rich_texts.record_type = 'BlogPost' AND action_text_rich_texts.record_id = blog_posts.id AND action_text_rich_texts.name = 'content_html'")
+        .where(
+          "blog_posts.title ILIKE ? OR blog_posts.content ILIKE ? OR blog_posts.excerpt ILIKE ? OR action_text_rich_texts.body ILIKE ?",
+          search_term, search_term, search_term, search_term
+        )
+        .distinct
     end
 
     @blog_posts = @blog_posts.recent

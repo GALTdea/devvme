@@ -9,3 +9,4 @@ pin "sortablejs" # @1.15.6
 pin "marked" # @16.2.0
 pin "trix"
 pin "@rails/actiontext", to: "actiontext.esm.js"
+pin "turndown", to: "turndown.js" # @7.2.2

@@ -7,6 +7,8 @@
  * depending on specificity.
  *
  * Consider organizing styles into separate files for maintainability.
+ *
+ * Note: actiontext.css is included separately via stylesheet_link_tag in the layout
  */
 
 /* Custom utility classes */

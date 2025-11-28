@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { marked } from "marked"
+import TurndownService from "turndown"
 
 // Simple function for basic syntax highlighting without external dependencies
 function simpleSyntaxHighlight(code, language) {
@@ -60,6 +61,15 @@ export default class extends Controller {
         this.lastSavedContent = this.getCurrentFormData()
         this.previewMode = false
 
+        // Initialize Turndown service for HTML to Markdown conversion
+        this.turndownService = new TurndownService({
+            headingStyle: 'atx',
+            codeBlockStyle: 'fenced',
+            bulletListMarker: '-',
+            emDelimiter: '*',
+            strongDelimiter: '**'
+        })
+
         // Initialize editor mode
         this.initializeEditorMode()
 
@@ -100,11 +110,22 @@ export default class extends Controller {
         const currentMode = this.editorModeValue
         const newMode = currentMode === 'markdown' ? 'rich_text' : 'markdown'
         
-        // Warn user if switching modes with content
+        // Convert content when switching modes
         if (this.hasContent()) {
-            const confirmMessage = `Switching to ${newMode === 'markdown' ? 'Markdown' : 'Rich Text'} editor. Your current content will be preserved, but formatting may need adjustment. Continue?`
-            if (!confirm(confirmMessage)) {
-                return
+            try {
+                if (currentMode === 'markdown') {
+                    // Converting from Markdown to Rich Text
+                    this.convertMarkdownToRichText()
+                } else {
+                    // Converting from Rich Text to Markdown
+                    this.convertRichTextToMarkdown()
+                }
+            } catch (error) {
+                console.error('Error converting content:', error)
+                const confirmMessage = `Error converting content. Switch anyway? (You may lose formatting)`
+                if (!confirm(confirmMessage)) {
+                    return
+                }
             }
         }
 
@@ -114,6 +135,48 @@ export default class extends Controller {
         }
         this.showEditorMode(newMode)
         this.updateStats()
+        
+        // Update last saved content after conversion
+        this.lastSavedContent = this.getCurrentFormData()
+    }
+
+    // Convert Markdown to Rich Text (HTML)
+    convertMarkdownToRichText() {
+        if (!this.hasContentTarget) return
+
+        const markdownContent = this.contentTarget.value.trim()
+        if (!markdownContent) return
+
+        // Convert markdown to HTML
+        const htmlContent = marked.parse(markdownContent)
+
+        // Set HTML in Trix editor
+        // Trix editor uses the value property to set content
+        if (this.hasRichTextContentTarget) {
+            // Wait for editor to be ready if switching modes
+            setTimeout(() => {
+                this.richTextContentTarget.value = htmlContent
+            }, 50)
+        }
+    }
+
+    // Convert Rich Text (HTML) to Markdown
+    convertRichTextToMarkdown() {
+        if (!this.hasRichTextContentTarget) return
+
+        // Get HTML content from Trix editor
+        // Trix stores HTML in the value property
+        const htmlContent = this.richTextContentTarget.value || ''
+        
+        if (!htmlContent.trim()) return
+
+        // Convert HTML to Markdown
+        const markdownContent = this.turndownService.turndown(htmlContent)
+
+        // Set markdown in textarea
+        if (this.hasContentTarget) {
+            this.contentTarget.value = markdownContent
+        }
     }
 
     // Show appropriate editor based on mode
@@ -199,9 +262,9 @@ export default class extends Controller {
         const html = marked.parse(content)
 
         if (this.hasPreviewTarget) {
-            this.previewTarget.innerHTML = html
-            this.previewTarget.classList.remove('hidden')
-            this.contentTarget.classList.add('hidden')
+        this.previewTarget.innerHTML = html
+        this.previewTarget.classList.remove('hidden')
+        this.contentTarget.classList.add('hidden')
         }
 
         // Update preview button
@@ -215,10 +278,10 @@ export default class extends Controller {
 
     showEditor() {
         if (this.hasPreviewTarget) {
-            this.previewTarget.classList.add('hidden')
+        this.previewTarget.classList.add('hidden')
         }
         if (this.hasContentTarget) {
-            this.contentTarget.classList.remove('hidden')
+        this.contentTarget.classList.remove('hidden')
         }
 
         // Update preview button
@@ -231,7 +294,7 @@ export default class extends Controller {
 
         // Focus back to textarea
         if (this.hasContentTarget) {
-            this.contentTarget.focus()
+        this.contentTarget.focus()
         }
     }
 
@@ -281,7 +344,7 @@ export default class extends Controller {
     setupAutosave() {
         // Markdown editor
         if (this.hasContentTarget) {
-            this.contentTarget.addEventListener('input', () => this.contentChanged())
+        this.contentTarget.addEventListener('input', () => this.contentChanged())
         }
 
         // Rich text editor (Trix)

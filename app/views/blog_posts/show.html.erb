@@ -120,11 +120,19 @@
 
   <!-- Content -->
   <article class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8">
-    <div class="prose dark:prose-invert max-w-none" 
-         data-controller="blog-viewer" 
-         data-blog-viewer-content-value="<%= html_escape(@blog_post.content) %>">
-      <!-- Markdown content will be rendered here -->
-    </div>
+    <% if @blog_post.editor_mode == 'rich_text' && @blog_post.content_html.present? %>
+      <!-- Rich Text Content (HTML) -->
+      <div class="prose dark:prose-invert max-w-none trix-content">
+        <%= @blog_post.content_html.to_s.html_safe %>
+      </div>
+    <% else %>
+      <!-- Markdown Content -->
+      <div class="prose dark:prose-invert max-w-none" 
+           data-controller="blog-viewer" 
+           data-blog-viewer-content-value="<%= html_escape(@blog_post.content) %>">
+        <!-- Markdown content will be rendered here -->
+      </div>
+    <% end %>
   </article>
 
   <!-- Footer Actions -->
