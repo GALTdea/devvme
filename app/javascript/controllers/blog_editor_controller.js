@@ -43,16 +43,25 @@ marked.setOptions({
 });
 
 export default class extends Controller {
-    static targets = ["content", "preview", "title", "excerpt", "publishedToggle", "publishedAt", "autosaveStatus", "wordCount", "readingTime"]
+    static targets = [
+        "content", "preview", "title", "excerpt", "publishedToggle", "publishedAt", 
+        "autosaveStatus", "wordCount", "readingTime", "editorMode", "editorModeToggle",
+        "editorModeLabel", "markdownEditor", "richTextEditor", "richTextContent",
+        "markdownToolbar", "editorHelp"
+    ]
     static values = {
         autosaveUrl: String,
-        autosaveEnabled: { type: Boolean, default: true }
+        autosaveEnabled: { type: Boolean, default: true },
+        editorMode: { type: String, default: 'markdown' }
     }
 
     connect() {
         this.autosaveTimer = null
-        this.lastSavedContent = this.contentTarget.value
+        this.lastSavedContent = this.getCurrentFormData()
         this.previewMode = false
+
+        // Initialize editor mode
+        this.initializeEditorMode()
 
         // Initialize word count and reading time
         this.updateStats()
@@ -72,8 +81,108 @@ export default class extends Controller {
         }
     }
 
-    // Toggle between edit and preview modes
+    // Initialize editor mode
+    initializeEditorMode() {
+        // Get initial mode from hidden field or value
+        let mode = this.editorModeValue || 'markdown'
+        
+        // If we have an editor mode target, use its value
+        if (this.hasEditorModeTarget && this.editorModeTarget.value) {
+            mode = this.editorModeTarget.value
+            this.editorModeValue = mode
+        }
+        
+        this.showEditorMode(mode)
+    }
+
+    // Toggle between markdown and rich text editor
+    toggleEditorMode() {
+        const currentMode = this.editorModeValue
+        const newMode = currentMode === 'markdown' ? 'rich_text' : 'markdown'
+        
+        // Warn user if switching modes with content
+        if (this.hasContent()) {
+            const confirmMessage = `Switching to ${newMode === 'markdown' ? 'Markdown' : 'Rich Text'} editor. Your current content will be preserved, but formatting may need adjustment. Continue?`
+            if (!confirm(confirmMessage)) {
+                return
+            }
+        }
+
+        this.editorModeValue = newMode
+        if (this.hasEditorModeTarget) {
+            this.editorModeTarget.value = newMode
+        }
+        this.showEditorMode(newMode)
+        this.updateStats()
+    }
+
+    // Show appropriate editor based on mode
+    showEditorMode(mode) {
+        const isMarkdown = mode === 'markdown'
+
+        // Show/hide editors
+        if (this.hasMarkdownEditorTarget) {
+            this.markdownEditorTarget.classList.toggle('hidden', !isMarkdown)
+        }
+        if (this.hasRichTextEditorTarget) {
+            this.richTextEditorTarget.classList.toggle('hidden', isMarkdown)
+        }
+
+        // Show/hide markdown toolbar
+        if (this.hasMarkdownToolbarTarget) {
+            this.markdownToolbarTarget.classList.toggle('hidden', !isMarkdown)
+        }
+
+        // Update editor mode label
+        if (this.hasEditorModeLabelTarget) {
+            this.editorModeLabelTarget.textContent = isMarkdown ? 'Markdown' : 'Rich Text'
+        }
+
+        // Update help text
+        if (this.hasEditorHelpTarget) {
+            if (isMarkdown) {
+                this.editorHelpTarget.innerHTML = '<span class="hidden sm:inline">Use Markdown for formatting. </span><a href="https://www.markdownguide.org/basic-syntax/" target="_blank" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Markdown guide</a>'
+            } else {
+                this.editorHelpTarget.innerHTML = '<span class="hidden sm:inline">Rich text editor. Format your content using the toolbar above.</span>'
+            }
+        }
+
+        // Hide preview button in rich text mode
+        const previewBtn = this.element.querySelector('[data-action*="togglePreview"]')
+        if (previewBtn) {
+            previewBtn.classList.toggle('hidden', !isMarkdown)
+        }
+
+        // Hide preview if in rich text mode
+        if (!isMarkdown && this.previewMode) {
+            this.togglePreview()
+        }
+    }
+
+    // Check if there's any content
+    hasContent() {
+        if (this.editorModeValue === 'markdown') {
+            return this.hasContentTarget && this.contentTarget && this.contentTarget.value.trim().length > 0
+        } else {
+            // For rich text, check if Trix editor has content
+            if (this.hasRichTextContentTarget && this.richTextContentTarget) {
+                const trixEditor = this.richTextContentTarget.editor
+                if (trixEditor) {
+                    const content = trixEditor.getDocument().toString()
+                    return content.trim().length > 0
+                }
+            }
+        }
+        return false
+    }
+
+    // Toggle between edit and preview modes (Markdown only)
     togglePreview() {
+        // Only allow preview in markdown mode
+        if (this.editorModeValue !== 'markdown') {
+            return
+        }
+
         this.previewMode = !this.previewMode
 
         if (this.previewMode) {
@@ -84,12 +193,16 @@ export default class extends Controller {
     }
 
     showPreview() {
+        if (!this.hasContentTarget) return
+
         const content = this.contentTarget.value
         const html = marked.parse(content)
 
-        this.previewTarget.innerHTML = html
-        this.previewTarget.classList.remove('hidden')
-        this.contentTarget.classList.add('hidden')
+        if (this.hasPreviewTarget) {
+            this.previewTarget.innerHTML = html
+            this.previewTarget.classList.remove('hidden')
+            this.contentTarget.classList.add('hidden')
+        }
 
         // Update preview button
         const previewBtn = this.element.querySelector('[data-action*="togglePreview"]')
@@ -101,8 +214,12 @@ export default class extends Controller {
     }
 
     showEditor() {
-        this.previewTarget.classList.add('hidden')
-        this.contentTarget.classList.remove('hidden')
+        if (this.hasPreviewTarget) {
+            this.previewTarget.classList.add('hidden')
+        }
+        if (this.hasContentTarget) {
+            this.contentTarget.classList.remove('hidden')
+        }
 
         // Update preview button
         const previewBtn = this.element.querySelector('[data-action*="togglePreview"]')
@@ -113,13 +230,31 @@ export default class extends Controller {
         }
 
         // Focus back to textarea
-        this.contentTarget.focus()
+        if (this.hasContentTarget) {
+            this.contentTarget.focus()
+        }
     }
 
     // Update word count and reading time
     updateStats() {
-        const content = this.contentTarget.value
-        const words = content.trim().split(/\s+/).filter(word => word.length > 0).length
+        let textContent = ''
+        
+        if (this.editorModeValue === 'markdown' && this.hasContentTarget) {
+            textContent = this.contentTarget.value
+        } else if (this.editorModeValue === 'rich_text' && this.hasRichTextContentTarget) {
+            // Get plain text from Trix editor
+            const trixEditor = this.richTextContentTarget.editor
+            if (trixEditor) {
+                textContent = trixEditor.getDocument().toString()
+            }
+        }
+
+        // Strip HTML tags if present (for rich text)
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = textContent
+        const plainText = tempDiv.textContent || tempDiv.innerText || ''
+        
+        const words = plainText.trim().split(/\s+/).filter(word => word.length > 0).length
         const readingTime = Math.max(1, Math.ceil(words / 200))
 
         if (this.hasWordCountTarget) {
@@ -144,7 +279,15 @@ export default class extends Controller {
 
     // Setup autosave functionality
     setupAutosave() {
-        this.contentTarget.addEventListener('input', () => this.contentChanged())
+        // Markdown editor
+        if (this.hasContentTarget) {
+            this.contentTarget.addEventListener('input', () => this.contentChanged())
+        }
+
+        // Rich text editor (Trix)
+        if (this.hasRichTextContentTarget) {
+            this.richTextContentTarget.addEventListener('trix-change', () => this.richTextChanged())
+        }
 
         if (this.hasTitleTarget) {
             this.titleTarget.addEventListener('input', () => this.fieldChanged())
@@ -153,6 +296,12 @@ export default class extends Controller {
         if (this.hasExcerptTarget) {
             this.excerptTarget.addEventListener('input', () => this.fieldChanged())
         }
+    }
+
+    // Rich text content changed handler
+    richTextChanged() {
+        this.updateStats()
+        this.scheduleAutosave()
     }
 
     // Schedule autosave
@@ -208,11 +357,23 @@ export default class extends Controller {
 
     // Get current form data
     getCurrentFormData() {
-        return {
+        const data = {
             title: this.hasTitleTarget ? this.titleTarget.value : '',
-            content: this.contentTarget.value,
-            excerpt: this.hasExcerptTarget ? this.excerptTarget.value : ''
+            excerpt: this.hasExcerptTarget ? this.excerptTarget.value : '',
+            editor_mode: this.editorModeValue
         }
+
+        if (this.editorModeValue === 'markdown' && this.hasContentTarget) {
+            data.content = this.contentTarget.value
+        } else if (this.editorModeValue === 'rich_text' && this.hasRichTextContentTarget) {
+            // Get HTML content from Trix editor
+            const trixEditor = this.richTextContentTarget.editor
+            if (trixEditor) {
+                data.content_html = trixEditor.getDocument().toString()
+            }
+        }
+
+        return data
     }
 
     // Show autosave status
@@ -249,16 +410,23 @@ export default class extends Controller {
         }
     }
 
-    // Insert markdown formatting
+    // Insert markdown formatting (Markdown mode only)
     insertMarkdown(event) {
+        // Only allow markdown insertion in markdown mode
+        if (this.editorModeValue !== 'markdown') {
+            return
+        }
+
         const button = event.currentTarget
         const format = button.dataset.format
 
         this.insertTextAtCursor(format)
     }
 
-    // Insert text at cursor position
+    // Insert text at cursor position (Markdown mode only)
     insertTextAtCursor(text) {
+        if (!this.hasContentTarget) return
+
         const textarea = this.contentTarget
         const start = textarea.selectionStart
         const end = textarea.selectionEnd
@@ -365,8 +533,13 @@ export default class extends Controller {
         }
     }
 
-    // Handle keyboard shortcuts
+    // Handle keyboard shortcuts (Markdown mode only)
     keydown(event) {
+        // Only process shortcuts in markdown mode
+        if (this.editorModeValue !== 'markdown') {
+            return
+        }
+
         // Ctrl/Cmd + B for bold
         if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
             event.preventDefault()

@@ -1,14 +1,18 @@
 <!-- Editor -->
 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-  <%= form_with model: blog_post, 
+      <%= form_with model: blog_post, 
       html: { 
         class: "h-full",
         data: { 
           controller: "blog-editor",
           blog_editor_autosave_url_value: blog_post.persisted? ? autosave_blog_post_path(blog_post) : "",
-          blog_editor_autosave_enabled_value: blog_post.persisted?
+          blog_editor_autosave_enabled_value: blog_post.persisted?,
+          blog_editor_editor_mode_value: blog_post.editor_mode || 'markdown'
         }
       } do |form| %>
+      
+      <!-- Hidden field for editor_mode -->
+      <%= form.hidden_field :editor_mode, data: { blog_editor_target: "editorMode" } %>
     
     <!-- Form Header -->
     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
@@ -86,25 +90,37 @@
 
     <!-- Editor Content -->
     <div class="relative" style="height: 500px;">
-      <!-- Textarea -->
-      <%= form.text_area :content, 
-          data: { 
-            blog_editor_target: "content",
-            action: "keydown->blog-editor#keydown"
-          },
-          placeholder: "Start writing your blog post...\n\nTip: Use Markdown for formatting. Press Ctrl+B for bold, Ctrl+I for italic, Ctrl+K for links.",
-          class: "w-full h-full p-6 border-0 resize-none focus:ring-0 focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-mono text-sm leading-relaxed" %>
+      <!-- Markdown Textarea (shown when editor_mode is 'markdown') -->
+      <div data-blog-editor-target="markdownEditor" class="w-full h-full">
+        <%= form.text_area :content, 
+            data: { 
+              blog_editor_target: "content",
+              action: "keydown->blog-editor#keydown"
+            },
+            placeholder: "Start writing your blog post...\n\nTip: Use Markdown for formatting. Press Ctrl+B for bold, Ctrl+I for italic, Ctrl+K for links.",
+            class: "w-full h-full p-6 border-0 resize-none focus:ring-0 focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-mono text-sm leading-relaxed" %>
 
-      <!-- Preview -->
-      <div data-blog-editor-target="preview" 
-           class="absolute inset-0 p-6 bg-white dark:bg-gray-800 overflow-auto hidden prose dark:prose-invert max-w-none">
-        <!-- Preview content will be inserted here -->
+        <!-- Preview (Markdown Mode) -->
+        <div data-blog-editor-target="preview" 
+             class="absolute inset-0 p-6 bg-white dark:bg-gray-800 overflow-auto hidden prose dark:prose-invert max-w-none">
+          <!-- Preview content will be inserted here -->
+        </div>
+      </div>
+
+      <!-- Rich Text Editor (Trix) (shown when editor_mode is 'rich_text') -->
+      <div data-blog-editor-target="richTextEditor" class="w-full h-full hidden">
+        <%= form.rich_text_area :content_html,
+            data: { 
+              blog_editor_target: "richTextContent",
+              action: "trix-change->blog-editor#richTextChanged"
+            },
+            class: "w-full h-full" %>
       </div>
     </div>
 
     <!-- Form Actions -->
     <div class="p-6 bg-gray-50 dark:bg-gray-750 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <div class="text-sm text-gray-500 dark:text-gray-400">
+      <div data-blog-editor-target="editorHelp" class="text-sm text-gray-500 dark:text-gray-400">
         <span class="hidden sm:inline">Use Markdown for formatting. </span>
         <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
           Markdown guide
@@ -154,6 +170,57 @@
     
     .prose blockquote {
       @apply border-l-4 border-blue-500 pl-4 italic;
+    }
+
+    /* Trix Editor Styles */
+    trix-toolbar {
+      @apply bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700;
+    }
+
+    trix-editor {
+      @apply w-full h-full p-6 border-0 resize-none focus:ring-0 focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm leading-relaxed;
+      min-height: 500px;
+    }
+
+    trix-editor:focus {
+      @apply outline-none;
+    }
+
+    .trix-content {
+      @apply text-gray-900 dark:text-white;
+    }
+
+    .trix-content h1 {
+      @apply text-2xl font-bold mb-4;
+    }
+
+    .trix-content h2 {
+      @apply text-xl font-bold mb-3;
+    }
+
+    .trix-content h3 {
+      @apply text-lg font-bold mb-2;
+    }
+
+    .trix-content p {
+      @apply mb-4;
+    }
+
+    .trix-content ul,
+    .trix-content ol {
+      @apply mb-4 ml-6;
+    }
+
+    .trix-content blockquote {
+      @apply border-l-4 border-blue-500 pl-4 italic my-4;
+    }
+
+    .trix-content code {
+      @apply bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-sm;
+    }
+
+    .trix-content pre {
+      @apply bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 my-4 overflow-x-auto;
     }
   </style>
   

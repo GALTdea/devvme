@@ -1,8 +1,17 @@
-<!-- Markdown Toolbar -->
+<!-- Editor Toolbar -->
 <div class="px-6 py-4 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700">
   <div class="flex flex-wrap items-center gap-2">
-    <!-- Formatting Buttons -->
+    <!-- Editor Mode Toggle -->
     <div class="flex items-center border-r border-gray-300 dark:border-gray-600 pr-3 mr-3">
+      <button type="button" 
+              data-action="click->blog-editor#toggleEditorMode"
+              data-blog-editor-target="editorModeToggle"
+              class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
+        <span data-blog-editor-target="editorModeLabel">Markdown</span>
+      </button>
+    </div>
+    <!-- Formatting Buttons (Markdown Mode Only) -->
+    <div data-blog-editor-target="markdownToolbar" class="flex items-center border-r border-gray-300 dark:border-gray-600 pr-3 mr-3">
       <button type="button" 
               data-action="click->blog-editor#insertMarkdown"
               data-format="bold"
