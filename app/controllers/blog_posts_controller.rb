@@ -32,7 +32,15 @@ class BlogPostsController < ApplicationController
         .distinct
     end
 
-    @blog_posts = @blog_posts.recent
+    # Sorting
+    case params[:sort]
+    when 'views_desc'
+      @blog_posts = @blog_posts.order(views_count: :desc, created_at: :desc)
+    when 'views_asc'
+      @blog_posts = @blog_posts.order(views_count: :asc, created_at: :desc)
+    else
+      @blog_posts = @blog_posts.recent
+    end
 
     # Pagination with Pagy
     @pagy, @blog_posts = pagy(@blog_posts, limit: 15)
@@ -42,6 +50,7 @@ class BlogPostsController < ApplicationController
     @draft_count = current_user.blog_posts.draft.count
     @archived_count = current_user.blog_posts.archived.count
     @total_count = current_user.blog_posts.count
+    @total_views = current_user.blog_posts.sum(:views_count)
   end
 
   # GET /blog/:id

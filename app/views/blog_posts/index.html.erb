@@ -20,7 +20,7 @@
   </div>
 
   <!-- Stats Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
       <div class="flex items-center">
         <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
@@ -62,33 +62,67 @@
         </div>
       </div>
     </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+      <div class="flex items-center">
+        <div class="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+          <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Views</p>
+          <p class="text-2xl font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter(@total_views) %></p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Filters and Search -->
   <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-6">
-    <%= form_with url: blog_posts_path, method: :get, local: true, class: "flex flex-col sm:flex-row gap-4" do |form| %>
-      <!-- Status Filter Tabs -->
-      <div class="flex-1">
-        <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-600" role="group">
-          <%= link_to blog_posts_path, 
-              class: "px-4 py-2 text-sm font-medium #{'bg-blue-600 text-white' if params[:status].blank?} #{'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700' unless params[:status].blank?} border-r border-gray-200 dark:border-gray-600 rounded-l-lg transition-colors" do %>
-            All (<%= @total_count %>)
-          <% end %>
-          
-          <%= link_to blog_posts_path(status: 'published'), 
-              class: "px-4 py-2 text-sm font-medium #{'bg-blue-600 text-white' if params[:status] == 'published'} #{'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700' unless params[:status] == 'published'} border-r border-gray-200 dark:border-gray-600 transition-colors" do %>
-            Published (<%= @published_count %>)
-          <% end %>
-          
-          <%= link_to blog_posts_path(status: 'draft'), 
-              class: "px-4 py-2 text-sm font-medium #{'bg-blue-600 text-white' if params[:status] == 'draft'} #{'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700' unless params[:status] == 'draft'} rounded-r-lg transition-colors" do %>
-            Drafts (<%= @draft_count %>)
-          <% end %>
+    <%= form_with url: blog_posts_path, method: :get, local: true, class: "flex flex-col gap-4" do |form| %>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <!-- Status Filter Tabs -->
+        <div class="flex-1">
+          <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-600" role="group">
+            <%= link_to blog_posts_path(sort: params[:sort], search: params[:search]), 
+                class: "px-4 py-2 text-sm font-medium #{'bg-blue-600 text-white' if params[:status].blank?} #{'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700' unless params[:status].blank?} border-r border-gray-200 dark:border-gray-600 rounded-l-lg transition-colors" do %>
+              All (<%= @total_count %>)
+            <% end %>
+            
+            <%= link_to blog_posts_path(status: 'published', sort: params[:sort], search: params[:search]), 
+                class: "px-4 py-2 text-sm font-medium #{'bg-blue-600 text-white' if params[:status] == 'published'} #{'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700' unless params[:status] == 'published'} border-r border-gray-200 dark:border-gray-600 transition-colors" do %>
+              Published (<%= @published_count %>)
+            <% end %>
+            
+            <%= link_to blog_posts_path(status: 'draft', sort: params[:sort], search: params[:search]), 
+                class: "px-4 py-2 text-sm font-medium #{'bg-blue-600 text-white' if params[:status] == 'draft'} #{'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700' unless params[:status] == 'draft'} rounded-r-lg transition-colors" do %>
+              Drafts (<%= @draft_count %>)
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Sort Dropdown -->
+        <div class="flex-shrink-0">
+          <%= form.select :sort, 
+              options_for_select([
+                ['Newest First', ''],
+                ['Most Views', 'views_desc'],
+                ['Least Views', 'views_asc']
+              ], params[:sort]),
+              {},
+              { 
+                class: "block w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                onchange: "this.form.submit()"
+              } %>
         </div>
       </div>
 
       <!-- Search -->
       <div class="flex gap-2">
+        <%= form.hidden_field :status, value: params[:status] %>
+        <%= form.hidden_field :sort, value: params[:sort] %>
         <%= form.text_field :search, 
             value: params[:search],
             placeholder: "Search posts...",
@@ -98,7 +132,7 @@
             class: "px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors" %>
         
         <% if params[:search].present? %>
-          <%= link_to blog_posts_path(status: params[:status]), 
+          <%= link_to blog_posts_path(status: params[:status], sort: params[:sort]), 
               class: "px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium rounded-lg transition-colors" do %>
             Clear
           <% end %>
@@ -152,7 +186,17 @@
                   </p>
                 <% end %>
 
-                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400 space-x-4">
+                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400 space-x-4 flex-wrap">
+                  <% if blog_post.published? %>
+                    <span class="flex items-center">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <%= number_with_delimiter(blog_post.views_count) %> views
+                    </span>
+                  <% end %>
+                  
                   <span class="flex items-center">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
