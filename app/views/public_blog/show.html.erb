@@ -19,17 +19,29 @@
 <% 
   post_url = public_blog_post_url(@blog_post)
   description = content_excerpt
+  # Use author's social image, fallback to main social image
+  social_image_url = if @blog_post.user.present?
+    social_profile_image_url(
+      @blog_post.user.username,
+      @blog_post.user.social_image_cache_key,
+      host: request.base_url
+    )
+  else
+    main_social_image_url(host: request.base_url)
+  end
 %>
 <% open_graph_tags(
   title: @blog_post.title,
   description: description,
   url: post_url,
-  type: "article"
+  type: "article",
+  image: social_image_url
 ) %>
 
 <% twitter_card_tags(
   title: @blog_post.title,
-  description: description
+  description: description,
+  image: social_image_url
 ) %>
 
 <%# Canonical URL %>
