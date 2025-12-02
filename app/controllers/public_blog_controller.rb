@@ -14,8 +14,6 @@ class PublicBlogController < ApplicationController
   # Public blog - no authentication required
   before_action :set_blog_post, only: [:show]
 
-  private
-
   def bot_request?
     return false unless request.user_agent
 

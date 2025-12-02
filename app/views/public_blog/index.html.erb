@@ -92,7 +92,8 @@
   <% if params[:search].present? %>
     <div class="text-center mb-8">
       <p class="text-gray-600 dark:text-gray-400">
-        <% if @blog_posts.any? %>
+        <% if @blog_posts&.any? %>
+          <% debugger %>
           Found <%= pluralize(@pagy.count, 'result') %> for "<em><%= params[:search] %></em>"
         <% else %>
           No results found for "<em><%= params[:search] %></em>"
@@ -102,7 +103,7 @@
   <% end %>
 
   <!-- Blog Posts Grid -->
-  <% if @blog_posts.any? %>
+  <% if @blog_posts&.any? %>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
       <% @blog_posts.each do |post| %>
         <article class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group">
