@@ -1,5 +1,16 @@
 # See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
 
+# Allow social media crawlers full access for Twitter Cards, Open Graph, etc.
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+# Default rules for all other crawlers
 User-agent: *
 Allow: /
 

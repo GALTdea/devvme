@@ -3,8 +3,31 @@ class PublicBlogController < ApplicationController
   include ActionView::Helpers::TagHelper
   include ActionView::Helpers::UrlHelper
 
+  # Override browser compatibility check to allow bots/crawlers
+  # This is necessary because the browser gem blocks non-modern browsers,
+  # but we need to allow social media crawlers (Twitterbot, etc.) to access blog posts
+  def browser_compatible?
+    return true if bot_request?
+    super
+  end
+
   # Public blog - no authentication required
   before_action :set_blog_post, only: [:show]
+
+  private
+
+  def bot_request?
+    return false unless request.user_agent
+
+    user_agent = request.user_agent.downcase
+    bot_patterns = [
+      "bot", "crawler", "spider", "scraper", "facebookexternalhit",
+      "twitterbot", "linkedinbot", "googlebot", "bingbot", "yandexbot",
+      "slurp", "duckduckbot", "baiduspider", "crawling"
+    ]
+
+    bot_patterns.any? { |pattern| user_agent.include?(pattern) }
+  end
 
   # GET /blog
   def index
