@@ -1,0 +1,121 @@
+<% content_for :title, "Notifications - Admin" %>
+
+<div class="min-h-screen bg-secondary-50 dark:bg-secondary-900">
+  <!-- Header -->
+  <%= admin_page_header("Notifications", "View and manage your notifications") do %>
+    <% if @unread_notifications_count > 0 %>
+      <%= button_to "Mark all as read", 
+          mark_all_as_read_admin_notifications_path, 
+          method: :patch,
+          class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" %>
+    <% end %>
+    <%= link_to admin_root_path, class: "inline-flex items-center px-4 py-2 border border-secondary-300 shadow-sm text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 dark:bg-secondary-700 dark:border-secondary-600 dark:text-secondary-200 dark:hover:bg-secondary-600" do %>
+      ← Back to Dashboard
+    <% end %>
+  <% end %>
+
+  <!-- Breadcrumbs -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <%= admin_breadcrumbs(
+      { text: "Admin Dashboard", path: admin_root_path },
+      { text: "Notifications", path: admin_notifications_path }
+    ) %>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Stats Card -->
+    <div class="mb-6">
+      <div class="bg-white dark:bg-secondary-800 overflow-hidden shadow rounded-lg">
+        <div class="p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Notification Summary</h3>
+              <p class="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
+                You have <%= pluralize(@unread_notifications_count, 'unread notification') %> out of <%= pluralize(@notifications.count, 'total notification') %>
+              </p>
+            </div>
+            <div class="flex items-center space-x-4">
+              <div class="text-center">
+                <p class="text-2xl font-bold text-secondary-900 dark:text-white"><%= @unread_notifications_count %></p>
+                <p class="text-sm text-secondary-500 dark:text-secondary-400">Unread</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-secondary-900 dark:text-white"><%= @notifications.count - @unread_notifications_count %></p>
+                <p class="text-sm text-secondary-500 dark:text-secondary-400">Read</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="bg-white dark:bg-secondary-800 shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="text-lg leading-6 font-medium text-secondary-900 dark:text-white">
+            All Notifications
+          </h3>
+        </div>
+        <div class="flow-root">
+          <% if @notifications.any? %>
+            <ul class="-my-5 divide-y divide-secondary-200 dark:divide-secondary-700">
+              <% @notifications.each do |notification| %>
+                <li id="notification_<%= notification.id %>" class="py-4 <%= 'bg-primary-50 dark:bg-primary-900/20' if notification.unread? %>">
+                  <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                      <div class="h-10 w-10 bg-primary-600 rounded-full flex items-center justify-center">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-secondary-900 dark:text-white">
+                          <%= notification_title(notification) %>
+                        </p>
+                        <% if notification.unread? %>
+                          <span class="ml-2 h-2 w-2 bg-primary-600 rounded-full"></span>
+                        <% end %>
+                      </div>
+                      <p class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
+                        <%= notification_message(notification) %>
+                      </p>
+                      <div class="flex items-center justify-between mt-2">
+                        <p class="text-xs text-secondary-400 dark:text-secondary-500">
+                          <%= time_ago_in_words(notification.created_at) %> ago
+                        </p>
+                        <div class="flex items-center space-x-2">
+                          <% if notification.unread? %>
+                            <%= button_to "Mark as read", 
+                                mark_as_read_admin_notification_path(notification), 
+                                method: :patch,
+                                class: "text-xs text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300" %>
+                          <% else %>
+                            <span class="text-xs text-secondary-400 dark:text-secondary-500">Read</span>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <div class="text-center py-12">
+              <svg class="mx-auto h-12 w-12 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-secondary-900 dark:text-white">No notifications</h3>
+              <p class="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
+                You're all caught up! New notifications will appear here.
+              </p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
