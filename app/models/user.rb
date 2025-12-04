@@ -67,6 +67,9 @@ class User < ApplicationRecord
   # Admin activity associations
   has_many :admin_activities, foreign_key: :admin_id, dependent: :destroy
 
+  # Notifications association (for receiving notifications)
+  has_many :notifications, as: :recipient, dependent: :destroy, class_name: 'Noticed::Notification'
+
   # Visitor tracking associations
   has_many :visitors, dependent: :nullify
 
@@ -421,6 +424,15 @@ class User < ApplicationRecord
 
   def update_last_login!
     update_column(:last_login_at, Time.current)
+  end
+
+  # Notification helpers
+  def unread_notifications_count
+    notifications.unread.count
+  end
+
+  def has_unread_notifications?
+    notifications.unread.exists?
   end
 
   # Featured profile methods
