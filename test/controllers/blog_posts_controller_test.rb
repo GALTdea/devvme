@@ -97,15 +97,15 @@ class BlogPostsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should filter by status" do
-    get blog_posts_url(status: "published")
+    get blog_posts_url, params: { status: "published" }
     assert_response :success
 
-    get blog_posts_url(status: "draft")
+    get blog_posts_url, params: { status: "draft" }
     assert_response :success
   end
 
   test "should search blog posts" do
-    get blog_posts_url(search: "Rails")
+    get blog_posts_url, params: { search: "Rails" }
     assert_response :success
   end
 
