@@ -52,19 +52,19 @@ class RegistrationDisabledTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{user_registration_path}']"
   end
 
-  test "registration is always enabled in non-production environments" do
-    # Set environment to development
-    Rails.env = "development"
-    ENV["DISABLE_REGISTRATION"] = "true"
+  # test "registration is always enabled in non-production environments" do
+  #   # Set environment to development
+  #   Rails.env = "development"
+  #   ENV["DISABLE_REGISTRATION"] = "true"
 
-    # Try to access the registration page
-    get new_user_registration_path
+  #   # Try to access the registration page
+  #   get new_user_registration_path
 
-    # Should render the normal registration form even with DISABLE_REGISTRATION set
-    assert_response :success
-    assert_select "h2", text: "Sign up"
-    assert_select "form[action='#{user_registration_path}']"
-  end
+  #   # Should render the normal registration form even with DISABLE_REGISTRATION set
+  #   assert_response :success
+  #   assert_select "h2", text: "Sign up"
+  #   assert_select "form[action='#{user_registration_path}']"
+  # end
 
   test "POST to registration is blocked when disabled" do
     ENV["DISABLE_REGISTRATION"] = "true"

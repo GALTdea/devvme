@@ -18,10 +18,13 @@ class WelcomeEmailIntegrationTest < ActionDispatch::IntegrationTest
       post user_registration_path, params: user_params
     end
 
-    # Follow the redirect (might be to pending_activation or dashboard)
+    # Should redirect after successful registration
+    assert_redirected_to complete_profile_registration_path
+
+    # Follow the redirect to the complete profile page
     follow_redirect!
-    # Accept redirect responses as success for this test
-    assert_response :redirect, "Expected redirect response but got #{response.status}"
+    # After following redirect, should get success response
+    assert_response :success
 
     # Verify the user was created
     user = User.find_by(email: "newuser@example.com")
