@@ -38,6 +38,9 @@ gem "rouge", "~> 4.2"
 # Fast pagination for Rails [https://github.com/ddnexus/pagy]
 gem "pagy", "~> 9.2"
 
+# Notifications for Rails [https://github.com/excid3/noticed]
+gem "noticed", "~> 2.0"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
