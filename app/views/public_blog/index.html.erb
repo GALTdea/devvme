@@ -93,7 +93,6 @@
     <div class="text-center mb-8">
       <p class="text-gray-600 dark:text-gray-400">
         <% if @blog_posts&.any? %>
-          <% debugger %>
           Found <%= pluralize(@pagy.count, 'result') %> for "<em><%= params[:search] %></em>"
         <% else %>
           No results found for "<em><%= params[:search] %></em>"
