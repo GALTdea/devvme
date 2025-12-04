@@ -23,6 +23,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
       # Send welcome email
       send_welcome_email(resource)
 
+      # Notify admins about new signup
+      notify_admins_of_new_signup(resource)
+
       # Sign in the user and redirect to profile completion
       sign_in(resource)
       set_flash_message! :notice, :signed_up
@@ -116,6 +119,20 @@ class Users::RegistrationsController < Devise::RegistrationsController
     rescue => e
       # Log error but don't break the registration process
       Rails.logger.error "Failed to send welcome email to #{user.email}: #{e.message}"
+    end
+  end
+
+  def notify_admins_of_new_signup(user)
+    return unless user&.persisted?
+
+    begin
+      # Find all admin and super_admin users
+      User.where(role: [:admin, :super_admin]).find_each do |admin|
+        NewUserSignupNotification.with(user: user).deliver(admin)
+      end
+    rescue => e
+      # Log error but don't break the registration process
+      Rails.logger.error "Failed to notify admins of new signup for user #{user.id}: #{e.message}"
     end
   end
 end
