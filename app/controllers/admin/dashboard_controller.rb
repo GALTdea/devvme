@@ -49,6 +49,10 @@ class Admin::DashboardController < ApplicationController
     @recent_blog_posts = BlogPost.includes(:user).order(created_at: :desc).limit(5)
     @recent_activities = AdminActivity.includes(:admin).recent.limit(10)
 
+    # Notifications for current admin
+    @notifications = current_user.notifications.order(created_at: :desc).limit(10)
+    @unread_notifications_count = current_user.unread_notifications_count
+
     @registration_chart_data = User.registration_stats(@days)
     @blog_views_chart_data = blog_views_stats(@days)
     @activity_chart_data = activity_stats(@days)

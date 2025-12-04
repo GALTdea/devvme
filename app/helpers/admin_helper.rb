@@ -159,4 +159,17 @@ module AdminHelper
       "text-gray-600 dark:text-gray-400"
     end
   end
+
+  # Notification helpers
+  def notification_title(notification)
+    notification.event.title
+  rescue
+    "Notification"
+  end
+
+  def notification_message(notification)
+    notification.event.message
+  rescue
+    "No message available"
+  end
 end

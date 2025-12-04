@@ -48,6 +48,15 @@ Rails.application.routes.draw do
 
     resources :activities, only: [:index, :show]
 
+    resources :notifications, only: [:index] do
+      member do
+        patch :mark_as_read
+      end
+      collection do
+        patch :mark_all_as_read
+      end
+    end
+
     namespace :content_moderation do
       get :index
       get :blog_posts
