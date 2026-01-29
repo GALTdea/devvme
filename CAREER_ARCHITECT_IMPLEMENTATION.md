@@ -63,8 +63,8 @@
     - timestamps
     ```
 
-- [ ] **Step 2: Create models**
-  - Status: ⚪ Not Started
+- [x] **Step 2: Create models**
+  - Status: ✅ Done
   - Files: `app/models/architect_session.rb`, `app/models/architect_message.rb`
   - Dependencies: Step 1
   - Notes: Add associations, validations, enums; update User model

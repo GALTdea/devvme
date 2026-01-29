@@ -141,6 +141,9 @@ class User < ApplicationRecord
   # Digest preferences
   has_one :digest_preference, class_name: 'UserDigestPreference', dependent: :destroy
 
+  # Career Architect sessions (AI-powered profile builder)
+  has_many :architect_sessions, dependent: :destroy
+
   # Follow helpers
   def can_be_followed?
     active? || invited?
