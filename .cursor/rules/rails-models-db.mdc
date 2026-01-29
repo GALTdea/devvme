@@ -1,0 +1,23 @@
+---
+description: Domain model and database conventions
+globs: app/models/**/*.rb, db/**/*.rb, db/schema.rb
+alwaysApply: false
+---
+
+# Models and Database
+
+## Domain entities
+- **User**: Devise, FriendlyId (slug from username). Enums: `role` (user/admin/super_admin), `account_status` (pending_activation, invited, active, suspended, deactivated). Invitation fields: invitation_token, invitation_sent_at, invitation_accepted_at, invitation_access_code. Associations: projects, blog_posts, profile_views, followers/following (Follow), visitors, user_digest_preferences, notifications (Noticed).
+- **BlogPost**: belongs_to user, FriendlyId (slug from title). Scopes: published, draft, archived. editor_mode (markdown/rich_text), has_rich_text :content_html. Validates title, slug, content by editor_mode.
+- **Project**: belongs_to user, display_order for sorting, status enum, technologies_used (json array).
+- **Follow**: follower_id, followee_id (both User); unique on [follower_id, followee_id].
+- **Visitor / VisitorPageView**: anonymous tracking; visitors optionally linked to user_id on conversion.
+- **ProfileView**: user_id, visitor_ip, user_agent, visited_at (analytics).
+- **UserDigestPreference**: user_id, frequency, enabled, next_send_at, include_blog_posts/projects/profile_updates, digest_time, timezone.
+- **AdminActivity**: admin_id, action, target_type/target_id, details (json). Used for admin audit.
+- **Noticed**: noticed_events, noticed_notifications (type, event_id, recipient, read_at/seen_at).
+
+## DB conventions
+- Change schema only via migrations; do not edit db/schema.rb by hand.
+- Add indexes for foreign keys and columns used in WHERE/ORDER; use composite indexes for common query patterns.
+- Use foreign_key in migrations for referential integrity. Use enums or integers with Rails enums where appropriate.

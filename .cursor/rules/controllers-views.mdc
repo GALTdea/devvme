@@ -1,0 +1,20 @@
+---
+description: Controllers and views conventions
+globs: app/controllers/**/*.rb, app/views/**/*.erb
+alwaysApply: false
+---
+
+# Controllers and Views
+
+## Controllers
+- Use **strong parameters** for all mass assignment; define permitted params in private methods.
+- **Pundit**: Call `authorize` per action (e.g. `authorize @user` or `authorize [:admin, @user]`). Admin policies live under Admin:: (e.g. Admin::UserPolicy). Invitation flows use `policy_class: InvitationPolicy` or `Admin::InvitationPolicy`.
+- **Before actions**: ApplicationController sets configure_permitted_parameters (Devise), check_user_suspension, check_pending_activation, check_limited_access; track_visitor for guests. Admin area uses require_admin or require_super_admin.
+- **Flash**: Use flash[:notice], flash[:alert], flash[:warning] for user feedback after redirects.
+- **Pagination**: Use Pagy (include Pagy::Backend); set @pagy, @records in index actions.
+
+## Views
+- Use **Tailwind CSS** and **Flowbite** components (v3.1.2). No custom CSS unless necessary.
+- **Turbo**: Prefer Turbo Frames and Turbo Streams for partial updates; use data-turbo-frame and turbo_stream responses where appropriate.
+- **Stimulus**: Use for client-side behavior (e.g. modals, dropdowns, form behavior); controllers in app/javascript/controllers.
+- Use Rails helpers (link_to, button_to, form_with, etc.) and partials to keep views DRY. Shared layouts in app/views/layouts.

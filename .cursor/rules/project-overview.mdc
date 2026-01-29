@@ -1,0 +1,25 @@
+---
+description: DevvMe stack and global coding conventions
+alwaysApply: true
+---
+
+# DevvMe – Project Overview
+
+## Stack
+- **Backend**: Ruby 3.4.1, Rails 8.0.2, PostgreSQL
+- **Auth**: Devise (no :validatable; custom password logic for invited users)
+- **Authorization**: Pundit (authorize in controllers; policies in app/policies)
+- **Frontend**: Hotwire (Turbo + Stimulus), Tailwind CSS, Flowbite v3.1.2
+- **Jobs/Cache**: Solid Queue, Solid Cache, Solid Cable
+- **Other**: FriendlyId (slugs), Noticed (notifications), Pagy (pagination), Action Text (rich text)
+
+## Conventions
+- Follow Rails conventions and Ruby Style Guide; snake_case for files/methods/variables, CamelCase for classes.
+- RESTful routes; strong parameters; service objects for complex logic (app/services).
+- Use Minitest and FactoryBot for tests; write tests for new behavior.
+- Security: strong params, Pundit for authorization, no raw SQL (use ActiveRecord).
+
+## Key paths
+- Models: app/models; policies: app/policies; services: app/services; jobs: app/jobs
+- Schema: db/schema.rb (source of truth); use migrations for changes.
+- Flowbite/Tailwind in views; Stimulus in app/javascript/controllers.
