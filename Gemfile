@@ -81,6 +81,9 @@ group :development do
 
   # Preview emails in the browser instead of sending them
   gem "letter_opener"
+
+  # Schema annotations in models (Rails 8–compatible fork of annotate_models)
+  gem "annotaterb"
 end
 
 group :test do
