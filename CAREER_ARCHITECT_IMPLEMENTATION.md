@@ -36,9 +36,9 @@
 
 ### Database & Models
 
-- [ ] **Step 1: Create migrations**
-  - Status: ⚪ Not Started
-  - Files: `db/migrate/XXX_create_architect_sessions.rb`, `db/migrate/XXX_create_architect_messages.rb`
+- [x] **Step 1: Create migrations**
+  - Status: ✅ Done
+  - Files: `db/migrate/20260129120000_create_architect_sessions.rb`, `db/migrate/20260129120001_create_architect_messages.rb`
   - Notes: Include `topic`, `insight_type`, `metadata` for future training data use
   - **Schema:**
     ```ruby

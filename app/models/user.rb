@@ -1,3 +1,62 @@
+# == Schema Information
+#
+# Table name: users
+#
+#  id                     :bigint           not null, primary key
+#  account_status         :integer          default("pending_activation"), not null
+#  admin_notes            :text
+#  bio                    :text
+#  contact_email          :string
+#  email                  :string           default(""), not null
+#  encrypted_password     :string           default(""), not null
+#  featured               :boolean          default(FALSE)
+#  featured_at            :datetime
+#  full_name              :string(100)
+#  github_url             :string
+#  headline               :text
+#  invitation_accepted_at :datetime
+#  invitation_access_code :string
+#  invitation_sent_at     :datetime
+#  invitation_token       :string
+#  job_title              :string
+#  last_login_at          :datetime
+#  linkedin_url           :string
+#  location               :string
+#  open_for_work          :boolean          default(FALSE), not null
+#  phone                  :string
+#  remember_created_at    :datetime
+#  reset_password_sent_at :datetime
+#  reset_password_token   :string
+#  resume_url             :string
+#  role                   :integer          default("user"), not null
+#  skills                 :json
+#  slug                   :string           not null
+#  social_image_version   :integer          default(1), not null
+#  suspended_at           :datetime
+#  suspension_reason      :text
+#  twitter_url            :string
+#  username               :string           not null
+#  website_url            :string
+#  work_preferences       :jsonb            not null
+#  created_at             :datetime         not null
+#  updated_at             :datetime         not null
+#
+# Indexes
+#
+#  index_users_on_account_status          (account_status)
+#  index_users_on_email                   (email) UNIQUE
+#  index_users_on_featured                (featured)
+#  index_users_on_invitation_accepted_at  (invitation_accepted_at)
+#  index_users_on_invitation_access_code  (invitation_access_code)
+#  index_users_on_invitation_sent_at      (invitation_sent_at)
+#  index_users_on_invitation_token        (invitation_token) UNIQUE
+#  index_users_on_last_login_at           (last_login_at)
+#  index_users_on_reset_password_token    (reset_password_token) UNIQUE
+#  index_users_on_role                    (role)
+#  index_users_on_slug                    (slug) UNIQUE
+#  index_users_on_suspended_at            (suspended_at)
+#  index_users_on_username                (username) UNIQUE
+#
 class User < ApplicationRecord
   extend FriendlyId
 

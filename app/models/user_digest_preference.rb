@@ -1,3 +1,31 @@
+# == Schema Information
+#
+# Table name: user_digest_preferences
+#
+#  id                      :bigint           not null, primary key
+#  digest_time             :time             default(2000-01-01 08:00:00.000000000 UTC +00:00), not null
+#  enabled                 :boolean          default(TRUE), not null
+#  frequency               :integer          default("weekly"), not null
+#  include_blog_posts      :boolean          default(TRUE), not null
+#  include_profile_updates :boolean          default(FALSE), not null
+#  include_projects        :boolean          default(TRUE), not null
+#  last_sent_at            :datetime
+#  next_send_at            :datetime
+#  timezone                :string           default("UTC"), not null
+#  created_at              :datetime         not null
+#  updated_at              :datetime         not null
+#  user_id                 :bigint           not null
+#
+# Indexes
+#
+#  idx_on_frequency_enabled_next_send_at_d7bc4c43b0  (frequency,enabled,next_send_at)
+#  index_user_digest_preferences_on_next_send_at     (next_send_at)
+#  index_user_digest_preferences_on_user_id          (user_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (user_id => users.id)
+#
 class UserDigestPreference < ApplicationRecord
   belongs_to :user
 

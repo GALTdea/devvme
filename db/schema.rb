@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_04_184113) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_29_120001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -67,6 +67,35 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_04_184113) do
     t.index ["admin_id"], name: "index_admin_activities_on_admin_id"
     t.index ["created_at"], name: "index_admin_activities_on_created_at"
     t.index ["target_type", "target_id"], name: "index_admin_activities_on_target_type_and_target_id"
+  end
+
+  create_table "architect_messages", force: :cascade do |t|
+    t.bigint "architect_session_id", null: false
+    t.string "role", null: false
+    t.text "content", null: false
+    t.integer "sequence", null: false
+    t.string "topic"
+    t.string "insight_type"
+    t.jsonb "metadata", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["architect_session_id", "sequence"], name: "index_architect_messages_on_architect_session_id_and_sequence", unique: true
+    t.index ["architect_session_id"], name: "index_architect_messages_on_architect_session_id"
+  end
+
+  create_table "architect_sessions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "status", default: "draft", null: false
+    t.string "goal", null: false
+    t.jsonb "context_snapshot", default: {}
+    t.text "generated_bio"
+    t.text "generated_headline"
+    t.integer "question_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_architect_sessions_on_status"
+    t.index ["user_id", "created_at"], name: "index_architect_sessions_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_architect_sessions_on_user_id"
   end
 
   create_table "blog_posts", force: :cascade do |t|
@@ -289,6 +318,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_04_184113) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_activities", "users", column: "admin_id"
+  add_foreign_key "architect_messages", "architect_sessions"
+  add_foreign_key "architect_sessions", "users"
   add_foreign_key "blog_posts", "users"
   add_foreign_key "follows", "users", column: "followee_id"
   add_foreign_key "follows", "users", column: "follower_id"

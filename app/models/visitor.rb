@@ -1,3 +1,39 @@
+# == Schema Information
+#
+# Table name: visitors
+#
+#  id                 :bigint           not null, primary key
+#  city               :string
+#  converted          :boolean          default(FALSE)
+#  country            :string
+#  first_visit_at     :datetime         not null
+#  ip_address         :string
+#  last_activity_at   :datetime
+#  last_visit_at      :datetime         not null
+#  page_views         :integer          default(0)
+#  referrer           :string(500)
+#  total_time_on_site :integer          default(0)
+#  user_agent         :string(500)
+#  visit_count        :integer          default(1)
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#  user_id            :bigint
+#  visitor_id         :string           not null
+#
+# Indexes
+#
+#  index_visitors_on_converted                      (converted)
+#  index_visitors_on_first_visit_at                 (first_visit_at)
+#  index_visitors_on_last_activity_at               (last_activity_at)
+#  index_visitors_on_last_visit_at                  (last_visit_at)
+#  index_visitors_on_user_id                        (user_id)
+#  index_visitors_on_visitor_id                     (visitor_id) UNIQUE
+#  index_visitors_on_visitor_id_and_first_visit_at  (visitor_id,first_visit_at)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (user_id => users.id)
+#
 class Visitor < ApplicationRecord
   include BlogAnalytics
 

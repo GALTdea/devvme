@@ -1,3 +1,38 @@
+# == Schema Information
+#
+# Table name: blog_posts
+#
+#  id           :bigint           not null, primary key
+#  archived     :boolean          default(FALSE), not null
+#  content      :text             not null
+#  editor_mode  :string           default("markdown")
+#  excerpt      :text
+#  featured     :boolean
+#  published    :boolean          default(FALSE), not null
+#  published_at :datetime
+#  slug         :string           not null
+#  title        :string           not null
+#  views_count  :integer          default(0), not null
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  user_id      :bigint           not null
+#
+# Indexes
+#
+#  index_blog_posts_on_archived                    (archived)
+#  index_blog_posts_on_editor_mode                 (editor_mode)
+#  index_blog_posts_on_published                   (published)
+#  index_blog_posts_on_published_and_published_at  (published,published_at)
+#  index_blog_posts_on_published_at                (published_at)
+#  index_blog_posts_on_slug                        (slug) UNIQUE
+#  index_blog_posts_on_user_id                     (user_id)
+#  index_blog_posts_on_user_id_and_published       (user_id,published)
+#  index_blog_posts_on_views_count                 (views_count)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (user_id => users.id)
+#
 require "test_helper"
 
 class BlogPostTest < ActiveSupport::TestCase

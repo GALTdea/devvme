@@ -1,3 +1,28 @@
+# == Schema Information
+#
+# Table name: visitor_page_views
+#
+#  id           :bigint           not null, primary key
+#  page_path    :string           not null
+#  page_title   :string
+#  referrer     :string(500)
+#  time_on_page :integer          default(0)
+#  viewed_at    :datetime         not null
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  visitor_id   :bigint           not null
+#
+# Indexes
+#
+#  index_visitor_page_views_on_page_path_and_viewed_at   (page_path,viewed_at)
+#  index_visitor_page_views_on_viewed_at                 (viewed_at)
+#  index_visitor_page_views_on_visitor_id                (visitor_id)
+#  index_visitor_page_views_on_visitor_id_and_viewed_at  (visitor_id,viewed_at)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (visitor_id => visitors.id)
+#
 class VisitorPageView < ApplicationRecord
   include BlogPageViewAnalytics
 
