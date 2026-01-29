@@ -100,5 +100,5 @@ gem "pundit", "~> 2.5"
 gem "mailersend-ruby", "~> 3.0"
 
 # Career Architect (LLM integration)
-gem "ruby-openai", "~> 6.0"
-gem "anthropic", "~> 1.0"
+gem "ruby-openai", "~> 8.3"
+gem "anthropic", "~> 1.17"

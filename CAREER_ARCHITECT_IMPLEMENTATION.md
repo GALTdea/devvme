@@ -85,8 +85,8 @@
   - Files: `Gemfile`, `config/environment.example`, `README.md`
   - Notes: Store API keys in credentials or ENV; documented in README and environment.example
 
-- [ ] **Step 5: Create ArchitectService**
-  - Status: ⚪ Not Started
+- [x] **Step 5: Create ArchitectService**
+  - Status: ✅ Done
   - File: `app/services/architect_service.rb`
   - Dependencies: Step 2, Step 4
   - Methods:
