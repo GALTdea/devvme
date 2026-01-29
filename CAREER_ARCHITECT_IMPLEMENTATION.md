@@ -96,8 +96,8 @@
     - `build_context(user, pasted_content)` - Extract profile + projects data
   - Notes: System prompts for Socratic interviewing; token limit management
 
-- [ ] **Step 6: Create background job**
-  - Status: ⚪ Not Started
+- [x] **Step 6: Create background job**
+  - Status: ✅ Done
   - File: `app/jobs/architect_reply_job.rb`
   - Dependencies: Step 5
   - Notes: Turbo Stream broadcast; retry logic; error handling

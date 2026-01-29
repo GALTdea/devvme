@@ -38,3 +38,7 @@ en:
   user_welcome_mailer:
     welcome_notification:
       subject: "Welcome to DevV.me! 🚀"
+  architect:
+    errors:
+      llm_failed: "The AI service is temporarily unavailable. Please try again in a moment."
+      generic: "Something went wrong. Please try again."

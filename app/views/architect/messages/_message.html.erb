@@ -1,0 +1,6 @@
+<%# Rendered by ArchitectReplyJob via Turbo Stream broadcast. Enhanced in Step 9. %>
+<div id="<%= dom_id(message) %>" class="architect-message architect-message--<%= message.role %>" data-architect-message data-role="<%= message.role %>">
+  <div class="architect-message__content">
+    <%= simple_format(message.content, {}, wrapper_tag: "p") %>
+  </div>
+</div>
