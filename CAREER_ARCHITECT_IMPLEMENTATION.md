@@ -69,8 +69,8 @@
   - Dependencies: Step 1
   - Notes: Add associations, validations, enums; update User model
 
-- [ ] **Step 3: Create Pundit policies**
-  - Status: ⚪ Not Started
+- [x] **Step 3: Create Pundit policies**
+  - Status: ✅ Done
   - Files: `app/policies/architect_session_policy.rb`, `app/policies/architect_message_policy.rb`
   - Dependencies: Step 2
   - Notes: Only session owner can access
