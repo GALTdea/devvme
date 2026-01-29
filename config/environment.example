@@ -64,6 +64,12 @@ FACEBOOK_APP_ID=your_facebook_app_id
 # IPInfo Token (Optional - for geolocation)
 IPINFO_TOKEN=your_ipinfo_token
 
+# Career Architect - LLM API keys (Optional - for AI-powered profile builder)
+# Store in credentials (rails credentials:edit) under :openai and :anthropic, or set here.
+# OpenAI (gpt-4o-mini for Q&A); Anthropic (claude-3-5-sonnet for final bio/headline)
+# OPENAI_API_KEY=sk-...
+# ANTHROPIC_API_KEY=sk-ant-...
+
 # =============================================================================
 # OPTIONAL - Performance & Monitoring
 # =============================================================================

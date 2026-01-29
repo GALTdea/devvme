@@ -79,11 +79,11 @@
 
 ### AI Integration
 
-- [ ] **Step 4: Add LLM gems**
-  - Status: ⚪ Not Started
+- [x] **Step 4: Add LLM gems**
+  - Status: ✅ Done
   - Gems: `ruby-openai`, `anthropic`
-  - Files: `Gemfile`, `config/credentials.yml.enc`
-  - Notes: Store API keys in credentials; document in README
+  - Files: `Gemfile`, `config/environment.example`, `README.md`
+  - Notes: Store API keys in credentials or ENV; documented in README and environment.example
 
 - [ ] **Step 5: Create ArchitectService**
   - Status: ⚪ Not Started

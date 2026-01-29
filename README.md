@@ -395,6 +395,36 @@ production:
       processes: 2
 ```
 
+### Career Architect (LLM API Keys)
+
+The Career Architect feature (AI-powered profile builder) uses OpenAI (gpt-4o-mini for Q&A) and Anthropic (claude-3-5-sonnet for final bio/headline generation). API keys can be stored in Rails credentials or set as environment variables.
+
+**Option 1 – Rails credentials (recommended for production)**
+
+```bash
+EDITOR="code --wait" bin/rails credentials:edit
+```
+
+Add under the root (use spaces, not tabs):
+
+```yaml
+openai:
+  api_key: sk-...
+anthropic:
+  api_key: sk-ant-...
+```
+
+**Option 2 – Environment variables**
+
+Set in `.env.local` (development) or your deployment environment:
+
+```bash
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+The application reads credentials first, then falls back to `OPENAI_API_KEY` and `ANTHROPIC_API_KEY`. If neither is set, Career Architect sessions will not be able to call the LLM APIs.
+
 ## 📈 Performance Optimizations
 
 - **Database Indexing**: Optimized queries with proper indexes
