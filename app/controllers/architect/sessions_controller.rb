@@ -2,6 +2,9 @@
 
 module Architect
   class SessionsController < ApplicationController
+    # Rate limits: max 3 sessions per hour, max 20 messages per session
+    MAX_SESSIONS_PER_HOUR = 3
+
     before_action :authenticate_user!
     before_action :set_session, only: [:show, :message, :accept, :destroy]
     before_action :check_create_rate_limit, only: [:create]
@@ -105,7 +108,7 @@ module Architect
 
     def check_create_rate_limit
       count = current_user.architect_sessions.where("created_at > ?", 1.hour.ago).count
-      return if count < 3
+      return if count < MAX_SESSIONS_PER_HOUR
 
       redirect_to dashboard_path, alert: t("architect.errors.rate_limit_sessions")
     end

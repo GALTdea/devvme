@@ -197,12 +197,12 @@ Use a user that can access the dashboard (e.g. local account or seed user).
 
 ---
 
-### Security & Performance
+### Security & Performanced
 
-- [ ] **Step 12: Rate limiting**
-  - Status: ⚪ Not Started
+- [x] **Step 12: Rate limiting**
+  - Status: ✅ Done
   - File: `app/controllers/architect/sessions_controller.rb` (before_action)
-  - Notes: Max 3 sessions/hour; max 20 messages/session; flash error messages
+  - Notes: Max 3 sessions/hour (`check_create_rate_limit` on `create`); max 20 messages/session (`check_message_rate_limit` on `message`); flash alerts via `architect.errors.rate_limit_sessions` and `architect.errors.rate_limit_messages`
 
 - [ ] **Step 13: Error handling**
   - Status: ⚪ Not Started
