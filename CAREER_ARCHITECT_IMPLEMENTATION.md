@@ -150,8 +150,8 @@
   - Dependencies: Step 7, Step 8
   - Features: Goal selection; optional paste field; create and redirect
 
-- [ ] **Step 11: Create acceptance flow**
-  - Status: ⚪ Not Started
+- [x] **Step 11: Create acceptance flow**
+  - Status: ✅ Done
   - Files: `app/views/architect/sessions/_review_panel.html.erb`
   - Dependencies: Step 7, Step 8
   - Features: Preview bio/headline; "Accept", "Edit & Accept", "Discard" buttons

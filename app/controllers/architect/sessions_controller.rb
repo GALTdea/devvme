@@ -77,7 +77,11 @@ module Architect
       attrs[:headline] = @architect_session.generated_headline if @architect_session.goal_headline? || @architect_session.goal_both?
 
       if current_user.update(attrs)
-        redirect_to profile_path, notice: t("architect.sessions.accepted")
+        if params[:edit].present?
+          redirect_to edit_profile_path, notice: t("architect.sessions.accepted")
+        else
+          redirect_to profile_path, notice: t("architect.sessions.accepted")
+        end
       else
         redirect_to architect_session_path(@architect_session), alert: current_user.errors.full_messages.to_sentence
       end

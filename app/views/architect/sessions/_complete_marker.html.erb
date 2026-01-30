@@ -1,3 +1,4 @@
-<%# Replaces the thinking indicator when the interview is complete. UI shows review panel (Step 11). %>
-<div id="architect_thinking_indicator" data-architect-status="complete" data-session-id="<%= session.id %>" class="architect-complete-marker hidden">
+<%# Replaces the thinking indicator when the interview is complete. Renders review panel for Accept / Edit & Accept / Discard. %>
+<div id="architect_thinking_indicator" data-architect-status="complete" data-session-id="<%= session.id %>" class="architect-complete-marker">
+  <%= render "architect/sessions/review_panel", session: session %>
 </div>
