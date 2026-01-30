@@ -158,6 +158,45 @@
 
 ---
 
+### Testing the Career Architect UI (Steps 9–11)
+
+**1. Start the app and job worker**
+
+```bash
+# Terminal 1: web + Tailwind
+bin/dev
+
+# Terminal 2: Solid Queue (so ArchitectReplyJob runs and Turbo Streams deliver replies)
+bin/jobs
+```
+
+Without `bin/jobs`, the chat will show "Thinking..." but assistant replies will never appear (the job never runs).
+
+**2. Sign in**
+
+Use a user that can access the dashboard (e.g. local account or seed user).
+
+**3. Test without LLM API keys (UI only)**
+
+- **Dashboard:** Open dashboard → you should see the **Career Architect** card in Quick Actions (first card).
+- **Start flow:** Click it → `/architect/sessions/new` → choose goal (Bio only / Headline only / Bio and headline), optionally paste text → **Start session**.
+- Without `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` in env/credentials, create will redirect with "Career Architect is not configured" (or the job will fail and broadcast an error into the chat). So either set dummy session in DB or skip create and go to show manually (see below).
+- **Chat UI (direct URL):** If you have an existing session ID, open `/architect/sessions/:id` → you should see the chat layout (message list, thinking slot, message form if session is in progress). Form submit will enqueue a job; with `bin/jobs` running but no keys, the job will broadcast an error and replace the thinking indicator with the error message.
+
+**4. Test with LLM API keys (full flow)**
+
+- Set `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` (e.g. in `.env` or `config/credentials`) per `config/environment.example`.
+- **Start session:** Dashboard → Career Architect → choose goal (and optional paste) → **Start session** → redirect to chat.
+- **Chat:** First assistant message may appear after a short delay (job runs). Type a reply → **Send** → your message appears, "Thinking..." shows, then (with `bin/jobs` running) the assistant reply appears via Turbo Stream and the list auto-scrolls.
+- **Complete:** After the interview completes, the thinking indicator is replaced by the **review panel**: preview of generated bio/headline, **Accept**, **Edit & Accept**, **Discard**.
+- **Accept:** Updates profile and redirects to profile (or to edit profile if you used **Edit & Accept**). **Discard:** Asks for confirmation, then deletes the session and redirects to dashboard.
+
+**5. Quick UI check without completing an interview**
+
+- Create a session and open its show page. You can confirm: message list, scroll area, message form, End session button, and (after a refresh while the last message is from the user) the thinking indicator. To see the review panel without running the real interview, temporarily mark a session completed and set `generated_bio` / `generated_headline` in the console, then reload the show page.
+
+---
+
 ### Security & Performance
 
 - [ ] **Step 12: Rate limiting**
