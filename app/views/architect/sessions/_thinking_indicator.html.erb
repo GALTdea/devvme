@@ -1,4 +1,6 @@
 <%# Shown while waiting for the assistant reply. Replaced by job with complete_marker or error. %>
-<div id="architect_thinking_indicator" data-architect-status="thinking" class="architect-thinking-indicator">
-  <span class="text-sm text-gray-500"><%= t("architect.sessions.thinking") %></span>
+<div id="architect_thinking_indicator" data-architect-status="thinking" class="architect-thinking-indicator flex justify-start">
+  <div class="max-w-[85%] rounded-2xl bg-secondary-100 px-4 py-2.5 dark:bg-secondary-700">
+    <span class="text-sm text-secondary-500 dark:text-secondary-400 animate-pulse"><%= t("architect.sessions.thinking") %></span>
+  </div>
 </div>

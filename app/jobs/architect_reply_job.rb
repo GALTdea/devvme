@@ -40,13 +40,9 @@ class ArchitectReplyJob < ApplicationJob
 
   private
 
-  def stream_name(session)
-    "architect_session_#{session.is_a?(ArchitectSession) ? session.id : session}"
-  end
-
   def broadcast_message(session, message)
     Turbo::StreamsChannel.broadcast_append_to(
-      stream_name(session),
+      session,
       target: "architect_messages",
       partial: "architect/messages/message",
       locals: { message: message }
@@ -55,7 +51,7 @@ class ArchitectReplyJob < ApplicationJob
 
   def broadcast_session_complete(session)
     Turbo::StreamsChannel.broadcast_replace_to(
-      stream_name(session),
+      session,
       target: "architect_thinking_indicator",
       partial: "architect/sessions/complete_marker",
       locals: { session: session }
@@ -67,7 +63,7 @@ class ArchitectReplyJob < ApplicationJob
     return unless session
 
     Turbo::StreamsChannel.broadcast_replace_to(
-      stream_name(session),
+      session,
       target: "architect_thinking_indicator",
       html: "<div id=\"architect_thinking_indicator\" class=\"architect-error\" data-architect-error=\"true\">#{ERB::Util.html_escape(error_message)}</div>"
     )

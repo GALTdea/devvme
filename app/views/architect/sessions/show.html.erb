@@ -1,0 +1,74 @@
+<% content_for :title, "Career Architect" %>
+
+<%= turbo_stream_from @architect_session %>
+
+<div class="max-w-3xl mx-auto px-4 py-6 sm:px-6 lg:px-8"
+     data-controller="architect-chat"
+     data-architect-chat-thinking-value="<%= t('architect.sessions.thinking') %>">
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-secondary-900 dark:text-white">
+        <%= t("architect.sessions.title") %>
+      </h1>
+      <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
+        <%= t("architect.sessions.subtitle") %>
+      </p>
+    </div>
+    <%= button_to t("architect.sessions.end_session"),
+                  architect_session_path(@architect_session),
+                  method: :delete,
+                  form: { data: { turbo_confirm: t("architect.sessions.confirm_destroy") } },
+                  class: "rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm font-medium text-secondary-700 shadow-sm hover:bg-secondary-50 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-300 dark:hover:bg-secondary-700" %>
+  </div>
+
+  <div class="rounded-xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-800 overflow-hidden">
+    <div class="flex flex-col" style="min-height: 420px;">
+      <div id="architect_messages"
+           class="flex-1 overflow-y-auto p-4 space-y-4"
+           data-architect-chat-target="messageList">
+        <% @architect_session.architect_messages.ordered.each do |message| %>
+          <%= render "architect/messages/message", message: message %>
+        <% end %>
+        <div data-architect-chat-target="thinkingIndicator">
+          <% if @architect_session.in_progress? && @architect_session.architect_messages.ordered.last&.message_user? %>
+            <%= render "architect/sessions/thinking_indicator" %>
+          <% else %>
+            <div id="architect_thinking_indicator" class="hidden" data-architect-status="idle"></div>
+          <% end %>
+        </div>
+      </div>
+
+      <% if @architect_session.in_progress? %>
+        <div class="border-t border-secondary-200 p-4 dark:border-secondary-700">
+          <%= form_with url: message_architect_session_path(@architect_session, format: :turbo_stream),
+                        method: :post,
+                        data: {
+                          architect_chat_target: "form",
+                          action: "turbo:submit-end->architect-chat#afterSubmit"
+                        },
+                        class: "flex gap-2" do |f| %>
+            <%= f.text_area :content,
+                            name: "architect_message[content]",
+                            id: "architect_message_content",
+                            rows: 2,
+                            placeholder: t("architect.sessions.message_placeholder"),
+                            class: "block w-full rounded-lg border border-secondary-300 bg-secondary-50 px-3 py-2 text-secondary-900 placeholder-secondary-500 focus:border-primary-500 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white dark:placeholder-secondary-400 sm:text-sm",
+                            data: { architect_chat_target: "input" } %>
+            <%= f.submit t("architect.sessions.send"),
+                        class: "inline-flex shrink-0 items-center justify-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:bg-primary-500 dark:hover:bg-primary-400",
+                        data: { architect_chat_target: "submitButton" } %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <% unless @architect_session.in_progress? %>
+    <div class="mt-4 text-center text-sm text-secondary-500 dark:text-secondary-400">
+      <%= t("architect.sessions.session_ended") %>
+      <%= link_to t("architect.sessions.back_to_dashboard"),
+                  dashboard_path,
+                  class: "font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400" %>
+    </div>
+  <% end %>
+</div>

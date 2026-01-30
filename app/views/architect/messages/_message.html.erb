@@ -1,6 +1,11 @@
-<%# Rendered by ArchitectReplyJob via Turbo Stream broadcast. Enhanced in Step 9. %>
-<div id="<%= dom_id(message) %>" class="architect-message architect-message--<%= message.role %>" data-architect-message data-role="<%= message.role %>">
-  <div class="architect-message__content">
-    <%= simple_format(message.content, {}, wrapper_tag: "p") %>
+<%# Rendered by controller (user) and ArchitectReplyJob (assistant) via Turbo Stream. %>
+<div id="<%= dom_id(message) %>"
+     class="architect-message flex <%= message.message_user? ? 'justify-end' : 'justify-start' %>"
+     data-architect-message
+     data-role="<%= message.role %>">
+  <div class="architect-message__bubble max-w-[85%] rounded-2xl px-4 py-2.5 <%= message.message_user? ? 'bg-primary-600 text-white dark:bg-primary-500' : 'bg-secondary-100 text-secondary-900 dark:bg-secondary-700 dark:text-secondary-100' %>">
+    <div class="architect-message__content text-sm leading-relaxed whitespace-pre-wrap break-words">
+      <%= simple_format(message.content, {}, wrapper_tag: "p") %>
+    </div>
   </div>
 </div>

@@ -40,11 +40,19 @@ en:
       subject: "Welcome to DevV.me! 🚀"
   architect:
     sessions:
+      title: "Career Architect"
+      subtitle: "Answer a few questions to build your bio and headline."
       created: "Career Architect session started. Answer the questions below."
       thinking: "Thinking..."
       message_sent: "Message sent."
+      message_placeholder: "Type your answer..."
+      send: "Send"
+      end_session: "End session"
+      confirm_destroy: "End this session? Your progress will be lost."
       accepted: "Profile updated with your new bio and headline."
       destroyed: "Session deleted."
+      session_ended: "This session has ended."
+      back_to_dashboard: "Back to dashboard"
     errors:
       llm_failed: "The AI service is temporarily unavailable. Please try again in a moment."
       generic: "Something went wrong. Please try again."

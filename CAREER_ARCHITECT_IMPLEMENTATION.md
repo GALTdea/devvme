@@ -133,8 +133,8 @@
 
 ### UI & UX
 
-- [ ] **Step 9: Create chat UI**
-  - Status: ⚪ Not Started
+- [x] **Step 9: Create chat UI**
+  - Status: ✅ Done
   - Files:
     - `app/views/architect/sessions/show.html.erb`
     - `app/views/architect/messages/_message.html.erb`
