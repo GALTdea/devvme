@@ -106,21 +106,21 @@
 
 ### Controllers & Routes
 
-- [ ] **Step 7: Create controllers**
-  - Status: ⚪ Not Started
+- [x] **Step 7: Create controllers**
+  - Status: ✅ Done
   - Files: `app/controllers/architect/sessions_controller.rb`
   - Dependencies: Step 5, Step 6
-  - Actions: `create`, `show`, `message`, `accept`, `destroy`
-  - Notes: Rate limiting; Turbo Stream responses
+  - Actions: `new`, `create`, `show`, `message`, `accept`, `destroy`
+  - Notes: Rate limiting (3 sessions/hour, 20 messages/session); Turbo Stream for `message`; Pundit authorize on all actions; locale keys in `config/locales/en.yml`; thinking indicator partial for message response
 
-- [ ] **Step 8: Add routes**
-  - Status: ⚪ Not Started
+- [x] **Step 8: Add routes**
+  - Status: ✅ Done
   - File: `config/routes.rb`
   - Dependencies: Step 7
   - Routes:
     ```ruby
     namespace :architect do
-      resources :sessions, only: [:create, :show, :destroy] do
+      resources :sessions, only: [:new, :create, :show, :destroy] do
         member do
           post :message
           patch :accept

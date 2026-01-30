@@ -121,6 +121,16 @@ Rails.application.routes.draw do
     get :complete, on: :member
   end
 
+  # Career Architect: AI-powered profile builder (Socratic interview)
+  namespace :architect do
+    resources :sessions, only: [:new, :create, :show, :destroy] do
+      member do
+        post :message
+        patch :accept
+      end
+    end
+  end
+
   # Digest preferences routes
   resource :digest_preferences, only: [:show, :update] do
     get :unsubscribe, on: :member

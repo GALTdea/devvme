@@ -27,7 +27,25 @@ class ArchitectService
     new.build_context(user, pasted_content)
   end
 
+  # ENV overrides credentials so export OPENAI_API_KEY wins when testing.
+  def self.openai_api_key
+    (ENV["OPENAI_API_KEY"].to_s.strip.presence || Rails.application.credentials.dig(:openai, :api_key).to_s.strip.presence).presence
+  end
+
+  def self.anthropic_api_key
+    (ENV["ANTHROPIC_API_KEY"].to_s.strip.presence || Rails.application.credentials.dig(:anthropic, :api_key).to_s.strip.presence).presence
+  end
+
+  def self.openai_configured?
+    openai_api_key.present?
+  end
+
+  def self.anthropic_configured?
+    anthropic_api_key.present?
+  end
+
   def start_session(user, goal, pasted_content: nil)
+    ensure_openai_configured!
     context = build_context(user, pasted_content)
     session = ArchitectSession.create!(
       user: user,
@@ -189,29 +207,43 @@ class ArchitectService
     [bio, headline]
   end
 
+  def ensure_openai_configured!
+    raise MissingApiKeysError, "OpenAI API key not set. Add it to credentials (openai.api_key) or set ENV OPENAI_API_KEY." if self.class.openai_api_key.blank?
+  end
+
   def call_openai(system_prompt, messages)
-    api_key = Rails.application.credentials.dig(:openai, :api_key) || ENV["OPENAI_API_KEY"]
+    api_key = self.class.openai_api_key
     raise MissingApiKeysError, "OpenAI API key not set (credentials or OPENAI_API_KEY)" if api_key.blank?
 
-    client = OpenAI::Client.new(api_key: api_key)
+    # Debug: log key source so we can see if Rails is using ENV or credentials (401 often = wrong key from credentials)
+    from_env = ENV["OPENAI_API_KEY"].to_s.strip.presence
+    source = from_env.present? && api_key == from_env ? "ENV" : "credentials"
+    Rails.logger.info "ArchitectService OpenAI key source: #{source}, length: #{api_key.length}"
+
+    client = OpenAI::Client.new(access_token: api_key)
     api_messages = [{ role: "system", content: system_prompt }] + messages.map { |m| m.transform_keys(&:to_s) }
 
-    response = client.chat.completions.create(
-      model: OPENAI_QA_MODEL,
-      messages: api_messages,
-      max_tokens: 512,
-      temperature: 0.7
+    response = client.chat(
+      parameters: {
+        model: OPENAI_QA_MODEL,
+        messages: api_messages,
+        max_tokens: 512,
+        temperature: 0.7
+      }
     )
 
     content = response.is_a?(Hash) ? response.dig("choices", 0, "message", "content") : response.choices&.first&.message&.content
     content.to_s
+  rescue Faraday::UnauthorizedError => e
+    Rails.logger.error "ArchitectService OpenAI 401: #{e.message}"
+    raise MissingApiKeysError, "OpenAI API key is invalid or expired. Check your key at https://platform.openai.com/api-keys (no extra spaces when pasting)."
   rescue Faraday::Error => e
     Rails.logger.error "ArchitectService OpenAI error: #{e.message}"
     raise
   end
 
   def call_anthropic(system_prompt, user_content)
-    api_key = Rails.application.credentials.dig(:anthropic, :api_key) || ENV["ANTHROPIC_API_KEY"]
+    api_key = self.class.anthropic_api_key
     raise MissingApiKeysError, "Anthropic API key not set (credentials or ANTHROPIC_API_KEY)" if api_key.blank?
 
     client = Anthropic::Client.new(api_key: api_key)
@@ -224,6 +256,9 @@ class ArchitectService
     )
 
     extract_anthropic_text(response)
+  rescue Faraday::UnauthorizedError => e
+    Rails.logger.error "ArchitectService Anthropic 401: #{e.message}"
+    raise MissingApiKeysError, "Anthropic API key is invalid or expired. Check your key at https://console.anthropic.com/ (no extra spaces when pasting)."
   rescue Faraday::Error => e
     Rails.logger.error "ArchitectService Anthropic error: #{e.message}"
     raise

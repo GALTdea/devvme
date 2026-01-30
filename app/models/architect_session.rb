@@ -38,7 +38,7 @@ class ArchitectSession < ApplicationRecord
     bio: "bio",
     headline: "headline",
     both: "both"
-  }, _prefix: true
+  }, prefix: true
 
   validates :goal, presence: true
   validates :generated_bio, length: { maximum: 500 }, allow_blank: true

@@ -425,6 +425,8 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 The application reads credentials first, then falls back to `OPENAI_API_KEY` and `ANTHROPIC_API_KEY`. If neither is set, Career Architect sessions will not be able to call the LLM APIs.
 
+**Verify in console:** After editing credentials, restart the Rails console and run `ArchitectService.openai_configured?` (should be `true`). The keys must be under `openai:` / `api_key:` and `anthropic:` / `api_key:` (nested), not `openai_api_key:` at root. Use spaces for indentation, not tabs.
+
 ## 📈 Performance Optimizations
 
 - **Database Indexing**: Optimized queries with proper indexes

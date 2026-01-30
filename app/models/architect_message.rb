@@ -28,7 +28,7 @@ class ArchitectMessage < ApplicationRecord
   enum :role, {
     user: "user",
     assistant: "assistant"
-  }, _prefix: :message
+  }, prefix: :message
 
   validates :content, presence: true
   validates :sequence, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
