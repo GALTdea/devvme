@@ -24,6 +24,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class ArchitectSession < ApplicationRecord
+  attr_accessor :pasted_content
+
   belongs_to :user
   has_many :architect_messages, dependent: :destroy
 

@@ -8,7 +8,7 @@ module Architect
     before_action :check_message_rate_limit, only: [:message]
 
     def new
-      @architect_session = current_user.architect_sessions.build
+      @architect_session = current_user.architect_sessions.build(goal: "both")
       authorize @architect_session
     end
 

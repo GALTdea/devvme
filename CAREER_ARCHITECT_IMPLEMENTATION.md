@@ -142,8 +142,8 @@
   - Dependencies: Step 7, Step 8
   - Features: Turbo Stream subscription; message list; auto-scroll; "thinking" indicator
 
-- [ ] **Step 10: Create session start flow**
-  - Status: ⚪ Not Started
+- [x] **Step 10: Create session start flow**
+  - Status: ✅ Done
   - Files:
     - `app/views/architect/sessions/new.html.erb` (or modal)
     - Dashboard CTA button
