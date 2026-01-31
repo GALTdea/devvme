@@ -1,0 +1,15 @@
+# Career Architect sessions for tests. Tests that need specific data often create
+# records in the test; these fixtures support fixtures :all and policy/scope tests.
+one:
+  user: test_user_one
+  goal: both
+  status: in_progress
+  context_snapshot: {}
+  question_count: 0
+
+two:
+  user: test_user_two
+  goal: bio
+  status: in_progress
+  context_snapshot: {}
+  question_count: 0

@@ -209,15 +209,16 @@ Use a user that can access the dashboard (e.g. local account or seed user).
   - Files: `app/jobs/architect_reply_job.rb`, `app/views/architect/sessions/_error_indicator.html.erb`, `config/locales/en.yml`
   - Notes: Retry on Faraday::TimeoutError and Faraday::ConnectionFailed (3 attempts, polynomially longer); discard on DeserializationError and MissingApiKeysError; reply and finalize errors broadcast user-friendly message via error_indicator partial; locale keys llm_failed, generic, generation_failed, missing_api_keys, try_again; admin notifications left optional
 
-- [ ] **Step 14: Testing**
-  - Status: ⚪ Not Started
+- [x] **Step 14: Testing**
+  - Status: ✅ Done
   - Files:
-    - `test/models/architect_session_test.rb`
-    - `test/models/architect_message_test.rb`
-    - `test/services/architect_service_test.rb` (mock LLM)
-    - `test/controllers/architect/sessions_controller_test.rb`
-    - `test/policies/architect_session_policy_test.rb`
-    - `test/integration/architect_flow_test.rb`
+    - `test/models/architect_session_test.rb` — validations, associations, enums, scopes
+    - `test/models/architect_message_test.rb` — validations, associations, enums, scope
+    - `test/services/architect_service_test.rb` — build_context, start_session (MissingApiKeysError), reply/finalize with mocked OpenAI/Anthropic
+    - `test/controllers/architect/sessions_controller_test.rb` — new, create (success, MissingApiKeysError, rate limit), show, message (success, blank, rate limit), accept, destroy
+    - `test/policies/architect_session_policy_test.rb` — create?, show?, message?, accept?, destroy?, scope
+    - `test/integration/architect_flow_test.rb` — signed-in flow (new, create, show, message, accept, destroy), guest redirects
+  - Fixtures: `test/fixtures/architect_sessions.yml`, `test/fixtures/architect_messages.yml`
   - Dependencies: All previous steps
 
 ---

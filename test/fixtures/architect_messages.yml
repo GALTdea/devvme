@@ -1,0 +1,12 @@
+# Career Architect messages for tests.
+one:
+  architect_session: one
+  role: assistant
+  content: "What do you do?"
+  sequence: 0
+
+two:
+  architect_session: one
+  role: user
+  content: "I build web apps."
+  sequence: 1
