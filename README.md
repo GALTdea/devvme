@@ -435,6 +435,8 @@ The application reads credentials first, then falls back to `OPENAI_API_KEY` and
 
 **Verify in console:** After editing credentials, restart the Rails console and run `ArchitectService.openai_configured?` (should be `true`). The keys must be under `openai:` / `api_key:` and `anthropic:` / `api_key:` (nested), not `openai_api_key:` at root. Use spaces for indentation, not tabs.
 
+**Beta access:** Career Architect is gated by `User#allow_career_architect`. Admins and super_admins bypass the gate. Enable for a user: `USERNAME=username bin/rails architect:enable_beta`. List beta users: `bin/rails architect:list_beta`. Monitor queue: `bin/rails architect:queue_status`. Session stats and estimated cost: `bin/rails architect:stats`.
+
 ## 📈 Performance Optimizations
 
 - **Database Indexing**: Optimized queries with proper indexes

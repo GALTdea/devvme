@@ -11,7 +11,7 @@ module Architect
         username: "archctrl",
         full_name: "Architect Controller User"
       )
-      @user.update!(account_status: :active)
+      @user.update!(account_status: :active, allow_career_architect: true)
       @session = ArchitectSession.create!(
         user: @user,
         goal: "both",
@@ -67,9 +67,17 @@ module Architect
       assert_redirected_to new_user_session_path
     end
 
+    test "should redirect to dashboard when user does not have beta access" do
+      @user.update!(allow_career_architect: false)
+      sign_in_user @user
+      get new_architect_session_path
+      assert_redirected_to dashboard_path
+      assert_equal I18n.t("architect.errors.beta_only"), flash[:alert]
+    end
+
     test "should not show other user session" do
       other = User.create!(email: "other_ctrl@example.com", password: "password123", username: "otherctrl")
-      other.update!(account_status: :active)
+      other.update!(account_status: :active, allow_career_architect: true)
       sign_in_user other
       get architect_session_path(@session)
       assert_response :not_found

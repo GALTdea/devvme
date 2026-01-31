@@ -10,7 +10,7 @@ class ArchitectFlowTest < ActionDispatch::IntegrationTest
       username: "archflow",
       full_name: "Architect Flow User"
     )
-    @user.update!(account_status: :active)
+    @user.update!(account_status: :active, allow_career_architect: true)
   end
 
   test "signed-in user can reach new architect session" do
@@ -24,13 +24,15 @@ class ArchitectFlowTest < ActionDispatch::IntegrationTest
   test "signed-in user can create session and is redirected to show" do
     sign_in @user
     created_session = ArchitectSession.create!(user: @user, goal: "both", status: :in_progress)
-    ArchitectService.stub(:start_session, { session: created_session }) do
-      post architect_sessions_path, params: { architect_session: { goal: "both" } }
-    end
+    original = ArchitectService.method(:start_session)
+    ArchitectService.define_singleton_method(:start_session) { |*_args, **_opts| { session: created_session } }
+    post architect_sessions_path, params: { architect_session: { goal: "both" } }
     assert_redirected_to architect_session_path(created_session)
     follow_redirect!
     assert_response :success
     assert_select "h1", text: /Career Architect/
+  ensure
+    ArchitectService.define_singleton_method(:start_session) { |*args, **opts| original.call(*args, **opts) }
   end
 
   test "signed-in user can view session show and send message" do

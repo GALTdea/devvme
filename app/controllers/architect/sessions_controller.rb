@@ -6,6 +6,7 @@ module Architect
     MAX_SESSIONS_PER_HOUR = 3
 
     before_action :authenticate_user!
+    before_action :ensure_career_architect_allowed
     before_action :set_session, only: [:show, :message, :accept, :destroy]
     before_action :check_create_rate_limit, only: [:create]
     before_action :check_message_rate_limit, only: [:message]
@@ -97,6 +98,12 @@ module Architect
     end
 
     private
+
+    def ensure_career_architect_allowed
+      return if current_user.allow_career_architect? || current_user.admin? || current_user.super_admin?
+
+      redirect_to dashboard_path, alert: t("architect.errors.beta_only")
+    end
 
     def set_session
       @architect_session = current_user.architect_sessions.find(params[:id])

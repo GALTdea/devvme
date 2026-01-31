@@ -1,6 +1,7 @@
 # == Schema Information
 #
 # Table name: blog_posts
+# Database name: primary
 #
 #  id           :bigint           not null, primary key
 #  archived     :boolean          default(FALSE), not null

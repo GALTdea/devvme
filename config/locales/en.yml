@@ -81,3 +81,4 @@ en:
       rate_limit_sessions: "You can start at most 3 Career Architect sessions per hour. Please try again later."
       rate_limit_messages: "Maximum messages per session reached."
       try_again: "You can send another message to retry or refresh the page."
+      beta_only: "Career Architect is currently in beta. You don't have access yet."

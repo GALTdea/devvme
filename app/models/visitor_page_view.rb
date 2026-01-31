@@ -1,6 +1,7 @@
 # == Schema Information
 #
 # Table name: visitor_page_views
+# Database name: primary
 #
 #  id           :bigint           not null, primary key
 #  page_path    :string           not null

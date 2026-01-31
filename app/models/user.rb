@@ -1,10 +1,12 @@
 # == Schema Information
 #
 # Table name: users
+# Database name: primary
 #
 #  id                     :bigint           not null, primary key
 #  account_status         :integer          default("pending_activation"), not null
 #  admin_notes            :text
+#  allow_career_architect :boolean          default(FALSE), not null
 #  bio                    :text
 #  contact_email          :string
 #  email                  :string           default(""), not null
@@ -44,6 +46,7 @@
 # Indexes
 #
 #  index_users_on_account_status          (account_status)
+#  index_users_on_allow_career_architect  (allow_career_architect) WHERE (allow_career_architect = true)
 #  index_users_on_email                   (email) UNIQUE
 #  index_users_on_featured                (featured)
 #  index_users_on_invitation_accepted_at  (invitation_accepted_at)

@@ -230,10 +230,10 @@ Use a user that can access the dashboard (e.g. local account or seed user).
   - Files: `docs/DATA_MODEL.md`, `README.md`, `CAREER_ARCHITECT_IMPLEMENTATION.md` (this file)
   - Notes: Documented architecture, costs, and usage: DATA_MODEL.md (ArchitectSession, ArchitectMessage); README (feature bullet, Career Architect config with architecture, rate limits, usage, costs, link to this doc)
 
-- [ ] **Step 16: Soft launch**
-  - Status: ⚪ Not Started
+- [x] **Step 16: Soft launch**
+  - Status: ✅ Done
   - Dependencies: All previous steps
-  - Notes: Enable for beta users; monitor Solid Queue; track costs and success rates
+  - Notes: Beta gate via `User#allow_career_architect`; admins/super_admins bypass; dashboard quick action hidden for non-beta; rake tasks: `architect:enable_beta`, `architect:disable_beta`, `architect:list_beta`, `architect:queue_status`, `architect:stats`; locale `architect.errors.beta_only`
 
 ---
 

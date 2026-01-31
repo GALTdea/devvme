@@ -1,6 +1,7 @@
 # == Schema Information
 #
 # Table name: user_digest_preferences
+# Database name: primary
 #
 #  id                      :bigint           not null, primary key
 #  digest_time             :time             default(2000-01-01 08:00:00.000000000 UTC +00:00), not null

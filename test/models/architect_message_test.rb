@@ -1,5 +1,30 @@
 # frozen_string_literal: true
 
+# == Schema Information
+#
+# Table name: architect_messages
+# Database name: primary
+#
+#  id                   :bigint           not null, primary key
+#  content              :text             not null
+#  insight_type         :string
+#  metadata             :jsonb            not null
+#  role                 :string           not null
+#  sequence             :integer          not null
+#  topic                :string
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#  architect_session_id :bigint           not null
+#
+# Indexes
+#
+#  index_architect_messages_on_architect_session_id               (architect_session_id)
+#  index_architect_messages_on_architect_session_id_and_sequence  (architect_session_id,sequence) UNIQUE
+#
+# Foreign Keys
+#
+#  fk_rails_...  (architect_session_id => architect_sessions.id)
+#
 require "test_helper"
 
 class ArchitectMessageTest < ActiveSupport::TestCase

@@ -1,21 +1,22 @@
 # == Schema Information
 #
 # Table name: architect_messages
+# Database name: primary
 #
 #  id                   :bigint           not null, primary key
-#  architect_session_id :bigint           not null
-#  role                 :string           not null
 #  content              :text             not null
+#  insight_type         :string
+#  metadata             :jsonb            not null
+#  role                 :string           not null
 #  sequence             :integer          not null
 #  topic                :string
-#  insight_type         :string
-#  metadata             :jsonb            default({}), not null
 #  created_at           :datetime         not null
 #  updated_at           :datetime         not null
+#  architect_session_id :bigint           not null
 #
 # Indexes
 #
-#  index_architect_messages_on_architect_session_id  (architect_session_id)
+#  index_architect_messages_on_architect_session_id               (architect_session_id)
 #  index_architect_messages_on_architect_session_id_and_sequence  (architect_session_id,sequence) UNIQUE
 #
 # Foreign Keys
