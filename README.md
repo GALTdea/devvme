@@ -19,6 +19,7 @@ DevvMe is a modern, feature-rich platform that empowers developers to create stu
 
 ### User Experience
 - **Professional Profiles**: Comprehensive user profiles with avatars, bio, and social links
+- **Career Architect**: AI-powered Socratic interview to generate bio and headline (OpenAI + Anthropic; optional)
 - **Dashboard Analytics**: Track portfolio performance with detailed statistics
 - **Progress Tracking**: Profile completion percentage to encourage full setup
 - **Responsive Design**: Mobile-first design that looks great on all devices
@@ -397,7 +398,14 @@ production:
 
 ### Career Architect (LLM API Keys)
 
-The Career Architect feature (AI-powered profile builder) uses OpenAI (gpt-4o-mini for Q&A) and Anthropic (claude-3-5-sonnet for final bio/headline generation). API keys can be stored in Rails credentials or set as environment variables.
+The **Career Architect** feature is an AI-powered profile builder that guides users through a short Socratic interview to generate a bio and/or headline. It uses **OpenAI gpt-4o-mini** for the Q&A conversation and **Anthropic claude-3-5-sonnet** for the final bio/headline generation. If API keys are not set, the feature is disabled and users see a friendly message.
+
+- **Architecture**: User starts a session → answers questions in chat → LLM replies via Solid Queue job and Turbo Stream broadcast → when the interview is complete, a second LLM call generates the final text → user can accept or discard.
+- **Rate limits**: Max 3 sessions per user per hour; max 20 messages per session.
+- **Usage**: Optional. Without keys, the app runs normally; Career Architect entry points can redirect or show “not configured.”
+- **Costs**: Roughly ~$0.06 per completed session (hybrid model strategy); see [CAREER_ARCHITECT_IMPLEMENTATION.md](CAREER_ARCHITECT_IMPLEMENTATION.md) for design notes.
+
+API keys can be stored in Rails credentials or set as environment variables.
 
 **Option 1 – Rails credentials (recommended for production)**
 

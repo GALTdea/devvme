@@ -225,10 +225,10 @@ Use a user that can access the dashboard (e.g. local account or seed user).
 
 ### Documentation & Launch
 
-- [ ] **Step 15: Update documentation**
-  - Status: ⚪ Not Started
+- [x] **Step 15: Update documentation**
+  - Status: ✅ Done
   - Files: `docs/DATA_MODEL.md`, `README.md`, `CAREER_ARCHITECT_IMPLEMENTATION.md` (this file)
-  - Notes: Document architecture, costs, and usage
+  - Notes: Documented architecture, costs, and usage: DATA_MODEL.md (ArchitectSession, ArchitectMessage); README (feature bullet, Career Architect config with architecture, rate limits, usage, costs, link to this doc)
 
 - [ ] **Step 16: Soft launch**
   - Status: ⚪ Not Started

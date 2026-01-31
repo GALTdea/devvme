@@ -74,6 +74,23 @@ One-page reference for main entities and relationships. Canonical schema: `db/sc
 
 ---
 
+## Career Architect (AI profile builder)
+
+### ArchitectSession (`architect_sessions`)
+- **Owner**: belongs_to user.
+- **State**: status (draft, in_progress, completed, abandoned); goal (bio, headline, both).
+- **Context**: context_snapshot (jsonb) — profile + projects + pasted content for LLM.
+- **Output**: generated_bio (text), generated_headline (text); question_count (integer).
+- **Associations**: has_many architect_messages.
+- **Use**: One Career Architect flow per session; user answers Socratic Q&A then accepts or discards generated bio/headline.
+
+### ArchitectMessage (`architect_messages`)
+- **Parent**: belongs_to architect_session.
+- **Fields**: role (user | assistant), content (text), sequence (integer); topic, insight_type, metadata (jsonb) for future training/analytics.
+- **Use**: Conversation history for Q&A; max 20 messages per session (ArchitectService::MAX_QA_MESSAGES).
+
+---
+
 ## Rails / third-party tables (reference only)
 
 - **action_text_rich_texts**: Action Text rich text (e.g. BlogPost content_html).
