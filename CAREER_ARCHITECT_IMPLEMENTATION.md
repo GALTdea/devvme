@@ -204,10 +204,10 @@ Use a user that can access the dashboard (e.g. local account or seed user).
   - File: `app/controllers/architect/sessions_controller.rb` (before_action)
   - Notes: Max 3 sessions/hour (`check_create_rate_limit` on `create`); max 20 messages/session (`check_message_rate_limit` on `message`); flash alerts via `architect.errors.rate_limit_sessions` and `architect.errors.rate_limit_messages`
 
-- [ ] **Step 13: Error handling**
-  - Status: ⚪ Not Started
-  - Files: `app/jobs/architect_reply_job.rb`, views for error states
-  - Notes: Retry logic; user-friendly errors; admin notifications (optional)
+- [x] **Step 13: Error handling**
+  - Status: ✅ Done
+  - Files: `app/jobs/architect_reply_job.rb`, `app/views/architect/sessions/_error_indicator.html.erb`, `config/locales/en.yml`
+  - Notes: Retry on Faraday::TimeoutError and Faraday::ConnectionFailed (3 attempts, polynomially longer); discard on DeserializationError and MissingApiKeysError; reply and finalize errors broadcast user-friendly message via error_indicator partial; locale keys llm_failed, generic, generation_failed, missing_api_keys, try_again; admin notifications left optional
 
 - [ ] **Step 14: Testing**
   - Status: ⚪ Not Started

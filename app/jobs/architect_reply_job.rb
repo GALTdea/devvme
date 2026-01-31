@@ -3,6 +3,9 @@
 # Processes the next Architect LLM reply and broadcasts the result via Turbo Stream.
 # Called after the user sends a message; calls ArchitectService.reply, then optionally
 # ArchitectService.finalize when the interview is complete.
+# Error handling: retries on timeout/connection failures; broadcasts user-friendly
+# errors to the session (error_indicator partial); finalize errors do not re-raise
+# so the session stays in_progress and the user can retry.
 class ArchitectReplyJob < ApplicationJob
   queue_as :default
 
@@ -20,13 +23,11 @@ class ArchitectReplyJob < ApplicationJob
     broadcast_message(session, assistant_message) if assistant_message.present?
 
     if interview_complete
-      ArchitectService.finalize(session)
-      session.reload
-      broadcast_session_complete(session)
+      finalize_session(session_id, session)
     end
   rescue ArchitectService::MissingApiKeysError => e
     Rails.logger.error "ArchitectReplyJob: #{e.message}"
-    broadcast_error(session_id, e.message)
+    broadcast_error(session_id, I18n.t("architect.errors.missing_api_keys"))
     raise
   rescue Faraday::Error => e
     Rails.logger.error "ArchitectReplyJob LLM error: #{e.message}"
@@ -58,14 +59,34 @@ class ArchitectReplyJob < ApplicationJob
     )
   end
 
+  def finalize_session(session_id, session)
+    ArchitectService.finalize(session)
+    session.reload
+    broadcast_session_complete(session)
+  rescue ArchitectService::MissingApiKeysError => e
+    Rails.logger.error "ArchitectReplyJob finalize: #{e.message}"
+    broadcast_error(session_id, I18n.t("architect.errors.missing_api_keys"))
+  rescue Faraday::Error => e
+    Rails.logger.error "ArchitectReplyJob finalize LLM error: #{e.message}"
+    broadcast_error(session_id, I18n.t("architect.errors.llm_failed"))
+  rescue StandardError => e
+    Rails.logger.error "ArchitectReplyJob finalize: #{e.class} #{e.message}\n#{e.backtrace.first(5).join("\n")}"
+    broadcast_error(session_id, I18n.t("architect.errors.generation_failed"))
+  end
+
   def broadcast_error(session_id, error_message)
     session = ArchitectSession.find_by(id: session_id)
     return unless session
 
+    html = ApplicationController.render(
+      partial: "architect/sessions/error_indicator",
+      locals: { message: error_message },
+      formats: [:html]
+    )
     Turbo::StreamsChannel.broadcast_replace_to(
       session,
       target: "architect_thinking_indicator",
-      html: "<div id=\"architect_thinking_indicator\" class=\"architect-error\" data-architect-error=\"true\">#{ERB::Util.html_escape(error_message)}</div>"
+      html: html
     )
   end
 end

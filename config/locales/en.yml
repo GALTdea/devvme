@@ -74,8 +74,10 @@ en:
     errors:
       llm_failed: "The AI service is temporarily unavailable. Please try again in a moment."
       generic: "Something went wrong. Please try again."
+      generation_failed: "We couldn't generate your bio and headline right now. Please try again."
       missing_api_keys: "Career Architect is not configured. Please contact support."
       message_blank: "Please enter a message."
       not_completed: "The interview is not complete yet."
       rate_limit_sessions: "You can start at most 3 Career Architect sessions per hour. Please try again later."
       rate_limit_messages: "Maximum messages per session reached."
+      try_again: "You can send another message to retry or refresh the page."
