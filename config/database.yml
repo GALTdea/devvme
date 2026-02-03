@@ -28,6 +28,10 @@ development:
     <<: *default
     database: devvme_app_development
     migrations_paths: db/queue_migrate
+  cable:
+    <<: *default
+    database: devvme_app_development
+    migrations_paths: db/cable_migrate
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
@@ -67,6 +71,10 @@ test:
     <<: *default
     database: devvme_app_test
     migrations_paths: db/queue_migrate
+  cable:
+    <<: *default
+    database: devvme_app_test
+    migrations_paths: db/cable_migrate
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is

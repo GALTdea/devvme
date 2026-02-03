@@ -55,10 +55,17 @@ module Architect
         sequence: next_sequence
       )
 
-      ArchitectReplyJob.perform_later(@architect_session.id)
-
       respond_to do |format|
         format.turbo_stream do
+          if Rails.env.development?
+            # Run job in web process so the broadcast is delivered to the same process.
+            # Request blocks for the LLM call (~1–2s); then we render so the client
+            # gets the user message + thinking; the job’s Cable broadcast updates the UI.
+            ArchitectReplyJob.perform_now(@architect_session.id)
+          else
+            ArchitectReplyJob.perform_later(@architect_session.id)
+          end
+
           render turbo_stream: [
             turbo_stream.append("architect_messages", partial: "architect/messages/message", locals: { message: user_message }),
             turbo_stream.replace("architect_thinking_indicator", partial: "architect/sessions/thinking_indicator")

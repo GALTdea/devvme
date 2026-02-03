@@ -233,7 +233,8 @@ Use a user that can access the dashboard (e.g. local account or seed user).
 - [x] **Step 16: Soft launch**
   - Status: ✅ Done
   - Dependencies: All previous steps
-  - Notes: Beta gate via `User#allow_career_architect`; admins/super_admins bypass; dashboard quick action hidden for non-beta; rake tasks: `architect:enable_beta`, `architect:disable_beta`, `architect:list_beta`, `architect:queue_status`, `architect:stats`; locale `architect.errors.beta_only`
+  - Files: Migration `AddAllowCareerArchitectToUsers`, `config/cable.yml`, `config/database.yml`, `Procfile.dev`, `lib/tasks/architect.rake`, controller/views/locale
+  - Notes: Beta gate via `User#allow_career_architect` (admins bypass); dashboard quick action hidden for non-beta; rake tasks `architect:enable_beta`, `architect:disable_beta`, `architect:list_beta`, `architect:queue_status`, `architect:stats`; `Procfile.dev` adds `jobs: bin/jobs`; `cable.yml` uses `solid_cable` for multi-process; `database.yml` adds cable DB for dev/test
 
 ---
 

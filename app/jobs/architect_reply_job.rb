@@ -20,7 +20,11 @@ class ArchitectReplyJob < ApplicationJob
 
     assistant_message, interview_complete = ArchitectService.reply(session)
 
-    broadcast_message(session, assistant_message) if assistant_message.present?
+    if assistant_message.present?
+      broadcast_message(session, assistant_message)
+      # Hide thinking indicator after showing assistant reply (session still in progress).
+      broadcast_thinking_idle(session) unless interview_complete
+    end
 
     if interview_complete
       finalize_session(session_id, session)
@@ -47,6 +51,14 @@ class ArchitectReplyJob < ApplicationJob
       target: "architect_messages",
       partial: "architect/messages/message",
       locals: { message: message }
+    )
+  end
+
+  def broadcast_thinking_idle(session)
+    Turbo::StreamsChannel.broadcast_replace_to(
+      session,
+      target: "architect_thinking_indicator",
+      partial: "architect/sessions/thinking_idle"
     )
   end
 
