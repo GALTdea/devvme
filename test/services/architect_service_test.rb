@@ -54,6 +54,37 @@ class ArchitectServiceTest < ActiveSupport::TestCase
     assert_not context.key?("github")
   end
 
+  test "start_session enriches user profile from github data before snapshot" do
+    @user.update!(github_url: "https://github.com/johndoe", skills: ["Ruby"])
+
+    github_data = {
+      "profile" => { "bio" => "GitHub bio" },
+      "repos" => [{ "language" => "Go" }],
+      "readmes" => {}
+    }
+
+    enrich_stub = lambda do |user, data|
+      assert_equal @user.id, user.id
+      assert_equal github_data, data
+      user.update!(skills: ["Ruby", "Go"], bio: "GitHub bio")
+      true
+    end
+
+    GitHubContextService.stub(:fetch_for_user, github_data) do
+      GitHubProfileEnrichmentService.stub(:enrich_user!, enrich_stub) do
+        service = ArchitectService.new
+        service.stub(:ensure_openai_configured!, true) do
+          service.stub(:call_openai, "What kind of roles are you targeting?") do
+            result = service.start_session(@user, "both")
+            session = result[:session]
+            assert_includes session.context_snapshot.dig("user_profile", "skills"), "Go"
+            assert_equal "GitHub bio", session.context_snapshot.dig("user_profile", "bio")
+          end
+        end
+      end
+    end
+  end
+
   test "start_session raises MissingApiKeysError when OpenAI key is blank" do
     ArchitectService.stub(:openai_api_key, nil) do
       assert_raises(ArchitectService::MissingApiKeysError) do

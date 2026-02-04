@@ -23,8 +23,8 @@ class ArchitectService
     new.finalize(session)
   end
 
-  def self.build_context(user, pasted_content = nil)
-    new.build_context(user, pasted_content)
+  def self.build_context(user, pasted_content = nil, github_data: nil)
+    new.build_context(user, pasted_content, github_data: github_data)
   end
 
   # ENV overrides credentials so export OPENAI_API_KEY wins when testing.
@@ -46,7 +46,9 @@ class ArchitectService
 
   def start_session(user, goal, pasted_content: nil)
     ensure_openai_configured!
-    context = build_context(user, pasted_content)
+    github_data = GitHubContextService.fetch_for_user(user)
+    GitHubProfileEnrichmentService.enrich_user!(user, github_data)
+    context = build_context(user.reload, pasted_content, github_data: github_data)
     session = ArchitectSession.create!(
       user: user,
       goal: goal.to_s,
@@ -114,7 +116,7 @@ class ArchitectService
     true
   end
 
-  def build_context(user, pasted_content = nil)
+  def build_context(user, pasted_content = nil, github_data: nil)
     user_profile = {
       full_name: user.full_name,
       job_title: user.job_title,
@@ -134,7 +136,7 @@ class ArchitectService
       }
     end
 
-    github = GitHubContextService.fetch_for_user(user)
+    github = github_data || GitHubContextService.fetch_for_user(user)
 
     {
       "user_profile" => user_profile,
