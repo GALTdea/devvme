@@ -20,12 +20,25 @@ module Architect
       @architect_session = current_user.architect_sessions.build
       authorize @architect_session
 
-      permitted = params.fetch(:architect_session, {}).permit(:goal, :pasted_content)
+      permitted = params.fetch(:architect_session, {}).permit(:goal, :pasted_content, :mode, :target_type, target_data: {})
       goal = permitted[:goal].to_s.presence
       goal = "both" unless goal.present? && ArchitectSession.goals.key?(goal)
       pasted_content = permitted[:pasted_content].to_s.strip.presence
+      mode = permitted[:mode].to_s.presence
+      mode = "profile_builder" unless mode.present? && ArchitectSession::MODES.include?(mode)
+      target_type = permitted[:target_type].to_s.presence
+      target_type = nil unless target_type.present? && ArchitectSession::TARGET_TYPES.include?(target_type)
+      target_data = permitted[:target_data].is_a?(ActionController::Parameters) ? permitted[:target_data].to_h : permitted[:target_data]
+      target_data = {} unless target_data.is_a?(Hash)
 
-      result = ArchitectService.start_session(current_user, goal, pasted_content: pasted_content)
+      result = ArchitectService.start_session(
+        current_user,
+        goal,
+        pasted_content: pasted_content,
+        mode: mode,
+        target_type: target_type,
+        target_data: target_data
+      )
       session = result[:session]
 
       redirect_to architect_session_path(session), notice: t("architect.sessions.created")

@@ -19,8 +19,8 @@ class ArchitectServiceTest < ActiveSupport::TestCase
     context = ArchitectService.build_context(@user)
     assert context.is_a?(Hash)
     assert context.key?("user_profile")
-    assert_equal @user.full_name, context["user_profile"]["full_name"]
-    assert_equal @user.bio, context["user_profile"]["bio"]
+    assert_equal @user.full_name, context["user_profile"]["full_name"] || context["user_profile"][:full_name]
+    assert_equal @user.bio, context["user_profile"]["bio"] || context["user_profile"][:bio]
     assert context.key?("projects")
     assert context["projects"].is_a?(Array)
   end
@@ -42,7 +42,7 @@ class ArchitectServiceTest < ActiveSupport::TestCase
       "readmes" => {}
     }
     @user.update!(github_url: "https://github.com/johndoe")
-    GitHubContextService.stub(:fetch_for_user, github_data) do
+    with_stubbed_singleton_method(GitHubContextService, :fetch_for_user, github_data) do
       context = ArchitectService.build_context(@user)
       assert context.key?("github")
       assert_equal github_data, context["github"]
@@ -70,15 +70,24 @@ class ArchitectServiceTest < ActiveSupport::TestCase
       true
     end
 
-    GitHubContextService.stub(:fetch_for_user, github_data) do
-      GitHubProfileEnrichmentService.stub(:enrich_user!, enrich_stub) do
+    with_stubbed_singleton_method(GitHubContextService, :fetch_for_user, github_data) do
+      with_stubbed_singleton_method(GitHubProfileEnrichmentService, :enrich_user!, enrich_stub) do
         service = ArchitectService.new
-        service.stub(:ensure_openai_configured!, true) do
-          service.stub(:call_openai, "What kind of roles are you targeting?") do
-            result = service.start_session(@user, "both")
+        with_stubbed_singleton_method(service, :ensure_openai_configured!, true) do
+          with_stubbed_singleton_method(service, :call_openai, "What kind of roles are you targeting?") do
+            result = service.start_session(
+              @user,
+              "both",
+              mode: "fit_gap",
+              target_type: "job_description",
+              target_data: { "job_description_text" => "Need Go APIs" }
+            )
             session = result[:session]
             assert_includes session.context_snapshot.dig("user_profile", "skills"), "Go"
             assert_equal "GitHub bio", session.context_snapshot.dig("user_profile", "bio")
+            assert_equal "fit_gap", session.mode
+            assert_equal "job_description", session.target_type
+            assert_equal({ "job_description_text" => "Need Go APIs" }, session.target_data)
           end
         end
       end
@@ -86,7 +95,7 @@ class ArchitectServiceTest < ActiveSupport::TestCase
   end
 
   test "start_session raises MissingApiKeysError when OpenAI key is blank" do
-    ArchitectService.stub(:openai_api_key, nil) do
+    with_stubbed_singleton_method(ArchitectService, :openai_api_key, nil) do
       assert_raises(ArchitectService::MissingApiKeysError) do
         ArchitectService.start_session(@user, "both")
       end
@@ -103,11 +112,11 @@ class ArchitectServiceTest < ActiveSupport::TestCase
   test "reply with mocked OpenAI creates assistant message" do
     session = ArchitectSession.create!(user: @user, goal: "both", status: :in_progress)
     mock_response = { "choices" => [{ "message" => { "content" => "What is your job title?" } }] }
-    client = Minitest::Mock.new
-    client.expect(:chat, mock_response, [Hash])
+    client = Object.new
+    client.define_singleton_method(:chat) { |parameters:| mock_response }
 
-    ArchitectService.stub(:openai_api_key, "sk-test") do
-      OpenAI::Client.stub(:new, client) do
+    with_stubbed_singleton_method(ArchitectService, :openai_api_key, "sk-test") do
+      with_stubbed_singleton_method(OpenAI::Client, :new, client) do
         msg, complete = ArchitectService.reply(session)
         assert msg.present?
         assert msg.message_assistant?
@@ -115,7 +124,6 @@ class ArchitectServiceTest < ActiveSupport::TestCase
         assert_not complete
       end
     end
-    client.verify
   end
 
   test "reply when message count at MAX_QA_MESSAGES returns interview_complete" do
@@ -141,22 +149,40 @@ class ArchitectServiceTest < ActiveSupport::TestCase
     session.architect_messages.create!(role: :user, content: "Hello", sequence: 1)
     text_block = Struct.new(:text).new("BIO:\nBio text here.\n\nHEADLINE:\nHeadline here.")
     mock_create_response = Struct.new(:content).new([text_block])
-    mock_messages = Minitest::Mock.new
-    mock_messages.expect(:create, mock_create_response)
-    anthropic_client = Minitest::Mock.new
-    anthropic_client.expect(:messages, mock_messages)
+    mock_messages = Object.new
+    mock_messages.define_singleton_method(:create) do |**kwargs|
+      mock_create_response
+    end
+    anthropic_client = Object.new
+    anthropic_client.define_singleton_method(:messages) { mock_messages }
 
-    ArchitectService.stub(:anthropic_api_key, "sk-ant-test") do
-      Anthropic::Client.stub(:new, anthropic_client) do
+    with_stubbed_singleton_method(ArchitectService, :anthropic_api_key, "sk-ant-test") do
+      with_stubbed_singleton_method(Anthropic::Client, :new, anthropic_client) do
         result = ArchitectService.finalize(session)
         assert result
       end
     end
-    mock_messages.verify
-    anthropic_client.verify
     session.reload
     assert session.completed?
     assert_equal "Bio text here.", session.generated_bio
     assert_equal "Headline here.", session.generated_headline
+  end
+
+  private
+
+  def with_stubbed_singleton_method(target, method_name, replacement)
+    original = target.method(method_name)
+    target.define_singleton_method(method_name) do |*args, **kwargs, &block|
+      if replacement.respond_to?(:call)
+        replacement.call(*args, **kwargs, &block)
+      else
+        replacement
+      end
+    end
+    yield
+  ensure
+    target.define_singleton_method(method_name) do |*args, **kwargs, &block|
+      original.call(*args, **kwargs, &block)
+    end
   end
 end

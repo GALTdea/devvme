@@ -11,8 +11,15 @@ class ArchitectService
 
   class MissingApiKeysError < StandardError; end
 
-  def self.start_session(user, goal, pasted_content: nil)
-    new.start_session(user, goal, pasted_content: pasted_content)
+  def self.start_session(user, goal, pasted_content: nil, mode: "profile_builder", target_type: nil, target_data: {})
+    new.start_session(
+      user,
+      goal,
+      pasted_content: pasted_content,
+      mode: mode,
+      target_type: target_type,
+      target_data: target_data
+    )
   end
 
   def self.reply(session)
@@ -44,14 +51,25 @@ class ArchitectService
     anthropic_api_key.present?
   end
 
-  def start_session(user, goal, pasted_content: nil)
+  def start_session(user, goal, pasted_content: nil, mode: "profile_builder", target_type: nil, target_data: {})
     ensure_openai_configured!
+    safe_mode = mode.to_s.presence
+    safe_mode = "profile_builder" unless ArchitectSession::MODES.include?(safe_mode)
+    safe_target_type = target_type.to_s.presence
+    safe_target_type = nil unless ArchitectSession::TARGET_TYPES.include?(safe_target_type)
+    safe_target_data = target_data.is_a?(Hash) ? target_data : {}
+
     github_data = GitHubContextService.fetch_for_user(user)
     GitHubProfileEnrichmentService.enrich_user!(user, github_data)
     context = build_context(user.reload, pasted_content, github_data: github_data)
     session = ArchitectSession.create!(
       user: user,
       goal: goal.to_s,
+      mode: safe_mode,
+      target_type: safe_target_type,
+      target_data: safe_target_data,
+      result_data: {},
+      context_version: 1,
       status: :in_progress,
       context_snapshot: context
     )

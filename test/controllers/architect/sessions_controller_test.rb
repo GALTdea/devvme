@@ -39,6 +39,54 @@ module Architect
       assert_equal I18n.t("architect.sessions.created"), flash[:notice]
     end
 
+    test "should pass mode and target payload to service on create" do
+      sign_in_user @user
+      captured = nil
+
+      stub_architect_start_session(->(*args, **opts) {
+        captured = { args: args, opts: opts }
+        { session: @session }
+      }) do
+        post architect_sessions_path, params: {
+          architect_session: {
+            goal: "both",
+            mode: "fit_gap",
+            target_type: "job_description",
+            target_data: { job_description_text: "Need Rails and Postgres" }
+          }
+        }
+      end
+
+      assert_redirected_to architect_session_path(@session)
+      assert_equal "fit_gap", captured[:opts][:mode]
+      assert_equal "job_description", captured[:opts][:target_type]
+      assert_equal({ "job_description_text" => "Need Rails and Postgres" }, captured[:opts][:target_data])
+    end
+
+    test "should default invalid mode and target params for create" do
+      sign_in_user @user
+      captured = nil
+
+      stub_architect_start_session(->(*args, **opts) {
+        captured = opts
+        { session: @session }
+      }) do
+        post architect_sessions_path, params: {
+          architect_session: {
+            goal: "both",
+            mode: "invalid_mode",
+            target_type: "invalid_target",
+            target_data: "not-a-hash"
+          }
+        }
+      end
+
+      assert_redirected_to architect_session_path(@session)
+      assert_equal "profile_builder", captured[:mode]
+      assert_nil captured[:target_type]
+      assert_equal({}, captured[:target_data])
+    end
+
     test "should redirect to dashboard with alert when create raises MissingApiKeysError" do
       sign_in_user @user
       stub_architect_start_session(->(*) { raise ArchitectService::MissingApiKeysError, "no key" }) do

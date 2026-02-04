@@ -7,18 +7,25 @@
 #
 #  id                 :bigint           not null, primary key
 #  context_snapshot   :jsonb
+#  context_version    :integer          default(1), not null
 #  generated_bio      :text
 #  generated_headline :text
 #  goal               :string           not null
+#  mode               :string           default("profile_builder"), not null
 #  question_count     :integer          default(0), not null
+#  result_data        :jsonb            not null
 #  status             :string           default("draft"), not null
+#  target_data        :jsonb            not null
+#  target_type        :string
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
 #  user_id            :bigint           not null
 #
 # Indexes
 #
+#  index_architect_sessions_on_mode                    (mode)
 #  index_architect_sessions_on_status                  (status)
+#  index_architect_sessions_on_target_type             (target_type)
 #  index_architect_sessions_on_user_id                 (user_id)
 #  index_architect_sessions_on_user_id_and_created_at  (user_id,created_at)
 #
@@ -60,6 +67,35 @@ class ArchitectSessionTest < ActiveSupport::TestCase
       @session.goal = goal
       assert @session.valid?, "goal #{goal} should be valid"
     end
+  end
+
+  test "should accept valid modes" do
+    ArchitectSession::MODES.each do |mode|
+      @session.mode = mode
+      assert @session.valid?, "mode #{mode} should be valid"
+    end
+  end
+
+  test "should reject invalid mode" do
+    assert_raises(ArgumentError) do
+      @session.mode = "something_else"
+    end
+  end
+
+  test "should accept valid target_type or nil" do
+    @session.target_type = nil
+    assert @session.valid?
+
+    ArchitectSession::TARGET_TYPES.each do |target_type|
+      @session.target_type = target_type
+      assert @session.valid?, "target_type #{target_type} should be valid"
+    end
+  end
+
+  test "should reject invalid target_type" do
+    @session.target_type = "random"
+    assert_not @session.valid?
+    assert_includes @session.errors[:target_type], "is not included in the list"
   end
 
   test "should validate generated_bio length when present" do
@@ -131,6 +167,18 @@ class ArchitectSessionTest < ActiveSupport::TestCase
     assert_equal({}, @session.context_snapshot)
     @session.context_snapshot = { "user_profile" => {} }
     assert_equal({ "user_profile" => {} }, @session.context_snapshot)
+  end
+
+  test "target_data returns hash" do
+    assert_equal({}, @session.target_data)
+    @session.target_data = { "job_description_text" => "Rails role" }
+    assert_equal({ "job_description_text" => "Rails role" }, @session.target_data)
+  end
+
+  test "result_data returns hash" do
+    assert_equal({}, @session.result_data)
+    @session.result_data = { "requirements" => [] }
+    assert_equal({ "requirements" => [] }, @session.result_data)
   end
 
   test "scope recent orders by created_at desc" do
