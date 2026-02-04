@@ -35,6 +35,25 @@ class ArchitectServiceTest < ActiveSupport::TestCase
     assert_not context.key?("pasted_content")
   end
 
+  test "build_context includes github when GitHubContextService returns data" do
+    github_data = {
+      "profile" => { "login" => "johndoe", "bio" => "Ruby dev" },
+      "repos" => [{ "name" => "my-app", "description" => "A Rails app" }],
+      "readmes" => {}
+    }
+    @user.update!(github_url: "https://github.com/johndoe")
+    GitHubContextService.stub(:fetch_for_user, github_data) do
+      context = ArchitectService.build_context(@user)
+      assert context.key?("github")
+      assert_equal github_data, context["github"]
+    end
+  end
+
+  test "build_context omits github when user has no github_url" do
+    context = ArchitectService.build_context(@user)
+    assert_not context.key?("github")
+  end
+
   test "start_session raises MissingApiKeysError when OpenAI key is blank" do
     ArchitectService.stub(:openai_api_key, nil) do
       assert_raises(ArchitectService::MissingApiKeysError) do

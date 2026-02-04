@@ -24,8 +24,8 @@ module DevvmeApp
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    # Add visitor tracking middleware
-    config.autoload_paths += %W[#{config.root}/app/middleware]
+    # Add visitor tracking middleware and services
+    config.autoload_paths += %W[#{config.root}/app/middleware #{config.root}/app/services]
 
     # Note: Middleware is commented out for now due to Rails 8 frozen middleware stack
     # Manual tracking is implemented in controllers instead

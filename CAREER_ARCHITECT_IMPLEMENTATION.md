@@ -240,10 +240,11 @@ Use a user that can access the dashboard (e.g. local account or seed user).
 
 ## Phase 2: Enhanced Context (Future)
 
-- [ ] **Step 17: GitHub integration**
-  - Status: ⚪ Not Started
-  - Approach: OAuth or URL-based fetch
-  - Notes: Enrich context with repos, README, profile
+- [x] **Step 17: GitHub integration**
+  - Status: ✅ Done
+  - Approach: URL-based fetch using user's `github_url`; GitHub REST API (no OAuth).
+  - Notes: Enrich context with profile, repos, and README snippets. Optional `GITHUB_TOKEN` (ENV or credentials `github.token`) for higher rate limits; 1-hour cache per username.
+  - Files: `app/services/github_context_service.rb`; `ArchitectService#build_context` adds `"github"` key to context when present. Tests: `test/services/github_context_service_test.rb`, `test/services/architect_service_test.rb` (build_context includes/omits github).
 
 - [ ] **Step 18: LinkedIn paste enhancement**
   - Status: ⚪ Not Started
@@ -270,6 +271,86 @@ Use a user that can access the dashboard (e.g. local account or seed user).
   - Notes: Use architect messages as "memory" for recruiter chatbot
 
 ---
+
+## Phase 4: Applicant-Facing Fit Gap (Planned)
+
+- [ ] **Step 23: Unified JD Analysis page**
+  - Status: ⚪ Not Started
+  - Dependencies: Step 17 (GitHub integration) required; Step 18 (LinkedIn paste enhancement) optional
+  - Goal: Single page that tells the full story: coverage → evidence → gaps → resume
+  - UX:
+    - Top summary banner: overall fit score, top strengths, top gaps
+    - Sections: Evidence Cards, Gap Guidance, Resume Builder (single template)
+    - Section nav (sticky or inline) to reduce scroll friction
+  - Functional requirements:
+    - Accept JD input (paste or saved JD)
+    - Run analysis and persist results
+    - Allow user to revisit analysis without re-running
+  - Data:
+    - Persist analysis JSON with requirements, evidence items, and gap list
+  - APIs:
+    - `POST /career_architect/jd_analyses` (create analysis)
+    - `GET /career_architect/jd_analyses/:id` (show)
+  - Notes: Default to a unified page; keep subsections collapsible for scannability
+
+- [ ] **Step 24: Evidence Cards (“Proof of Work”)**
+  - Status: ⚪ Not Started
+  - Dependencies: Step 23, Step 17
+  - Goal: Transparent, clickable proof per JD requirement
+  - UX:
+    - Requirement list with status: Strong / Partial / Missing
+    - Evidence card shows artifact, date, confidence, short rationale
+    - “Use in Resume” action per card
+  - Functional requirements:
+    - 1–5 evidence cards per requirement
+    - Confidence score + short explanation for match
+    - Recency indicator and artifact type filter
+  - Data & logic:
+    - Rank evidence by relevance, recency, ownership, and complexity signals
+    - Suppress low-signal evidence (trivial commits, merge-only)
+  - APIs:
+    - `GET /career_architect/jd_analyses/:id/evidence`
+    - `GET /career_architect/jd_analyses/:id/evidence?requirement_id=...`
+
+- [ ] **Step 25: Gap Guidance (“Close the Gap”)**
+  - Status: ⚪ Not Started
+  - Dependencies: Step 23, Step 24
+  - Goal: Turn missing requirements into actionable next steps
+  - UX:
+    - Gap list with severity + effort estimate
+    - Recommendations: project brief, OSS contribution, micro-practice task
+    - “Add to plan” control per recommendation
+  - Functional requirements:
+    - 1–3 recommendations per missing requirement
+    - Allow user to mark recommendation as “in progress”
+    - Optional re-score after completion
+  - Data & logic:
+    - Map JD requirement → skill taxonomy → recommendation template
+    - Prioritize recommendations adjacent to user’s existing stack
+  - APIs:
+    - `GET /career_architect/jd_analyses/:id/gaps`
+    - `POST /career_architect/jd_analyses/:id/recommendations`
+
+- [ ] **Step 26: JD-Aligned Resume Builder (single template, future-ready)**
+  - Status: ⚪ Not Started
+  - Dependencies: Step 23, Step 24
+  - Goal: Generate a resume variant tailored to the JD with evidence-backed bullets
+  - UX:
+    - Resume preview with inline evidence badges
+    - Inline edits saved to draft
+    - Export PDF and DOCX
+  - Functional requirements:
+    - 3–7 bullets per top project/role
+    - Evidence badge per bullet; “Strongest evidence” highlights
+    - Draft saves, revisions persist
+  - Data & logic:
+    - Store `template_id` on resume drafts (nullable) to support future templates
+    - Deduplicate evidence per skill; exclude unsupported skills
+  - APIs:
+    - `POST /career_architect/resume_drafts` (jd_analysis_id)
+    - `GET /career_architect/resume_drafts/:id`
+    - `PATCH /career_architect/resume_drafts/:id`
+    - `POST /career_architect/resume_drafts/:id/export` (pdf/docx)
 
 ## Technical Architecture
 
@@ -374,6 +455,6 @@ User Dashboard
 
 ---
 
-**Last Updated:** 2026-01-29  
+**Last Updated:** 2026-02-04  
 **Maintained By:** Gustavo  
 **Related Docs:** `docs/DATA_MODEL.md`, `README.md`

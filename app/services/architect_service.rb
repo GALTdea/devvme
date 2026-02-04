@@ -134,9 +134,12 @@ class ArchitectService
       }
     end
 
+    github = GitHubContextService.fetch_for_user(user)
+
     {
       "user_profile" => user_profile,
       "projects" => projects,
+      "github" => github,
       "pasted_content" => pasted_content.to_s.strip.presence
     }.compact
   end
