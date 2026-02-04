@@ -133,6 +133,39 @@ devvme_app/
 └── test/                  # Comprehensive test suite
 ```
 
+### Models (domain structure)
+
+```
+app/models/
+├── application_record.rb       # Base class for all models
+├── user.rb                     # Devise auth, profile, slug (FriendlyId); role & account_status enums
+├── project.rb                  # belongs_to user; status, display_order, technologies_used; Active Storage images
+├── blog_post.rb                # belongs_to user; slug, published/archived; has_rich_text content; BlogAnalytics concern
+├── follow.rb                   # follower_id, followee_id → User; unique [follower_id, followee_id]
+├── profile_view.rb            # belongs_to user; visitor_ip, user_agent, visited_at (profile analytics)
+├── visitor.rb                 # visitor_id, ip_address, optional user_id on conversion
+├── visitor_page_view.rb       # belongs_to visitor; page_path, viewed_at (anonymous tracking)
+├── user_digest_preference.rb  # belongs_to user; frequency, enabled, next_send_at, content toggles
+├── admin_activity.rb          # admin_id → User; polymorphic target; action, details (admin audit)
+├── architect_session.rb       # belongs_to user; status, goal; context_snapshot, generated_bio/headline
+├── architect_message.rb       # belongs_to architect_session; role, content, sequence (Career Architect Q&A)
+└── concerns/
+    ├── blog_analytics.rb
+    └── blog_page_view_analytics.rb
+```
+
+| Model | Purpose |
+|-------|---------|
+| **User** | Auth (Devise), profile, invitations, followers/following, digest prefs |
+| **Project** | User portfolio items; tech stack, URLs, status, images |
+| **BlogPost** | User articles; slug, published state, rich text, view counts |
+| **Follow** | User → User follow relationship |
+| **ProfileView** | Profile view analytics (per user) |
+| **Visitor** / **VisitorPageView** | Anonymous visit tracking; optional link to User on signup |
+| **UserDigestPreference** | Email digest frequency and content options |
+| **AdminActivity** | Audit log for admin actions (polymorphic target) |
+| **ArchitectSession** / **ArchitectMessage** | Career Architect AI flow: session + Q&A messages |
+
 ## 🎯 Key Models
 
 ### User Model
