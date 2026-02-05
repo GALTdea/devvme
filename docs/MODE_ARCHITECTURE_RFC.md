@@ -69,6 +69,18 @@ Indexes:
 - `index_architect_artifacts_on_architect_session_id`
 - `index_architect_artifacts_on_artifact_type`
 
+### 4.4 GitHub snapshot cache (Phase C)
+
+`github_profile_snapshots`
+
+- `user_id :bigint, null: false, unique`
+- `username :string, null: false`
+- `payload :jsonb, null: false, default: {}`
+- `fetched_at :datetime`
+- `created_at/updated_at`
+
+Purpose: store a stable GitHub profile snapshot per user to avoid refetching for every analysis and to provide a consistent baseline for skills extraction.
+
 ---
 
 ## 5. Exact Domain Enums / Contracts
@@ -112,6 +124,55 @@ Mock Interview:
   "focus_areas": ["system design", "testing"]
 }
 ```
+
+### 5.4 GitHub snapshot payload shape (summary)
+
+Top-level keys (current shape used by context builders):
+
+```json
+{
+  "profile": {
+    "login": "johndoe",
+    "name": "John Doe",
+    "bio": "Backend engineer...",
+    "company": "Acme",
+    "location": "Austin, TX",
+    "blog": "https://johndoe.dev",
+    "public_repos": 12,
+    "html_url": "https://github.com/johndoe",
+    "followers": 42,
+    "following": 10
+  },
+  "repos": [
+    {
+      "name": "api-service",
+      "description": "Rails API",
+      "language": "Ruby",
+      "stargazers_count": 8,
+      "forks_count": 2,
+      "topics": ["ruby-on-rails", "api"],
+      "updated_at": "2026-02-01T10:20:30Z",
+      "pushed_at": "2026-02-01T10:15:00Z",
+      "archived": false,
+      "fork": false,
+      "html_url": "https://github.com/johndoe/api-service"
+    }
+  ],
+  "readmes": {
+    "api-service": "README text (truncated)"
+  },
+  "skills_profile": {
+    "languages": ["Ruby", "TypeScript"],
+    "topics": ["Ruby On Rails", "Api", "Backend"],
+    "readme_signals": ["Ruby on Rails", "PostgreSQL", "Docker"],
+    "combined": ["Ruby", "TypeScript", "Ruby On Rails", "PostgreSQL", "Docker", "Api", "Backend"]
+  }
+}
+```
+
+Notes:
+- `skills_profile.combined` is the canonical list used for skills merging and Fit Gap context.
+- Topic normalization is title-cased and deduped.
 
 ---
 
