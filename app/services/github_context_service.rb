@@ -11,33 +11,15 @@ class GitHubContextService
 
   class FetchError < StandardError; end
 
-  def self.fetch_for_user(user)
-    new.fetch_for_user(user)
+  def self.fetch_for_user(user, force_refresh: false)
+    new.fetch_for_user(user, force_refresh: force_refresh)
   end
 
-  def fetch_for_user(user)
-    return nil if user.github_url.blank?
-
-    username = extract_username(user.github_url)
-    return nil if username.blank?
-
-    cache_key = "architect:github:#{username}"
-    Rails.cache.fetch(cache_key, expires_in: CACHE_TTL) do
-      fetch_github_context(username)
-    end
-  rescue FetchError, Faraday::Error => e
-    Rails.logger.warn "GitHubContextService: skip context for #{user.github_url}: #{e.message}"
-    nil
+  def self.fetch_for_username(username, force_refresh: false)
+    new.fetch_for_username(username, force_refresh: force_refresh)
   end
 
-  def self.api_token
-    ENV["GITHUB_TOKEN"].to_s.strip.presence ||
-      Rails.application.credentials.dig(:github, :token).to_s.strip.presence
-  end
-
-  private
-
-  def extract_username(url)
+  def self.extract_username(url)
     return nil if url.blank?
     # https://github.com/username, https://github.com/username/, github.com/username
     normalized = url.to_s.strip.downcase
@@ -48,14 +30,54 @@ class GitHubContextService
     path.first.presence
   end
 
+  def fetch_for_user(user, force_refresh: false)
+    return nil if user.github_url.blank?
+
+    username = self.class.extract_username(user.github_url)
+    return nil if username.blank?
+
+    fetch_for_username(username, force_refresh: force_refresh)
+  rescue FetchError, Faraday::Error => e
+    Rails.logger.warn "GitHubContextService: skip context for #{user.github_url}: #{e.message}"
+    nil
+  end
+
+  def fetch_for_username(username, force_refresh: false)
+    return nil if username.blank?
+
+    cache_key = "architect:github:#{username}"
+    if force_refresh
+      fetch_github_context(username)
+    else
+      Rails.cache.fetch(cache_key, expires_in: CACHE_TTL) do
+        fetch_github_context(username)
+      end
+    end
+  rescue FetchError, Faraday::Error => e
+    Rails.logger.warn "GitHubContextService: skip context for #{username}: #{e.message}"
+    nil
+  end
+
+  def self.api_token
+    ENV["GITHUB_TOKEN"].to_s.strip.presence ||
+      Rails.application.credentials.dig(:github, :token).to_s.strip.presence
+  end
+
+  private
+
   def fetch_github_context(username)
     profile = fetch_profile(username)
     repos = fetch_repos(username)
     readmes = fetch_readmes_for_repos(username, repos)
+    skills_profile = GitHubSkillsProfileBuilder.build(
+      "repos" => repos,
+      "readmes" => readmes
+    )
     {
       "profile" => profile,
       "repos" => repos,
-      "readmes" => readmes
+      "readmes" => readmes,
+      "skills_profile" => skills_profile
     }.compact
   end
 
@@ -69,7 +91,10 @@ class GitHubContextService
       "company" => resp["company"],
       "location" => resp["location"],
       "blog" => resp["blog"],
-      "public_repos" => resp["public_repos"]
+      "public_repos" => resp["public_repos"],
+      "html_url" => resp["html_url"],
+      "followers" => resp["followers"],
+      "following" => resp["following"]
     }.compact
   end
 
@@ -83,7 +108,13 @@ class GitHubContextService
         "description" => r["description"],
         "language" => r["language"],
         "stargazers_count" => r["stargazers_count"],
-        "html_url" => r["html_url"]
+        "forks_count" => r["forks_count"],
+        "html_url" => r["html_url"],
+        "topics" => r["topics"],
+        "updated_at" => r["updated_at"],
+        "pushed_at" => r["pushed_at"],
+        "archived" => r["archived"],
+        "fork" => r["fork"]
       }.compact
     end
   end

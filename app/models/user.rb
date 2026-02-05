@@ -146,6 +146,7 @@ class User < ApplicationRecord
 
   # Career Architect sessions (AI-powered profile builder)
   has_many :architect_sessions, dependent: :destroy
+  has_one :github_profile_snapshot, dependent: :destroy, class_name: "GitHubProfileSnapshot"
 
   # Follow helpers
   def can_be_followed?

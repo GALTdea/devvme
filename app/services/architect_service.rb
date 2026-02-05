@@ -65,7 +65,7 @@ class ArchitectService
       target_data: target_data
     )
 
-    github_data = GitHubContextService.fetch_for_user(user)
+    github_data = GitHubSnapshotService.fetch_for_user(user)
     GitHubProfileEnrichmentService.enrich_user!(user, github_data)
     context = build_context(
       user.reload,
@@ -147,7 +147,7 @@ class ArchitectService
   end
 
   def build_context(user, pasted_content = nil, github_data: nil, mode: "profile_builder", target_data: {})
-    github = github_data || GitHubContextService.fetch_for_user(user)
+    github = github_data || GitHubSnapshotService.fetch_for_user(user)
     ContextBuilder.build(
       user: user,
       mode: mode,

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_04_130000) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_05_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -149,6 +149,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_04_130000) do
     t.index ["slug", "sluggable_type", "scope"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type_and_scope", unique: true
     t.index ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
     t.index ["sluggable_type", "sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_type_and_sluggable_id"
+  end
+
+  create_table "github_profile_snapshots", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "username", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.datetime "fetched_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_github_profile_snapshots_on_user_id", unique: true
+    t.index ["username"], name: "index_github_profile_snapshots_on_username"
   end
 
   create_table "noticed_events", force: :cascade do |t|
@@ -464,6 +475,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_04_130000) do
   add_foreign_key "blog_posts", "users"
   add_foreign_key "follows", "users", column: "followee_id"
   add_foreign_key "follows", "users", column: "follower_id"
+  add_foreign_key "github_profile_snapshots", "users"
   add_foreign_key "profile_views", "users"
   add_foreign_key "projects", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

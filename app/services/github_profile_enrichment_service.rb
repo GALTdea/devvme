@@ -7,25 +7,6 @@
 class GitHubProfileEnrichmentService
   MAX_SKILLS = 20
 
-  README_SKILL_PATTERNS = {
-    /ruby on rails|rails/i => "Ruby on Rails",
-    /\breact\b/i => "React",
-    /\bnext\.?js\b/i => "Next.js",
-    /\bnode\.?js\b/i => "Node.js",
-    /\bexpress\b/i => "Express",
-    /\btypescript\b/i => "TypeScript",
-    /\bjavascript\b/i => "JavaScript",
-    /\bpostgres(?:ql)?\b/i => "PostgreSQL",
-    /\bmysql\b/i => "MySQL",
-    /\bredis\b/i => "Redis",
-    /\bdocker\b/i => "Docker",
-    /\bkubernetes\b/i => "Kubernetes",
-    /\bgithub actions\b/i => "GitHub Actions",
-    /\baws\b|amazon web services/i => "AWS",
-    /\bgcp\b|google cloud/i => "Google Cloud",
-    /\bazure\b/i => "Azure"
-  }.freeze
-
   def self.enrich_user!(user, github_data = nil)
     new.enrich_user!(user, github_data)
   end
@@ -53,22 +34,8 @@ class GitHubProfileEnrichmentService
   private
 
   def extract_skills(data)
-    skills = []
-
-    repos = data["repos"].is_a?(Array) ? data["repos"] : []
-    repos.each do |repo|
-      language = repo.is_a?(Hash) ? repo["language"] : nil
-      skills << language.to_s.strip if language.present?
-    end
-
-    readmes = data["readmes"].is_a?(Hash) ? data["readmes"] : {}
-    readmes.each_value do |readme|
-      README_SKILL_PATTERNS.each do |pattern, canonical_skill|
-        skills << canonical_skill if readme.to_s.match?(pattern)
-      end
-    end
-
-    normalize_skills(skills)
+    skills_profile = GitHubSkillsProfileBuilder.build(data)
+    normalize_skills(skills_profile["combined"])
   end
 
   def merge_skills(existing, inferred)
