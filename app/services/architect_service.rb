@@ -30,8 +30,14 @@ class ArchitectService
     new.finalize(session)
   end
 
-  def self.build_context(user, pasted_content = nil, github_data: nil)
-    new.build_context(user, pasted_content, github_data: github_data)
+  def self.build_context(user, pasted_content = nil, github_data: nil, mode: "profile_builder", target_data: {})
+    new.build_context(
+      user,
+      pasted_content,
+      github_data: github_data,
+      mode: mode,
+      target_data: target_data
+    )
   end
 
   # ENV overrides credentials so export OPENAI_API_KEY wins when testing.
@@ -53,21 +59,27 @@ class ArchitectService
 
   def start_session(user, goal, pasted_content: nil, mode: "profile_builder", target_type: nil, target_data: {})
     ensure_openai_configured!
-    safe_mode = mode.to_s.presence
-    safe_mode = "profile_builder" unless ArchitectSession::MODES.include?(safe_mode)
-    safe_target_type = target_type.to_s.presence
-    safe_target_type = nil unless ArchitectSession::TARGET_TYPES.include?(safe_target_type)
-    safe_target_data = target_data.is_a?(Hash) ? target_data : {}
+    mode_payload = ModePolicy.validate!(
+      mode: mode,
+      target_type: target_type,
+      target_data: target_data
+    )
 
     github_data = GitHubContextService.fetch_for_user(user)
     GitHubProfileEnrichmentService.enrich_user!(user, github_data)
-    context = build_context(user.reload, pasted_content, github_data: github_data)
+    context = build_context(
+      user.reload,
+      pasted_content,
+      github_data: github_data,
+      mode: mode_payload[:mode],
+      target_data: mode_payload[:target_data]
+    )
     session = ArchitectSession.create!(
       user: user,
       goal: goal.to_s,
-      mode: safe_mode,
-      target_type: safe_target_type,
-      target_data: safe_target_data,
+      mode: mode_payload[:mode],
+      target_type: mode_payload[:target_type],
+      target_data: mode_payload[:target_data],
       result_data: {},
       context_version: 1,
       status: :in_progress,
@@ -134,100 +146,29 @@ class ArchitectService
     true
   end
 
-  def build_context(user, pasted_content = nil, github_data: nil)
-    user_profile = {
-      full_name: user.full_name,
-      job_title: user.job_title,
-      location: user.location,
-      skills: user.skills.is_a?(Array) ? user.skills : [],
-      github_url: user.github_url,
-      linkedin_url: user.linkedin_url,
-      bio: user.bio,
-      headline: user.headline
-    }.compact
-
-    projects = user.projects.published.by_display_order.limit(20).map do |p|
-      {
-        title: p.title,
-        description: p.description,
-        technologies_used: p.technologies_used.is_a?(Array) ? p.technologies_used : []
-      }
-    end
-
+  def build_context(user, pasted_content = nil, github_data: nil, mode: "profile_builder", target_data: {})
     github = github_data || GitHubContextService.fetch_for_user(user)
-
-    {
-      "user_profile" => user_profile,
-      "projects" => projects,
-      "github" => github,
-      "pasted_content" => pasted_content.to_s.strip.presence
-    }.compact
+    ContextBuilder.build(
+      user: user,
+      mode: mode,
+      pasted_content: pasted_content,
+      github_data: github,
+      target_data: target_data
+    )
   end
 
   private
 
   def qa_system_prompt(session)
-    goal_desc = case session.goal
-    when "bio" then "a short bio (2–4 sentences)"
-    when "headline" then "a headline (one punchy line)"
-    else "a short bio and a headline"
-    end
-
-    context_json = session.context_snapshot.to_json
-    <<~PROMPT.strip
-      You are a Career Architect. Your job is to run a short Socratic interview to gather enough detail to write #{goal_desc} for a developer portfolio.
-
-      Context about the developer (use this to avoid asking things we already know):
-      #{context_json}
-
-      Rules:
-      - Ask one short question at a time. Be conversational and specific.
-      - After 3–6 questions, when you have enough to write a strong #{goal_desc}, output exactly: #{INTERVIEW_COMPLETE_SIGNAL}
-      - Do not write the bio or headline yourself; only ask questions and then signal #{INTERVIEW_COMPLETE_SIGNAL}.
-      - Keep each question to one or two sentences.
-    PROMPT
+    PromptStrategy.for(session.mode).qa_system_prompt(session: session, context: session.context_snapshot)
   end
 
   def finalize_system_prompt(session)
-    goal_desc = case session.goal
-    when "bio" then "Write only a short bio (2–4 sentences). Do not output a headline."
-    when "headline" then "Write only a headline (one punchy line). Do not output a bio."
-    else "Write both: first a short bio (2–4 sentences), then a headline (one punchy line)."
-    end
-
-    <<~PROMPT.strip
-      You are a Career Architect. Below is a Socratic interview with a developer. #{goal_desc}
-
-      Output format:
-      - If only bio: write the bio as plain text.
-      - If only headline: write the headline as plain text.
-      - If both: first line "BIO:" then the bio paragraph, then a blank line, then "HEADLINE:" then the headline on the next line.
-
-      Be concise, professional, and specific to what was discussed. No filler or generic phrases.
-    PROMPT
+    PromptStrategy.for(session.mode).finalize_system_prompt(session: session, context: session.context_snapshot)
   end
 
   def parse_finalize_response(text, session)
-    bio = nil
-    headline = nil
-
-    if session.goal_both?
-      if text =~ /\A\s*BIO:\s*\n?(.*?)(?=\n\s*HEADLINE:|\z)/im
-        bio = Regexp.last_match(1).strip
-      end
-      if text =~ /HEADLINE:\s*\n?(.*)/im
-        headline = Regexp.last_match(1).strip
-      end
-      # Fallback: first paragraph = bio, second = headline
-      bio ||= text.split(/\n\n+/).first&.strip
-      headline ||= text.split(/\n\n+/).second&.strip
-    elsif session.goal_bio?
-      bio = text.strip
-    else
-      headline = text.strip
-    end
-
-    [bio, headline]
+    ResultParser.for(session.mode).parse_finalize(text: text, session: session)
   end
 
   def ensure_openai_configured!
