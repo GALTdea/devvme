@@ -24,17 +24,15 @@ class GitHubContextServiceTest < ActiveSupport::TestCase
   end
 
   test "extract_username parses github.com URL" do
-    svc = ::GitHubContextService.new
-    assert_equal "johndoe", svc.send(:extract_username, "https://github.com/johndoe")
-    assert_equal "johndoe", svc.send(:extract_username, "https://github.com/johndoe/")
-    assert_equal "johndoe", svc.send(:extract_username, "github.com/johndoe")
+    assert_equal "johndoe", ::GitHubContextService.extract_username("https://github.com/johndoe")
+    assert_equal "johndoe", ::GitHubContextService.extract_username("https://github.com/johndoe/")
+    assert_equal "johndoe", ::GitHubContextService.extract_username("github.com/johndoe")
   end
 
   test "extract_username returns nil for non-github URL" do
-    svc = ::GitHubContextService.new
-    assert_nil svc.send(:extract_username, "https://gitlab.com/johndoe")
-    assert_nil svc.send(:extract_username, nil)
-    assert_nil svc.send(:extract_username, "")
+    assert_nil ::GitHubContextService.extract_username("https://gitlab.com/johndoe")
+    assert_nil ::GitHubContextService.extract_username(nil)
+    assert_nil ::GitHubContextService.extract_username("")
   end
 
   test "fetch_for_user returns profile and repos when API is stubbed" do
@@ -47,6 +45,9 @@ class GitHubContextServiceTest < ActiveSupport::TestCase
     assert result["repos"].is_a?(Array)
     assert_equal 1, result["repos"].size
     assert_equal "my-app", result["repos"].first["name"]
+    assert result["skills_profile"].is_a?(Hash)
+    assert_includes result["skills_profile"]["combined"], "Ruby"
+    assert_includes result["skills_profile"]["combined"], "Ruby on Rails"
   end
 
   private

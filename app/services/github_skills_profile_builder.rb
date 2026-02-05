@@ -70,8 +70,6 @@ class GitHubSkillsProfileBuilder
   end
 
   def titleize_token(token)
-    return token.upcase if token.length <= 2
-
     token.capitalize
   end
 end
