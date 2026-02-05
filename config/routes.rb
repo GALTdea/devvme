@@ -104,7 +104,8 @@ Rails.application.routes.draw do
 
   # Devise with custom registrations controller for beta flow
   devise_for :users, controllers: {
-    registrations: 'users/registrations'
+    registrations: "users/registrations",
+    omniauth_callbacks: "users/omniauth_callbacks"
   }
 
   # Profile completion routes (Step 2 of registration)

@@ -26,6 +26,7 @@
 #  location               :string
 #  open_for_work          :boolean          default(FALSE), not null
 #  phone                  :string
+#  provider               :string
 #  remember_created_at    :datetime
 #  reset_password_sent_at :datetime
 #  reset_password_token   :string
@@ -37,6 +38,7 @@
 #  suspended_at           :datetime
 #  suspension_reason      :text
 #  twitter_url            :string
+#  uid                    :string
 #  username               :string           not null
 #  website_url            :string
 #  work_preferences       :jsonb            not null
@@ -54,6 +56,7 @@
 #  index_users_on_invitation_sent_at      (invitation_sent_at)
 #  index_users_on_invitation_token        (invitation_token) UNIQUE
 #  index_users_on_last_login_at           (last_login_at)
+#  index_users_on_provider_and_uid        (provider,uid) UNIQUE
 #  index_users_on_reset_password_token    (reset_password_token) UNIQUE
 #  index_users_on_role                    (role)
 #  index_users_on_slug                    (slug) UNIQUE
@@ -367,5 +370,63 @@ class UserTest < ActiveSupport::TestCase
     assert_equal new_project, recent.first
     assert_equal old_project, recent.second
     assert_not_includes recent, draft_project
+  end
+
+  test "from_omniauth creates new user with github provider and profile fields" do
+    auth = {
+      "provider" => "github",
+      "uid" => "12345",
+      "info" => {
+        "email" => "oauth_new@example.com",
+        "nickname" => "octocat",
+        "name" => "Octo Cat",
+        "description" => "Ruby developer",
+        "blog" => "octo.dev",
+        "urls" => { "GitHub" => "https://github.com/octocat" }
+      },
+      "credentials" => { "token" => "token123" }
+    }
+
+    assert_difference "User.count", 1 do
+      user = User.from_omniauth(auth)
+      assert user.persisted?
+      assert_equal "github", user.provider
+      assert_equal "12345", user.uid
+      assert_equal "oauth_new@example.com", user.email
+      assert_equal "octocat", user.username
+      assert_equal "Octo Cat", user.full_name
+      assert_equal "Ruby developer", user.bio
+      assert_equal "https://octo.dev", user.website_url
+      assert_equal "https://github.com/octocat", user.github_url
+    end
+  end
+
+  test "from_omniauth links existing user by email" do
+    existing = User.create!(
+      email: "oauth_existing@example.com",
+      password: "password123",
+      username: "existinguser",
+      full_name: ""
+    )
+
+    auth = {
+      "provider" => "github",
+      "uid" => "99999",
+      "info" => {
+        "email" => "oauth_existing@example.com",
+        "nickname" => "othername",
+        "name" => "Existing User",
+        "urls" => { "GitHub" => "https://github.com/othername" }
+      }
+    }
+
+    assert_no_difference "User.count" do
+      user = User.from_omniauth(auth)
+      assert_equal existing.id, user.id
+      assert_equal "github", user.provider
+      assert_equal "99999", user.uid
+      assert_equal "Existing User", user.full_name
+      assert_equal "https://github.com/othername", user.github_url
+    end
   end
 end

@@ -26,6 +26,7 @@
 #  location               :string
 #  open_for_work          :boolean          default(FALSE), not null
 #  phone                  :string
+#  provider               :string
 #  remember_created_at    :datetime
 #  reset_password_sent_at :datetime
 #  reset_password_token   :string
@@ -37,6 +38,7 @@
 #  suspended_at           :datetime
 #  suspension_reason      :text
 #  twitter_url            :string
+#  uid                    :string
 #  username               :string           not null
 #  website_url            :string
 #  work_preferences       :jsonb            not null
@@ -54,6 +56,7 @@
 #  index_users_on_invitation_sent_at      (invitation_sent_at)
 #  index_users_on_invitation_token        (invitation_token) UNIQUE
 #  index_users_on_last_login_at           (last_login_at)
+#  index_users_on_provider_and_uid        (provider,uid) UNIQUE
 #  index_users_on_reset_password_token    (reset_password_token) UNIQUE
 #  index_users_on_role                    (role)
 #  index_users_on_slug                    (slug) UNIQUE
@@ -67,7 +70,8 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   # Note: We handle email validation manually to allow reusing emails from deactivated users
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable
+         :recoverable, :rememberable,
+         :omniauthable, omniauth_providers: [:github]
 
   # Override Devise's password validation for invited users
   def password_required?
@@ -691,6 +695,47 @@ class User < ApplicationRecord
     group(:role).count
   end
 
+  def self.from_omniauth(auth)
+    auth_data = auth.respond_to?(:to_h) ? auth.to_h : auth
+    provider = auth_data["provider"].to_s
+    uid = auth_data["uid"].to_s
+    info = auth_data["info"].is_a?(Hash) ? auth_data["info"] : {}
+
+    user = find_by(provider: provider, uid: uid)
+    return user.tap { |u| u.update_from_omniauth!(auth_data) } if user.present?
+
+    email = info["email"].to_s.downcase.presence
+    user = find_by(email: email) if email.present?
+
+    if user.blank?
+      user = new(
+        email: email || "github_#{uid}@users.noreply.github.com",
+        username: generate_unique_username(info["nickname"], info["name"], email),
+        password: Devise.friendly_token.first(20)
+      )
+    end
+
+    user.provider = provider
+    user.uid = uid
+    user.update_from_omniauth!(auth_data)
+    user
+  end
+
+  def self.generate_unique_username(*candidates)
+    base = candidates.compact.map(&:to_s).find(&:present?).to_s.downcase
+    base = base.gsub(/[^a-z0-9_-]/, "_").gsub(/_{2,}/, "_").gsub(/\A[_-]+|[_-]+\z/, "")
+    base = "devuser" if base.blank?
+
+    candidate = base.first(30)
+    counter = 1
+    while where("LOWER(username) = ?", candidate.downcase).exists?
+      suffix = "_#{counter}"
+      candidate = "#{base.first(30 - suffix.length)}#{suffix}"
+      counter += 1
+    end
+    candidate
+  end
+
   def self.registration_stats(days = 30)
     where('created_at > ?', days.days.ago)
       .group("DATE(created_at)")
@@ -748,6 +793,21 @@ class User < ApplicationRecord
   def work_status_message
     return nil unless open_to_work?
     work_preferences.dig('message') || 'Open to new opportunities'
+  end
+
+  def update_from_omniauth!(auth_data)
+    info = auth_data["info"].is_a?(Hash) ? auth_data["info"] : {}
+    credentials = auth_data["credentials"].is_a?(Hash) ? auth_data["credentials"] : {}
+
+    self.github_url = info["urls"].is_a?(Hash) ? info["urls"]["GitHub"] : github_url
+    self.full_name = info["name"].to_s.strip if full_name.blank? && info["name"].present?
+    self.bio = info["description"].to_s.strip if bio.blank? && info["description"].present?
+    self.website_url = info["blog"].to_s.strip if website_url.blank? && info["blog"].present?
+
+    # Store OAuth credentials in memory only for request-time logic if needed later.
+    @oauth_token = credentials["token"].to_s.presence
+
+    save!
   end
 
   def work_types

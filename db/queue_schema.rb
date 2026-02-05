@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_05_120000) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_05_203000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -410,6 +410,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_05_120000) do
     t.boolean "open_for_work", default: false, null: false
     t.jsonb "work_preferences", default: {}, null: false
     t.boolean "allow_career_architect", default: false, null: false
+    t.string "provider"
+    t.string "uid"
     t.index ["account_status"], name: "index_users_on_account_status"
     t.index ["allow_career_architect"], name: "index_users_on_allow_career_architect", where: "(allow_career_architect = true)"
     t.index ["email"], name: "index_users_on_email", unique: true
@@ -419,6 +421,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_05_120000) do
     t.index ["invitation_sent_at"], name: "index_users_on_invitation_sent_at"
     t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
     t.index ["last_login_at"], name: "index_users_on_last_login_at"
+    t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
     t.index ["slug"], name: "index_users_on_slug", unique: true

@@ -28,6 +28,7 @@
 #  location               :string
 #  open_for_work          :boolean          default(FALSE), not null
 #  phone                  :string
+#  provider               :string
 #  remember_created_at    :datetime
 #  reset_password_sent_at :datetime
 #  reset_password_token   :string
@@ -39,6 +40,7 @@
 #  suspended_at           :datetime
 #  suspension_reason      :text
 #  twitter_url            :string
+#  uid                    :string
 #  username               :string           not null
 #  website_url            :string
 #  work_preferences       :jsonb            not null
@@ -56,6 +58,7 @@
 #  index_users_on_invitation_sent_at      (invitation_sent_at)
 #  index_users_on_invitation_token        (invitation_token) UNIQUE
 #  index_users_on_last_login_at           (last_login_at)
+#  index_users_on_provider_and_uid        (provider,uid) UNIQUE
 #  index_users_on_reset_password_token    (reset_password_token) UNIQUE
 #  index_users_on_role                    (role)
 #  index_users_on_slug                    (slug) UNIQUE

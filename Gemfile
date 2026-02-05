@@ -24,6 +24,8 @@ gem "jbuilder"
 
 # Flexible authentication solution for Rails [https://github.com/heartcombo/devise]
 gem "devise", "~> 4.9.4"
+gem "omniauth-github", "~> 2.0"
+gem "omniauth-rails_csrf_protection"
 
 # Friendly URLs for Rails models [https://github.com/norman/friendly_id]
 gem "friendly_id", "~> 5.5"
