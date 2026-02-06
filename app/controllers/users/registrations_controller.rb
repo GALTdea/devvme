@@ -94,7 +94,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # Permit all optional profile fields for completion step
   def profile_completion_params
     params.require(:user).permit(
-      :full_name, :bio, :github_url, :linkedin_url, :twitter_url,
+      :username, :full_name, :bio, :github_url, :linkedin_url, :twitter_url,
       :website_url, :avatar, :job_title, :location, :headline,
       :contact_email, :skills_list
     )
