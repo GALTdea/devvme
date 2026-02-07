@@ -67,6 +67,7 @@ DevvMe is a modern, feature-rich platform that empowers developers to create stu
 ## 📚 Documentation
 
 - **Data model**: [docs/DATA_MODEL.md](docs/DATA_MODEL.md) — one-page overview of main entities, relationships, and enums.
+- **Project Insight source of truth**: [PROJECT_INSIGHT_IMPLEMENTATION.md](PROJECT_INSIGHT_IMPLEMENTATION.md) — finalized v1 scope, architecture, constraints, and rollout plan.
 - **Schema in models**: [AnnotateRb](https://github.com/drwl/annotaterb) adds schema comments to the top of each model file. Run `bundle exec annotaterb models` to annotate; annotations also run automatically after `bin/rails db:migrate` in development (see `lib/tasks/annotate_rb.rake`). Use `ANNOTATERB_SKIP_ON_DB_TASKS=1` to skip annotation when migrating.
 
 ## 📋 Prerequisites
