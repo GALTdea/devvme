@@ -370,26 +370,26 @@ Failure-path tests:
 
 ### Phase 2: Core Services
 
-- [ ] **Step 2.1: Implement URL resolver**
-  - Status: Not started
+- [x] **Step 2.1: Implement URL resolver**
+  - Status: Done
   - Files: `app/services/github_insights/repo_resolver.rb`
   - Dependencies: Phase 1
   - Notes: Parse and normalize `owner/repo`, reject unsupported URLs
 
-- [ ] **Step 2.2: Implement GitHub fetch service**
-  - Status: Not started
+- [x] **Step 2.2: Implement GitHub fetch service**
+  - Status: Done
   - Files: `app/services/github_insights/fetch_service.rb`
   - Dependencies: Step 2.1
   - Notes: Collect bounded metadata/languages/commits/issues/PRs/contributors
 
-- [ ] **Step 2.3: Implement metrics compute service**
-  - Status: Not started
+- [x] **Step 2.3: Implement metrics compute service**
+  - Status: Done
   - Files: `app/services/github_insights/compute_service.rb`
   - Dependencies: Step 2.2
   - Notes: Produce normalized metrics + highlights + caveats
 
-- [ ] **Step 2.4: Implement orchestration sync service**
-  - Status: Not started
+- [x] **Step 2.4: Implement orchestration sync service**
+  - Status: Done
   - Files: `app/services/github_insights/sync_service.rb`
   - Dependencies: Steps 2.1-2.3
   - Notes: Fetch -> compute -> persist snapshot + project summary/status updates
