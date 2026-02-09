@@ -2,6 +2,7 @@ require "test_helper"
 
 class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
   setup do
+    ProjectInsight::RateLimiter::FALLBACK_STORE.clear
     @user = users(:test_user_one)
     @other_user = users(:test_user_two)
     @admin_user = users(:test_admin) if defined?(users(:test_admin))
@@ -326,5 +327,49 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
         password: "password123"
       }
     }
+  end
+
+  test "should require authentication to ask project insight" do
+    @published_project.update!(project_insight_enabled: true)
+
+    post ask_public_project_insight_path(@published_project), params: { question: "What does this app do?" }
+
+    assert_redirected_to new_user_session_path
+  end
+
+  test "should block project insight when disabled" do
+    @published_project.update!(project_insight_enabled: false)
+    @user.update!(account_status: :active)
+    sign_in @user
+
+    post ask_public_project_insight_path(@published_project), params: { question: "What does this app do?" }
+
+    assert_redirected_to public_project_path(@published_project)
+    assert_equal "Project Insight is not enabled for this project.", flash[:alert]
+  end
+
+  test "should render answer when project insight is enabled" do
+    @published_project.update!(project_insight_enabled: true)
+    @user.update!(account_status: :active)
+    sign_in @user
+
+    answer_payload = {
+      "question" => "What does this app do?",
+      "answer" => "It demonstrates a multi-layer Rails architecture.",
+      "evidence" => ["Gemfile includes Rails 8", "Recent commits show active maintenance"]
+    }
+
+    original_call = ProjectInsight::AnswerService.method(:call)
+    ProjectInsight::AnswerService.singleton_class.send(:define_method, :call) do |project:, question:, user:|
+      answer_payload
+    end
+    post ask_public_project_insight_path(@published_project), params: { question: "What does this app do?" }
+  ensure
+    ProjectInsight::AnswerService.singleton_class.send(:define_method, :call, original_call)
+
+    assert_response :success
+    assert_select "h3", text: /project insight/i
+    assert_select "p", text: /multi-layer rails architecture/i
+    assert_select "li", text: /Gemfile includes Rails 8/i
   end
 end

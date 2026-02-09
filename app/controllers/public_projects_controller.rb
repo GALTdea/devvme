@@ -2,8 +2,9 @@ class PublicProjectsController < ApplicationController
   # Public project controller - no authentication required
   # Handles public viewing of published projects
 
-  before_action :set_project, only: [:show]
-  before_action :set_cache_headers
+  before_action :set_project, only: [:show, :ask_insight]
+  before_action :set_cache_headers, only: [:index, :show]
+  before_action :authenticate_user!, only: [:ask_insight]
 
   # GET /projects
   # Display all published projects with pagination and filtering
@@ -62,6 +63,41 @@ class PublicProjectsController < ApplicationController
                                .where.not(id: @project.id)
                                .includes(thumbnail_attachment: :blob)
                                .limit(3)
+  end
+
+  def ask_insight
+    unless @project.published?
+      redirect_to public_projects_path, alert: "Project not found."
+      return
+    end
+
+    unless @project.project_insight_enabled?
+      redirect_to public_project_path(@project), alert: "Project Insight is not enabled for this project."
+      return
+    end
+
+    limiter = ProjectInsight::RateLimiter.new
+    allowed, message = limiter.allowed?(user: current_user, project: @project)
+    unless allowed
+      redirect_to public_project_path(@project), alert: message
+      return
+    end
+
+    @project_insight_result = ProjectInsight::AnswerService.call(
+      project: @project,
+      question: params[:question],
+      user: current_user
+    )
+    limiter.track!(user: current_user, project: @project)
+
+    @related_projects = @project.user.projects
+                               .published
+                               .where.not(id: @project.id)
+                               .includes(thumbnail_attachment: :blob)
+                               .limit(3)
+    render :show, status: :ok
+  rescue ProjectInsight::AnswerService::AnswerError, ArchitectService::MissingApiKeysError => e
+    redirect_to public_project_path(@project), alert: e.message
   end
 
   private

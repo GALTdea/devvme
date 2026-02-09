@@ -76,6 +76,7 @@ class ProjectsController < ApplicationController
   def project_params
     params.require(:project).permit(:title, :description, :live_url, :source_code_url,
                                    :featured, :status, :display_order, :technologies_display,
+                                   :project_insight_enabled,
                                    :thumbnail, images: [])
   end
 

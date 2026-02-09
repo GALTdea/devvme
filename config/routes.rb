@@ -79,6 +79,7 @@ Rails.application.routes.draw do
   # Public project routes (no authentication required)
   get "explore", to: "public_projects#index", as: :public_projects
   get "explore/:id", to: "public_projects#show", as: :public_project
+  post "explore/:id/project_insight/ask", to: "public_projects#ask_insight", as: :ask_public_project_insight
 
   # SEO Sitemap
   get "sitemap.xml", to: "sitemap#index", as: :sitemap, defaults: { format: :xml }

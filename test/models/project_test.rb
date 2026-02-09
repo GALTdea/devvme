@@ -3,25 +3,29 @@
 # Table name: projects
 # Database name: primary
 #
-#  id                :bigint           not null, primary key
-#  demo_url          :string
-#  description       :text
-#  display_order     :integer
-#  featured          :boolean
-#  github_url        :string
-#  live_url          :string
-#  source_code_url   :string
-#  status            :integer
-#  technologies      :text
-#  technologies_used :json
-#  title             :string
-#  created_at        :datetime         not null
-#  updated_at        :datetime         not null
-#  user_id           :bigint           not null
+#  id                               :bigint           not null, primary key
+#  demo_url                         :string
+#  description                      :text
+#  display_order                    :integer
+#  featured                         :boolean
+#  github_url                       :string
+#  live_url                         :string
+#  project_insight_analysis         :jsonb            not null
+#  project_insight_enabled          :boolean          default(FALSE), not null
+#  project_insight_last_analyzed_at :datetime
+#  source_code_url                  :string
+#  status                           :integer
+#  technologies                     :text
+#  technologies_used                :json
+#  title                            :string
+#  created_at                       :datetime         not null
+#  updated_at                       :datetime         not null
+#  user_id                          :bigint           not null
 #
 # Indexes
 #
 #  index_projects_on_display_order              (display_order)
+#  index_projects_on_project_insight_enabled    (project_insight_enabled)
 #  index_projects_on_status                     (status)
 #  index_projects_on_user_id                    (user_id)
 #  index_projects_on_user_id_and_display_order  (user_id,display_order)
@@ -198,6 +202,29 @@ class ProjectTest < ActiveSupport::TestCase
     @project.live_url = ""
     @project.source_code_url = ""
     assert @project.valid?
+  end
+
+  test "project insight should require a github repository url when enabled" do
+    @project.project_insight_enabled = true
+    @project.source_code_url = "https://example.com/not-github"
+    @project.github_url = ""
+
+    assert_not @project.valid?
+    assert_includes @project.errors[:project_insight_enabled], "requires a valid GitHub repository URL in source code URL (or legacy GitHub URL)"
+  end
+
+  test "project github repo url should prefer source_code_url" do
+    @project.source_code_url = "github.com/acme/source-repo"
+    @project.github_url = "github.com/acme/legacy-repo"
+
+    assert_equal "https://github.com/acme/source-repo", @project.project_github_repo_url
+  end
+
+  test "project github repo url should fallback to legacy github_url" do
+    @project.source_code_url = "https://example.com/not-github"
+    @project.github_url = "github.com/acme/legacy-repo"
+
+    assert_equal "https://github.com/acme/legacy-repo", @project.project_github_repo_url
   end
 
   # URL normalization tests

@@ -3,25 +3,29 @@
 # Table name: projects
 # Database name: primary
 #
-#  id                :bigint           not null, primary key
-#  demo_url          :string
-#  description       :text
-#  display_order     :integer
-#  featured          :boolean
-#  github_url        :string
-#  live_url          :string
-#  source_code_url   :string
-#  status            :integer
-#  technologies      :text
-#  technologies_used :json
-#  title             :string
-#  created_at        :datetime         not null
-#  updated_at        :datetime         not null
-#  user_id           :bigint           not null
+#  id                               :bigint           not null, primary key
+#  demo_url                         :string
+#  description                      :text
+#  display_order                    :integer
+#  featured                         :boolean
+#  github_url                       :string
+#  live_url                         :string
+#  project_insight_analysis         :jsonb            not null
+#  project_insight_enabled          :boolean          default(FALSE), not null
+#  project_insight_last_analyzed_at :datetime
+#  source_code_url                  :string
+#  status                           :integer
+#  technologies                     :text
+#  technologies_used                :json
+#  title                            :string
+#  created_at                       :datetime         not null
+#  updated_at                       :datetime         not null
+#  user_id                          :bigint           not null
 #
 # Indexes
 #
 #  index_projects_on_display_order              (display_order)
+#  index_projects_on_project_insight_enabled    (project_insight_enabled)
 #  index_projects_on_status                     (status)
 #  index_projects_on_user_id                    (user_id)
 #  index_projects_on_user_id_and_display_order  (user_id,display_order)
@@ -31,6 +35,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Project < ApplicationRecord
+  GITHUB_HOST_PATTERN = /\A(?:www\.)?github\.com\z/i
+
   belongs_to :user
 
   # Active Storage associations for project images
@@ -54,6 +60,7 @@ class Project < ApplicationRecord
             presence: false,
             allow_blank: true
   validate :validate_url_format
+  validate :project_insight_source_url_required
 
   # Technologies used validation - ensures it's an array
   validate :technologies_used_format
@@ -118,6 +125,44 @@ class Project < ApplicationRecord
   # Set technologies from display string (for form handling)
   def technologies_display=(value)
     self.technologies_used = value
+  end
+
+  def project_insight_analysis
+    super.presence || {}
+  end
+
+  def project_insight_ready?
+    project_insight_enabled? && project_github_repo_url.present?
+  end
+
+  # Canonical repository URL resolver:
+  # 1) source_code_url when it points to GitHub
+  # 2) legacy github_url as fallback for older records
+  def project_github_repo_url
+    source = normalize_url_for_validation(source_code_url)
+    return source if github_repo_url?(source)
+
+    legacy = normalize_url_for_validation(github_url)
+    return legacy if github_repo_url?(legacy)
+
+    nil
+  end
+
+  def github_repo_coordinates
+    repo_url = project_github_repo_url
+    return nil if repo_url.blank?
+
+    uri = URI.parse(repo_url)
+    segments = uri.path.to_s.split("/").reject(&:blank?)
+    return nil if segments.size < 2
+
+    owner = segments[0]
+    repo = segments[1].sub(/\.git\z/i, "")
+    return nil if owner.blank? || repo.blank?
+
+    { owner: owner, repo: repo }
+  rescue URI::InvalidURIError
+    nil
   end
 
   private
@@ -231,5 +276,24 @@ class Project < ApplicationRecord
 
     # Add https:// prefix for domain-only URLs
     self[field] = "https://#{url}"
+  end
+
+  def github_repo_url?(url)
+    return false if url.blank?
+
+    uri = URI.parse(url)
+    return false unless uri.host.to_s.match?(GITHUB_HOST_PATTERN)
+
+    segments = uri.path.to_s.split("/").reject(&:blank?)
+    segments.size >= 2
+  rescue URI::InvalidURIError
+    false
+  end
+
+  def project_insight_source_url_required
+    return unless project_insight_enabled?
+    return if project_github_repo_url.present?
+
+    errors.add(:project_insight_enabled, "requires a valid GitHub repository URL in source code URL (or legacy GitHub URL)")
   end
 end
