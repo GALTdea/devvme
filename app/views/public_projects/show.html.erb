@@ -171,7 +171,7 @@
             </p>
 
             <% if user_signed_in? %>
-              <%= form_with url: ask_public_project_insight_path(@project), method: :post, local: true, class: "space-y-3" do |form| %>
+              <%= form_with url: ask_public_project_insight_path(@project), method: :post, local: true, class: "space-y-3", data: { turbo: false } do |form| %>
                 <%= form.label :question, "Question", class: "block text-sm font-medium text-gray-700" %>
                 <%= form.text_area :question,
                     rows: 3,

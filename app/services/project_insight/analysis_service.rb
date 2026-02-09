@@ -267,8 +267,9 @@ module ProjectInsight
       nil
     end
 
-    def get(path, params = {}, allow_not_found: false)
+    def get(path, params = {}, allow_not_found: false, **query_params)
       uri = URI(API_BASE + path)
+      params = (params.is_a?(Hash) ? params : {}).merge(query_params)
       uri.query = URI.encode_www_form(params) if params.present?
 
       response = connection.get(uri.request_uri, nil, headers)
