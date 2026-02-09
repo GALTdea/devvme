@@ -8,6 +8,11 @@
 #  description                      :text
 #  display_order                    :integer
 #  featured                         :boolean
+#  github_insights_enabled          :boolean          default(TRUE), not null
+#  github_insights_last_error       :text
+#  github_insights_last_synced_at   :datetime
+#  github_insights_summary          :jsonb            not null
+#  github_insights_sync_status      :string           default("never"), not null
 #  github_url                       :string
 #  live_url                         :string
 #  project_insight_analysis         :jsonb            not null
@@ -24,11 +29,13 @@
 #
 # Indexes
 #
-#  index_projects_on_display_order              (display_order)
-#  index_projects_on_project_insight_enabled    (project_insight_enabled)
-#  index_projects_on_status                     (status)
-#  index_projects_on_user_id                    (user_id)
-#  index_projects_on_user_id_and_display_order  (user_id,display_order)
+#  index_projects_on_display_order                (display_order)
+#  index_projects_on_github_insights_enabled      (github_insights_enabled)
+#  index_projects_on_github_insights_sync_status  (github_insights_sync_status)
+#  index_projects_on_project_insight_enabled      (project_insight_enabled)
+#  index_projects_on_status                       (status)
+#  index_projects_on_user_id                      (user_id)
+#  index_projects_on_user_id_and_display_order    (user_id,display_order)
 #
 # Foreign Keys
 #
@@ -38,6 +45,7 @@ class Project < ApplicationRecord
   GITHUB_HOST_PATTERN = /\A(?:www\.)?github\.com\z/i
 
   belongs_to :user
+  has_many :project_github_insight_snapshots, dependent: :destroy, class_name: "ProjectGitHubInsightSnapshot"
 
   # Active Storage associations for project images
   has_many_attached :images
@@ -98,6 +106,7 @@ class Project < ApplicationRecord
   # Callbacks
   before_validation :set_display_order, on: :create
   before_save :normalize_urls
+  after_commit :enqueue_github_insights_sync, on: %i[create update]
 
   # Technologies used getter - returns array of technologies
   def technologies_used
@@ -135,17 +144,29 @@ class Project < ApplicationRecord
     project_insight_enabled? && project_github_repo_url.present?
   end
 
+  def github_insights_summary
+    super.presence || {}
+  end
+
+  def github_insights_ready?
+    github_insights_enabled? && github_insights_sync_status == "ready"
+  end
+
+  def github_insights_failed?
+    github_insights_sync_status == "failed"
+  end
+
+  def github_insights_stale?(stale_after: 7.days)
+    return true if github_insights_last_synced_at.blank?
+
+    github_insights_last_synced_at < stale_after.ago
+  end
+
   # Canonical repository URL resolver:
   # 1) source_code_url when it points to GitHub
   # 2) legacy github_url as fallback for older records
   def project_github_repo_url
-    source = normalize_url_for_validation(source_code_url)
-    return source if github_repo_url?(source)
-
-    legacy = normalize_url_for_validation(github_url)
-    return legacy if github_repo_url?(legacy)
-
-    nil
+    canonical_github_repo_url_for_values(source_code_url: source_code_url, legacy_url: github_url)
   end
 
   def github_repo_coordinates
@@ -251,6 +272,8 @@ class Project < ApplicationRecord
   end
 
   def normalize_url_for_validation(url)
+    return nil if url.blank?
+
     # Add https:// if no protocol is present
     return url if url.match?(/\A[a-z][a-z0-9+.-]*:/i)
     "https://#{url}"
@@ -295,5 +318,41 @@ class Project < ApplicationRecord
     return if project_github_repo_url.present?
 
     errors.add(:project_insight_enabled, "requires a valid GitHub repository URL in source code URL (or legacy GitHub URL)")
+  end
+
+  def enqueue_github_insights_sync
+    return unless should_enqueue_github_insights_sync?
+    return unless defined?(GithubInsightsSyncJob)
+
+    GithubInsightsSyncJob.perform_later(id, sync_type: "light", source: "auto")
+    update_columns(github_insights_sync_status: "queued", github_insights_last_error: nil)
+  rescue StandardError => e
+    Rails.logger.error("Failed to enqueue GitHub insights sync for project #{id}: #{e.message}")
+  end
+
+  def should_enqueue_github_insights_sync?
+    return false unless github_insights_enabled?
+    return false if project_github_repo_url.blank?
+    return true if previous_changes.key?("id")
+
+    github_repo_url_changed_since_last_commit?
+  end
+
+  def github_repo_url_changed_since_last_commit?
+    old_source_code_url = previous_changes.fetch("source_code_url", [source_code_url, source_code_url]).first
+    old_github_url = previous_changes.fetch("github_url", [github_url, github_url]).first
+
+    old_repo_url = canonical_github_repo_url_for_values(source_code_url: old_source_code_url, legacy_url: old_github_url)
+    old_repo_url != project_github_repo_url
+  end
+
+  def canonical_github_repo_url_for_values(source_code_url:, legacy_url:)
+    source = normalize_url_for_validation(source_code_url)
+    return source if github_repo_url?(source)
+
+    legacy = normalize_url_for_validation(legacy_url)
+    return legacy if github_repo_url?(legacy)
+
+    nil
   end
 end

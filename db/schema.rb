@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_07_190000) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_09_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -200,6 +200,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_07_190000) do
     t.index ["visitor_ip", "user_id", "visited_at"], name: "index_profile_views_on_visitor_ip_and_user_id_and_visited_at"
   end
 
+  create_table "project_github_insight_snapshots", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.string "sync_type", null: false
+    t.string "source", null: false
+    t.datetime "captured_at", null: false
+    t.jsonb "repo_payload", default: {}, null: false
+    t.jsonb "metrics_payload", default: {}, null: false
+    t.jsonb "highlights_payload", default: {}, null: false
+    t.jsonb "errors_payload", default: {}, null: false
+    t.integer "duration_ms"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "captured_at"], name: "idx_proj_gh_insight_snapshots_project_captured"
+    t.index ["project_id"], name: "index_project_github_insight_snapshots_on_project_id"
+    t.index ["source"], name: "index_project_github_insight_snapshots_on_source"
+    t.index ["sync_type"], name: "index_project_github_insight_snapshots_on_sync_type"
+  end
+
   create_table "projects", force: :cascade do |t|
     t.string "title"
     t.text "description"
@@ -218,7 +236,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_07_190000) do
     t.boolean "project_insight_enabled", default: false, null: false
     t.datetime "project_insight_last_analyzed_at"
     t.jsonb "project_insight_analysis", default: {}, null: false
+    t.boolean "github_insights_enabled", default: true, null: false
+    t.string "github_insights_sync_status", default: "never", null: false
+    t.datetime "github_insights_last_synced_at"
+    t.text "github_insights_last_error"
+    t.jsonb "github_insights_summary", default: {}, null: false
     t.index ["display_order"], name: "index_projects_on_display_order"
+    t.index ["github_insights_enabled"], name: "index_projects_on_github_insights_enabled"
+    t.index ["github_insights_sync_status"], name: "index_projects_on_github_insights_sync_status"
     t.index ["project_insight_enabled"], name: "index_projects_on_project_insight_enabled"
     t.index ["status"], name: "index_projects_on_status"
     t.index ["user_id", "display_order"], name: "index_projects_on_user_id_and_display_order"
@@ -484,6 +509,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_07_190000) do
   add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "github_profile_snapshots", "users"
   add_foreign_key "profile_views", "users"
+  add_foreign_key "project_github_insight_snapshots", "projects"
   add_foreign_key "projects", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

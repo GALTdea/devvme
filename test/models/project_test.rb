@@ -8,6 +8,11 @@
 #  description                      :text
 #  display_order                    :integer
 #  featured                         :boolean
+#  github_insights_enabled          :boolean          default(TRUE), not null
+#  github_insights_last_error       :text
+#  github_insights_last_synced_at   :datetime
+#  github_insights_summary          :jsonb            not null
+#  github_insights_sync_status      :string           default("never"), not null
 #  github_url                       :string
 #  live_url                         :string
 #  project_insight_analysis         :jsonb            not null
@@ -24,11 +29,13 @@
 #
 # Indexes
 #
-#  index_projects_on_display_order              (display_order)
-#  index_projects_on_project_insight_enabled    (project_insight_enabled)
-#  index_projects_on_status                     (status)
-#  index_projects_on_user_id                    (user_id)
-#  index_projects_on_user_id_and_display_order  (user_id,display_order)
+#  index_projects_on_display_order                (display_order)
+#  index_projects_on_github_insights_enabled      (github_insights_enabled)
+#  index_projects_on_github_insights_sync_status  (github_insights_sync_status)
+#  index_projects_on_project_insight_enabled      (project_insight_enabled)
+#  index_projects_on_status                       (status)
+#  index_projects_on_user_id                      (user_id)
+#  index_projects_on_user_id_and_display_order    (user_id,display_order)
 #
 # Foreign Keys
 #
