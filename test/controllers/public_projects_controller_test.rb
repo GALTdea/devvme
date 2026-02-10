@@ -242,6 +242,92 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "dt", text: /created/i
   end
 
+  test "should show github enrichment ready cards when summary is available" do
+    @published_project.update_columns(
+      github_insights_enabled: true,
+      github_insights_sync_status: "ready",
+      github_insights_last_synced_at: Time.current,
+      github_insights_summary: {
+        "project_overview" => {
+          "stars" => 10,
+          "forks" => 3,
+          "open_issues_count" => 2,
+          "default_branch" => "main"
+        },
+        "tech_stack" => {
+          "languages" => [{ "name" => "Ruby" }, { "name" => "JavaScript" }],
+          "manifests_detected" => ["Gemfile", "package.json"]
+        },
+        "activity_ownership" => {
+          "commit_count_sampled" => 20,
+          "active_contributors_sampled" => 2,
+          "top_contributor_commit_share_percent" => 60.0,
+          "latest_commit_at" => "2026-02-10T00:00:00Z"
+        },
+        "issues_prs" => {
+          "issues_open_count" => 1,
+          "issues_closed_count" => 4,
+          "prs_open_count" => 2,
+          "prs_closed_count" => 6,
+          "prs_merged_count" => 5,
+          "median_pr_merge_time_hours" => 12.5
+        },
+        "highlights" => ["Recent activity detected"],
+        "caveats" => ["Bounded sample"]
+      }
+    )
+
+    get public_project_url(@published_project)
+    assert_response :success
+    assert_select "h3", text: /github project signals/i
+    assert_select "h4", text: /project overview/i
+    assert_select "h4", text: /tech stack & architecture/i
+    assert_select "h4", text: /activity & ownership/i
+    assert_select "h4", text: /issues & pr delivery/i
+    assert_select "h4", text: /evidence highlights/i
+    assert_select "h4", text: /caveats/i
+  end
+
+  test "should show github enrichment syncing state" do
+    @published_project.update_columns(
+      github_insights_enabled: true,
+      github_insights_sync_status: "syncing",
+      github_insights_summary: {}
+    )
+
+    get public_project_url(@published_project)
+    assert_response :success
+    assert_select "h3", text: /github project signals/i
+    assert_select "p", text: /signals are being refreshed/i
+  end
+
+  test "should show github enrichment failed state" do
+    @published_project.update_columns(
+      github_insights_enabled: true,
+      github_insights_sync_status: "failed",
+      github_insights_last_error: "GitHub timeout"
+    )
+
+    get public_project_url(@published_project)
+    assert_response :success
+    assert_select "h3", text: /github project signals/i
+    assert_select "p", text: /signals could not be loaded/i
+    assert_select "p", text: /GitHub timeout/i
+  end
+
+  test "should show github enrichment empty state when never synced" do
+    @published_project.update_columns(
+      github_insights_enabled: true,
+      github_insights_sync_status: "never",
+      github_insights_summary: {}
+    )
+
+    get public_project_url(@published_project)
+    assert_response :success
+    assert_select "h3", text: /github project signals/i
+    assert_select "p", text: /signals are not available yet/i
+  end
+
   test "should handle project with images" do
     # Attach a test image
     @published_project.images.attach(

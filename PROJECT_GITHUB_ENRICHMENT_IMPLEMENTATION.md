@@ -436,8 +436,8 @@ Failure-path tests:
 
 ### Phase 5: Public Project Page Insights
 
-- [ ] **Step 5.1: Render recruiter-friendly insight cards**
-  - Status: Not started
+- [x] **Step 5.1: Render recruiter-friendly insight cards**
+  - Status: Done
   - Files: `app/views/public_projects/show.html.erb`, insight partials in `app/views/public_projects/`
   - Dependencies: Phase 4
   - Cards:
@@ -446,13 +446,13 @@ Failure-path tests:
     - Activity & Ownership
     - Issues/PR Problem-Solving
 
-- [ ] **Step 5.2: Add ready/queued/failed/empty UI states**
-  - Status: Not started
+- [x] **Step 5.2: Add ready/queued/failed/empty UI states**
+  - Status: Done
   - Files: `app/views/public_projects/show.html.erb`, state partials/components
   - Dependencies: Step 5.1
 
-- [ ] **Step 5.3: Add evidence and caveat display**
-  - Status: Not started
+- [x] **Step 5.3: Add evidence and caveat display**
+  - Status: Done
   - Files: `app/views/public_projects/*`
   - Dependencies: Step 5.1
   - Notes: Keep references compact and non-technical where possible

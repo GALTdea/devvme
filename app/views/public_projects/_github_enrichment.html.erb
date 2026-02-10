@@ -1,0 +1,154 @@
+<% return unless project.github_insights_enabled? %>
+
+<div class="bg-white rounded-lg shadow-md p-6">
+  <h3 class="text-lg font-semibold text-gray-900 mb-2">GitHub Project Signals</h3>
+  <p class="text-sm text-gray-600 mb-4">
+    Recruiter-friendly repository evidence for stack, activity, and delivery patterns.
+  </p>
+
+  <% sync_status = project.github_insights_sync_status.to_s %>
+  <% summary = project.github_insights_summary %>
+
+  <% if ["queued", "syncing"].include?(sync_status) %>
+    <div class="rounded-md border border-blue-200 bg-blue-50 p-4">
+      <p class="text-sm font-medium text-blue-900">Signals are being refreshed.</p>
+      <p class="mt-1 text-xs text-blue-800">
+        Status: <%= sync_status.humanize %>. Check back in a few moments.
+      </p>
+    </div>
+  <% elsif sync_status == "failed" %>
+    <div class="rounded-md border border-red-200 bg-red-50 p-4">
+      <p class="text-sm font-medium text-red-900">Signals could not be loaded.</p>
+      <p class="mt-1 text-xs text-red-800">
+        <%= project.github_insights_last_error.presence || "The last sync failed. Try refreshing insights from the project settings page." %>
+      </p>
+    </div>
+  <% elsif sync_status == "ready" && summary.present? %>
+    <% overview = summary["project_overview"] || {} %>
+    <% tech_stack = summary["tech_stack"] || {} %>
+    <% activity = summary["activity_ownership"] || {} %>
+    <% issues_prs = summary["issues_prs"] || {} %>
+    <% highlights = Array(summary["highlights"]) %>
+    <% caveats = Array(summary["caveats"]) %>
+
+    <div class="space-y-4">
+      <div class="rounded-md border border-gray-200 p-3">
+        <h4 class="text-sm font-semibold text-gray-900 mb-2">Project Overview</h4>
+        <dl class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <dt class="text-gray-500">Stars</dt>
+            <dd class="text-gray-900 font-medium"><%= overview["stars"].to_i %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Forks</dt>
+            <dd class="text-gray-900 font-medium"><%= overview["forks"].to_i %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Open Issues</dt>
+            <dd class="text-gray-900 font-medium"><%= overview["open_issues_count"].to_i %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Default Branch</dt>
+            <dd class="text-gray-900 font-medium"><%= overview["default_branch"].presence || "Unknown" %></dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="rounded-md border border-gray-200 p-3">
+        <h4 class="text-sm font-semibold text-gray-900 mb-2">Tech Stack & Architecture</h4>
+        <div class="flex flex-wrap gap-1 mb-2">
+          <% Array(tech_stack["languages"]).first(4).each do |language| %>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-indigo-100 text-indigo-800">
+              <%= language["name"] %>
+            </span>
+          <% end %>
+          <% if Array(tech_stack["languages"]).blank? %>
+            <span class="text-xs text-gray-500">No language data captured</span>
+          <% end %>
+        </div>
+        <p class="text-xs text-gray-600">
+          Manifests detected:
+          <%= Array(tech_stack["manifests_detected"]).presence&.first(4)&.join(", ") || "None" %>
+        </p>
+      </div>
+
+      <div class="rounded-md border border-gray-200 p-3">
+        <h4 class="text-sm font-semibold text-gray-900 mb-2">Activity & Ownership</h4>
+        <dl class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <dt class="text-gray-500">Commits Sampled</dt>
+            <dd class="text-gray-900 font-medium"><%= activity["commit_count_sampled"].to_i %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Active Contributors</dt>
+            <dd class="text-gray-900 font-medium"><%= activity["active_contributors_sampled"].to_i %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Top Contributor Share</dt>
+            <dd class="text-gray-900 font-medium"><%= activity["top_contributor_commit_share_percent"].to_f %>%</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Latest Commit</dt>
+            <dd class="text-gray-900 font-medium"><%= activity["latest_commit_at"].present? ? l(Time.zone.parse(activity["latest_commit_at"]), format: :short) : "Unknown" %></dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="rounded-md border border-gray-200 p-3">
+        <h4 class="text-sm font-semibold text-gray-900 mb-2">Issues & PR Delivery</h4>
+        <dl class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <dt class="text-gray-500">Issues Open / Closed</dt>
+            <dd class="text-gray-900 font-medium"><%= issues_prs["issues_open_count"].to_i %> / <%= issues_prs["issues_closed_count"].to_i %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">PRs Open / Closed</dt>
+            <dd class="text-gray-900 font-medium"><%= issues_prs["prs_open_count"].to_i %> / <%= issues_prs["prs_closed_count"].to_i %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Merged PRs</dt>
+            <dd class="text-gray-900 font-medium"><%= issues_prs["prs_merged_count"].to_i %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Median PR Merge Time</dt>
+            <dd class="text-gray-900 font-medium"><%= issues_prs["median_pr_merge_time_hours"].present? ? "#{issues_prs['median_pr_merge_time_hours']}h" : "Unknown" %></dd>
+          </div>
+        </dl>
+      </div>
+
+      <% if highlights.present? %>
+        <div class="rounded-md border border-emerald-200 bg-emerald-50 p-3">
+          <h4 class="text-sm font-semibold text-emerald-900 mb-1">Evidence Highlights</h4>
+          <ul class="list-disc list-inside text-xs text-emerald-900 space-y-1">
+            <% highlights.each do |item| %>
+              <li><%= item %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <% if caveats.present? %>
+        <div class="rounded-md border border-amber-200 bg-amber-50 p-3">
+          <h4 class="text-sm font-semibold text-amber-900 mb-1">Caveats</h4>
+          <ul class="list-disc list-inside text-xs text-amber-900 space-y-1">
+            <% caveats.each do |item| %>
+              <li><%= item %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <p class="text-xs text-gray-500">
+        Last synced:
+        <%= project.github_insights_last_synced_at.present? ? l(project.github_insights_last_synced_at, format: :short) : "Unknown" %>
+      </p>
+    </div>
+  <% else %>
+    <div class="rounded-md border border-gray-200 bg-gray-50 p-4">
+      <p class="text-sm font-medium text-gray-800">GitHub signals are not available yet.</p>
+      <p class="mt-1 text-xs text-gray-600">
+        The project owner can trigger an enrichment sync from the project settings page.
+      </p>
+    </div>
+  <% end %>
+</div>
