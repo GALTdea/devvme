@@ -398,20 +398,20 @@ Failure-path tests:
 
 ### Phase 3: Background Jobs and Reliability
 
-- [ ] **Step 3.1: Add sync job**
-  - Status: Not started
+- [x] **Step 3.1: Add sync job**
+  - Status: Done
   - Files: `app/jobs/github_insights_sync_job.rb`
   - Dependencies: Step 2.4
   - Notes: Supports `light` and `deep` sync modes
 
-- [ ] **Step 3.2: Add dedupe/concurrency guards**
-  - Status: Not started
+- [x] **Step 3.2: Add dedupe/concurrency guards**
+  - Status: Done
   - Files: `app/jobs/github_insights_sync_job.rb`, `app/services/github_insights/sync_service.rb`
   - Dependencies: Step 3.1
   - Notes: Skip when project currently syncing
 
-- [ ] **Step 3.3: Add retry/backoff and error mapping**
-  - Status: Not started
+- [x] **Step 3.3: Add retry/backoff and error mapping**
+  - Status: Done
   - Files: `app/jobs/github_insights_sync_job.rb`, `app/services/github_insights/fetch_service.rb`
   - Dependencies: Steps 3.1-3.2
   - Notes: Handle timeout, not found, rate-limited responses cleanly

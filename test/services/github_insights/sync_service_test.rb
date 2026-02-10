@@ -77,5 +77,61 @@ module GitHubInsights
       assert_equal "skipped", result["status"]
       assert_equal "sync_in_progress", result["reason"]
     end
+
+    test "maps repository not found to permanent sync error and marks project failed" do
+      project = projects(:test_project_one)
+
+      resolver = Class.new do
+        def self.resolve_project!(_project)
+          { owner: "example", repo: "missing", canonical_url: "https://github.com/example/missing" }
+        end
+      end
+
+      fetcher = Class.new do
+        def self.call(**)
+          raise GitHubInsights::FetchService::RepositoryNotFoundError, "Repository not found"
+        end
+      end
+
+      error = assert_raises(GitHubInsights::SyncService::PermanentSyncError) do
+        GitHubInsights::SyncService.new(
+          repo_resolver: resolver,
+          fetch_service: fetcher,
+          compute_service: Class.new
+        ).call(project: project, sync_type: "deep", source: "manual")
+      end
+
+      assert_match(/Repository not found/i, error.message)
+      assert_equal "failed", project.reload.github_insights_sync_status
+      assert_match(/Repository not found/i, project.github_insights_last_error)
+    end
+
+    test "maps temporary upstream failure to retryable sync error and marks project failed" do
+      project = projects(:test_project_one)
+
+      resolver = Class.new do
+        def self.resolve_project!(_project)
+          { owner: "example", repo: "demo", canonical_url: "https://github.com/example/demo" }
+        end
+      end
+
+      fetcher = Class.new do
+        def self.call(**)
+          raise GitHubInsights::FetchService::TemporaryFetchError, "GitHub timeout"
+        end
+      end
+
+      error = assert_raises(GitHubInsights::SyncService::RetryableSyncError) do
+        GitHubInsights::SyncService.new(
+          repo_resolver: resolver,
+          fetch_service: fetcher,
+          compute_service: Class.new
+        ).call(project: project, sync_type: "light", source: "auto")
+      end
+
+      assert_match(/GitHub timeout/i, error.message)
+      assert_equal "failed", project.reload.github_insights_sync_status
+      assert_match(/GitHub timeout/i, project.github_insights_last_error)
+    end
   end
 end

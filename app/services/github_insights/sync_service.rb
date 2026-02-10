@@ -6,6 +6,10 @@ module GitHubInsights
     VALID_SOURCES = %w[auto manual].freeze
     MAX_ERROR_LENGTH = 500
 
+    class SyncError < StandardError; end
+    class RetryableSyncError < SyncError; end
+    class PermanentSyncError < SyncError; end
+
     def self.call(project:, sync_type: "light", source: "auto")
       new.call(project:, sync_type:, source:)
     end
@@ -18,6 +22,7 @@ module GitHubInsights
 
     def call(project:, sync_type: "light", source: "auto")
       validate_inputs!(sync_type, source)
+      started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 
       project.with_lock do
         return { "status" => "skipped", "reason" => "sync_in_progress" } if project.github_insights_sync_status == "syncing"
@@ -46,7 +51,7 @@ module GitHubInsights
         metrics_payload: computed["metrics"] || {},
         highlights_payload: { "highlights" => computed["highlights"] || [], "caveats" => computed["caveats"] || [] },
         errors_payload: {},
-        duration_ms: nil
+        duration_ms: duration_ms_since(started_at)
       )
 
       project.update!(
@@ -66,12 +71,18 @@ module GitHubInsights
         "caveats" => computed["caveats"],
         "confidence" => computed["confidence"]
       }
+    rescue RepoResolver::InvalidRepositoryUrlError, FetchService::RepositoryNotFoundError, ArgumentError => e
+      mark_failed(project, e.message)
+      raise PermanentSyncError, e.message
+    rescue FetchService::GitHubRateLimitError, FetchService::TemporaryFetchError => e
+      mark_failed(project, e.message)
+      raise RetryableSyncError, e.message
+    rescue FetchService::FetchError => e
+      mark_failed(project, e.message)
+      raise RetryableSyncError, e.message
     rescue StandardError => e
-      project.update_columns(
-        github_insights_sync_status: "failed",
-        github_insights_last_error: e.message.to_s.truncate(MAX_ERROR_LENGTH)
-      )
-      raise
+      mark_failed(project, e.message)
+      raise RetryableSyncError, e.message
     end
 
     private
@@ -79,6 +90,18 @@ module GitHubInsights
     def validate_inputs!(sync_type, source)
       raise ArgumentError, "Unsupported sync_type: #{sync_type}" unless VALID_SYNC_TYPES.include?(sync_type.to_s)
       raise ArgumentError, "Unsupported source: #{source}" unless VALID_SOURCES.include?(source.to_s)
+    end
+
+    def mark_failed(project, message)
+      project.update_columns(
+        github_insights_sync_status: "failed",
+        github_insights_last_error: message.to_s.truncate(MAX_ERROR_LENGTH)
+      )
+    end
+
+    def duration_ms_since(started_at)
+      elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started_at
+      (elapsed * 1000).round
     end
   end
 end

@@ -26,8 +26,9 @@ module GitHubInsights
     VALID_SYNC_TYPES = %w[light deep].freeze
 
     class FetchError < StandardError; end
+    class TemporaryFetchError < FetchError; end
     class RepositoryNotFoundError < FetchError; end
-    class GitHubRateLimitError < FetchError; end
+    class GitHubRateLimitError < TemporaryFetchError; end
 
     def self.call(owner:, repo:, sync_type: "light")
       new.call(owner:, repo:, sync_type:)
@@ -62,6 +63,8 @@ module GitHubInsights
       end
 
       payload
+    rescue Faraday::TimeoutError, Faraday::ConnectionFailed => e
+      raise TemporaryFetchError, "GitHub request failed: #{e.message}"
     rescue Faraday::Error => e
       raise FetchError, "GitHub request failed: #{e.message}"
     end
@@ -191,6 +194,8 @@ module GitHubInsights
         raise RepositoryNotFoundError, "Repository not found or not publicly accessible."
       when 403
         raise GitHubRateLimitError, "GitHub API rate limit reached. Try again shortly."
+      when 500..599
+        raise TemporaryFetchError, "GitHub request failed (HTTP #{response.status})."
       else
         raise FetchError, "GitHub request failed (HTTP #{response.status})."
       end
