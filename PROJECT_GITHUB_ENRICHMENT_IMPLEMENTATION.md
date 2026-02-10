@@ -420,14 +420,14 @@ Failure-path tests:
 
 ### Phase 4: Manual Refresh + Owner Controls
 
-- [ ] **Step 4.1: Add controller endpoint for manual refresh**
-  - Status: Not started
+- [x] **Step 4.1: Add controller endpoint for manual refresh**
+  - Status: Done
   - Files: `app/controllers/projects_controller.rb` (or project settings controller), `config/routes.rb`
   - Dependencies: Phase 3
   - Notes: Auth + ownership checks + enqueue deep sync
 
-- [ ] **Step 4.2: Add owner-facing refresh UI**
-  - Status: Not started
+- [x] **Step 4.2: Add owner-facing refresh UI**
+  - Status: Done
   - Files: `app/views/projects/*` (or settings views), relevant partials/components
   - Dependencies: Step 4.1
   - Notes: Show status badge, last sync timestamp, retry button

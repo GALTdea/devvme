@@ -69,6 +69,7 @@ Rails.application.routes.draw do
   end
   resources :projects do
     patch :reorder, on: :collection
+    post :refresh_github_insights, on: :member
   end
 
   # Public blog routes (no authentication required)

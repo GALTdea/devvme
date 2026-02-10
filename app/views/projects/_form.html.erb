@@ -196,7 +196,7 @@
   <div class="form-section mb-8">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Project Settings</h3>
     
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
       <!-- Status -->
       <div>
         <%= form.label :status, class: "block text-sm font-medium text-gray-700 mb-2" %>
@@ -234,7 +234,47 @@
         </div>
         <p class="mt-1 text-xs text-gray-500">Authenticated users can ask AI questions about this project's GitHub repository.</p>
       </div>
+
+      <!-- GitHub Enrichment -->
+      <div>
+        <div class="flex items-center h-9">
+          <%= form.check_box :github_insights_enabled,
+              class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+          <%= form.label :github_insights_enabled, "Enable GitHub Enrichment", class: "ml-2 block text-sm text-gray-900" %>
+        </div>
+        <p class="mt-1 text-xs text-gray-500">Collects recruiter-friendly activity, stack, and delivery signals from GitHub.</p>
+      </div>
     </div>
+
+    <% if project.persisted? %>
+      <div class="mt-6 p-4 border border-gray-200 rounded-md bg-gray-50">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-900">
+              GitHub Enrichment Status:
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-white border border-gray-300 text-gray-700">
+                <%= project.github_insights_sync_status.to_s.humanize.presence || "Never" %>
+              </span>
+            </p>
+            <p class="mt-1 text-xs text-gray-500">
+              Last synced:
+              <%= project.github_insights_last_synced_at.present? ? l(project.github_insights_last_synced_at, format: :short) : "Never" %>
+            </p>
+            <% if project.github_insights_last_error.present? %>
+              <p class="mt-1 text-xs text-red-600"><%= project.github_insights_last_error %></p>
+            <% end %>
+          </div>
+
+          <div>
+            <%= button_to "Refresh GitHub Insights",
+                refresh_github_insights_project_path(project),
+                method: :post,
+                class: "inline-flex items-center px-3 py-2 border border-blue-600 text-sm font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 disabled:opacity-60 disabled:cursor-not-allowed",
+                disabled: !project.project_github_repo_url.present? || project.github_insights_sync_status == "syncing" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
   </div>
 
   <!-- Action Buttons -->

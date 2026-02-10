@@ -159,7 +159,8 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
         title: "Updated Project Title",
         description: "Updated description",
         technologies_display: "Vue, Node.js",
-        featured: true
+        featured: true,
+        github_insights_enabled: false
       }
     }
 
@@ -168,6 +169,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Updated description", @project1.description
     assert_equal ["Vue", "Node.js"], @project1.technologies_used
     assert @project1.featured?
+    assert_not @project1.github_insights_enabled?
     assert_redirected_to project_path(@project1)
     assert_equal "Project was successfully updated.", flash[:notice]
   end
@@ -285,6 +287,52 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
 
     assert_response :unprocessable_content
+  end
+
+  # GITHUB INSIGHTS REFRESH TESTS
+  test "should enqueue deep manual github insights refresh for owner" do
+    @project1.update_columns(source_code_url: "https://github.com/rails/rails", github_insights_sync_status: "ready")
+    clear_enqueued_jobs
+
+    assert_enqueued_with(job: GitHubInsightsSyncJob, args: [@project1.id, { sync_type: "deep", source: "manual" }]) do
+      post refresh_github_insights_project_url(@project1)
+    end
+
+    @project1.reload
+    assert_equal "queued", @project1.github_insights_sync_status
+    assert_redirected_to edit_project_path(@project1)
+    assert_equal "GitHub insights refresh started.", flash[:notice]
+  end
+
+  test "should not refresh github insights when repo url missing" do
+    @project1.update_columns(source_code_url: nil, github_url: nil)
+    clear_enqueued_jobs
+
+    assert_no_enqueued_jobs only: GitHubInsightsSyncJob do
+      post refresh_github_insights_project_url(@project1)
+    end
+
+    assert_redirected_to edit_project_path(@project1)
+    assert_equal "Add a valid GitHub Source Code URL before refreshing insights.", flash[:alert]
+  end
+
+  test "should not refresh github insights while syncing" do
+    @project1.update_columns(source_code_url: "https://github.com/rails/rails", github_insights_sync_status: "syncing")
+    clear_enqueued_jobs
+
+    assert_no_enqueued_jobs only: GitHubInsightsSyncJob do
+      post refresh_github_insights_project_url(@project1)
+    end
+
+    assert_redirected_to edit_project_path(@project1)
+    assert_equal "GitHub insights sync is already in progress.", flash[:alert]
+  end
+
+  test "should reject github insights refresh for non-owner" do
+    post refresh_github_insights_project_url(@project2)
+
+    assert_redirected_to projects_path
+    assert_equal "You don't have permission to perform this action.", flash[:alert]
   end
 
   # ADMIN TESTS
