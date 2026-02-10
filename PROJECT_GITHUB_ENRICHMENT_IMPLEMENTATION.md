@@ -461,14 +461,14 @@ Failure-path tests:
 
 ### Phase 6: Scheduled Refresh
 
-- [ ] **Step 6.1: Add stale-project refresher job**
-  - Status: Not started
+- [x] **Step 6.1: Add stale-project refresher job**
+  - Status: Done
   - Files: `app/jobs/github_insights_stale_refresh_job.rb`
   - Dependencies: Phase 5
   - Notes: Queue light/deep sync based on staleness window
 
-- [ ] **Step 6.2: Register recurring schedule**
-  - Status: Not started
+- [x] **Step 6.2: Register recurring schedule**
+  - Status: Done
   - Files: scheduler config used by app (`config/recurring.yml`, `config/schedule.rb`, or existing scheduler setup)
   - Dependencies: Step 6.1
 
