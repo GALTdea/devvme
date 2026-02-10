@@ -8,8 +8,10 @@ class GitHubInsightsStaleRefreshJob < ApplicationJob
 
   def perform
     queued_count = 0
+    scanned_count = 0
 
     stale_candidates.find_each(batch_size: BATCH_SIZE) do |project|
+      scanned_count += 1
       next unless should_refresh?(project)
 
       sync_type = project.github_insights_sync_status.in?(%w[never failed]) ? "deep" : "light"
@@ -17,7 +19,12 @@ class GitHubInsightsStaleRefreshJob < ApplicationJob
       queued_count += 1
     end
 
-    Rails.logger.info("GitHubInsightsStaleRefreshJob queued #{queued_count} projects")
+    ActiveSupport::Notifications.instrument(
+      "github_insights.stale_refresh",
+      scanned_count: scanned_count,
+      queued_count: queued_count
+    )
+    Rails.logger.info("GitHubInsightsStaleRefreshJob scanned=#{scanned_count} queued=#{queued_count}")
   end
 
   private

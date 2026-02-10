@@ -44,6 +44,8 @@
 require "test_helper"
 
 class ProjectTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+
   def setup
     @user = User.create!(
       email: "test@example.com",
@@ -543,5 +545,56 @@ class ProjectTest < ActiveSupport::TestCase
 
     result = Project.reorder_for_user(user1, [project.id])
     assert_not result, "Reorder should fail for projects not owned by user"
+  end
+
+  test "github insights summary returns empty hash when blank" do
+    @project.save!
+    @project.update_columns(github_insights_summary: {})
+
+    assert_equal({}, @project.github_insights_summary)
+  end
+
+  test "github insights stale helper behavior" do
+    @project.save!
+    @project.update_columns(github_insights_last_synced_at: nil)
+    assert @project.github_insights_stale?
+
+    @project.update_columns(github_insights_last_synced_at: 1.day.ago)
+    assert_not @project.github_insights_stale?(stale_after: 7.days)
+
+    @project.update_columns(github_insights_last_synced_at: 10.days.ago)
+    assert @project.github_insights_stale?(stale_after: 7.days)
+  end
+
+  test "github insights state helpers" do
+    @project.save!
+    @project.update_columns(github_insights_enabled: true, github_insights_sync_status: "ready")
+    assert @project.github_insights_ready?
+    assert_not @project.github_insights_failed?
+
+    @project.update_columns(github_insights_sync_status: "failed")
+    assert @project.github_insights_failed?
+  end
+
+  test "enqueues github insights sync when github repo url changes" do
+    clear_enqueued_jobs
+    @project.save!
+    clear_enqueued_jobs
+
+    assert_enqueued_with(job: GitHubInsightsSyncJob, args: [@project.id, { sync_type: "light", source: "auto" }]) do
+      @project.update!(source_code_url: "https://github.com/acme/demo")
+    end
+
+    assert_equal "queued", @project.reload.github_insights_sync_status
+  end
+
+  test "does not enqueue github insights sync when github insights disabled" do
+    clear_enqueued_jobs
+    @project.save!
+    clear_enqueued_jobs
+
+    assert_no_enqueued_jobs only: GitHubInsightsSyncJob do
+      @project.update!(github_insights_enabled: false, source_code_url: "https://github.com/acme/demo")
+    end
   end
 end

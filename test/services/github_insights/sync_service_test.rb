@@ -4,6 +4,10 @@ module GitHubInsights
   class SyncServiceTest < ActiveSupport::TestCase
     test "runs sync and persists snapshot and summary" do
       project = projects(:test_project_one)
+      events = []
+      subscriber = ActiveSupport::Notifications.subscribe("github_insights.sync") do |_name, _start, _finish, _id, payload|
+        events << payload
+      end
 
       resolver = Class.new do
         def self.resolve_project!(_project)
@@ -56,6 +60,12 @@ module GitHubInsights
       snapshot = project.project_github_insight_snapshots.order(:created_at).last
       assert_equal "deep", snapshot.sync_type
       assert_equal "manual", snapshot.source
+      assert_equal 1, events.size
+      assert_equal "success", events.first[:result]
+      assert_equal project.id, events.first[:project_id]
+      assert events.first[:duration_ms].is_a?(Integer)
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
     end
 
     test "returns skipped when project is already syncing" do
@@ -108,6 +118,10 @@ module GitHubInsights
 
     test "maps temporary upstream failure to retryable sync error and marks project failed" do
       project = projects(:test_project_one)
+      events = []
+      subscriber = ActiveSupport::Notifications.subscribe("github_insights.sync") do |_name, _start, _finish, _id, payload|
+        events << payload
+      end
 
       resolver = Class.new do
         def self.resolve_project!(_project)
@@ -132,6 +146,12 @@ module GitHubInsights
       assert_match(/GitHub timeout/i, error.message)
       assert_equal "failed", project.reload.github_insights_sync_status
       assert_match(/GitHub timeout/i, project.github_insights_last_error)
+      assert_equal 1, events.size
+      assert_equal "failure", events.first[:result]
+      assert_equal "retryable", events.first[:failure_type]
+      assert_equal "GitHubInsights::FetchService::TemporaryFetchError", events.first[:error_class]
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
     end
   end
 end

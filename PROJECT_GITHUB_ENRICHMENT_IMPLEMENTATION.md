@@ -476,28 +476,28 @@ Failure-path tests:
 
 ### Phase 7: Testing and Instrumentation
 
-- [ ] **Step 7.1: Model tests**
-  - Status: Not started
+- [x] **Step 7.1: Model tests**
+  - Status: Done
   - Files: `test/models/project_test.rb`, `test/models/project_github_insight_snapshot_test.rb`
   - Dependencies: Phases 1-3
 
-- [ ] **Step 7.2: Service tests**
-  - Status: Not started
+- [x] **Step 7.2: Service tests**
+  - Status: Done
   - Files: `test/services/github_insights/repo_resolver_test.rb`, `test/services/github_insights/fetch_service_test.rb`, `test/services/github_insights/compute_service_test.rb`, `test/services/github_insights/sync_service_test.rb`
   - Dependencies: Phase 2
 
-- [ ] **Step 7.3: Job tests**
-  - Status: Not started
+- [x] **Step 7.3: Job tests**
+  - Status: Done
   - Files: `test/jobs/github_insights_sync_job_test.rb`, `test/jobs/github_insights_stale_refresh_job_test.rb`
   - Dependencies: Phases 3 and 6
 
-- [ ] **Step 7.4: Controller/request/integration tests**
-  - Status: Not started
+- [x] **Step 7.4: Controller/request/integration tests**
+  - Status: Done
   - Files: `test/controllers/*_test.rb`, `test/integration/*github_insights*_test.rb`
   - Dependencies: Phases 4-5
 
-- [ ] **Step 7.5: Instrumentation and rollout checks**
-  - Status: Not started
+- [x] **Step 7.5: Instrumentation and rollout checks**
+  - Status: Done
   - Files: service/job files + logging/metrics initializer if present
   - Dependencies: Phases 3-6
   - Track:

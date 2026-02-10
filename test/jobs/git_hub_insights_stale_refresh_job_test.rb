@@ -73,4 +73,27 @@ class GitHubInsightsStaleRefreshJobTest < ActiveJob::TestCase
       GitHubInsightsStaleRefreshJob.perform_now
     end
   end
+
+  test "emits stale refresh instrumentation payload" do
+    project = projects(:test_project_one)
+    project.update_columns(
+      source_code_url: "https://github.com/rails/rails",
+      github_insights_enabled: true,
+      github_insights_sync_status: "never",
+      github_insights_last_synced_at: nil
+    )
+
+    events = []
+    subscriber = ActiveSupport::Notifications.subscribe("github_insights.stale_refresh") do |_name, _start, _finish, _id, payload|
+      events << payload
+    end
+
+    GitHubInsightsStaleRefreshJob.perform_now
+
+    assert_equal 1, events.size
+    assert events.first[:scanned_count].to_i >= 1
+    assert events.first[:queued_count].to_i >= 1
+  ensure
+    ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+  end
 end
