@@ -26,4 +26,33 @@ class GitHubInsightsSyncJobTest < ActiveJob::TestCase
       GitHubInsightsSyncJob.perform_now(-999, sync_type: "light", source: "auto")
     end
   end
+
+  test "skips sync when rollout is internal and project owner is not admin" do
+    project = projects(:test_project_one)
+    calls = 0
+
+    original_call = GitHubInsights::SyncService.method(:call)
+    GitHubInsights::SyncService.define_singleton_method(:call) do |**|
+      calls += 1
+      { "status" => "ready" }
+    end
+
+    with_github_enrichment_rollout("internal") do
+      GitHubInsightsSyncJob.perform_now(project.id, sync_type: "deep", source: "manual")
+    end
+
+    assert_equal 0, calls
+  ensure
+    GitHubInsights::SyncService.define_singleton_method(:call, original_call)
+  end
+
+  private
+
+  def with_github_enrichment_rollout(value)
+    original = ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"]
+    ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"] = value
+    yield
+  ensure
+    ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"] = original
+  end
 end

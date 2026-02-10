@@ -96,4 +96,45 @@ class GitHubInsightsStaleRefreshJobTest < ActiveJob::TestCase
   ensure
     ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
   end
+
+  test "internal rollout only queues admin-owned projects" do
+    regular_project = projects(:test_project_one)
+    regular_project.update_columns(
+      source_code_url: "https://github.com/rails/rails",
+      github_insights_enabled: true,
+      github_insights_sync_status: "never",
+      github_insights_last_synced_at: nil
+    )
+
+    admin = users(:test_admin)
+    admin.update!(account_status: :active)
+    admin_project = admin.projects.create!(
+      title: "Admin GitHub Project",
+      description: "admin owned",
+      technologies_used: ["Ruby"],
+      status: :published,
+      source_code_url: "https://github.com/rails/rails"
+    )
+    admin_project.update_columns(
+      github_insights_enabled: true,
+      github_insights_sync_status: "never",
+      github_insights_last_synced_at: nil
+    )
+
+    with_github_enrichment_rollout("internal") do
+      assert_enqueued_with(job: GitHubInsightsSyncJob, args: [admin_project.id, { sync_type: "deep", source: "auto" }]) do
+        GitHubInsightsStaleRefreshJob.perform_now
+      end
+    end
+  end
+
+  private
+
+  def with_github_enrichment_rollout(value)
+    original = ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"]
+    ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"] = value
+    yield
+  ensure
+    ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"] = original
+  end
 end

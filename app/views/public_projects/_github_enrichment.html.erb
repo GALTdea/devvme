@@ -1,3 +1,4 @@
+<% return unless FeatureFlags.github_project_enrichment_enabled_for?(current_user) %>
 <% return unless project.github_insights_enabled? %>
 
 <div class="bg-white rounded-lg shadow-md p-6">

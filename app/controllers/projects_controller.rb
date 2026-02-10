@@ -62,6 +62,11 @@ class ProjectsController < ApplicationController
   end
 
   def refresh_github_insights
+    unless FeatureFlags.github_project_enrichment_enabled_for?(current_user)
+      redirect_to edit_project_path(@project), alert: "GitHub enrichment is not enabled for your account yet."
+      return
+    end
+
     unless @project.project_github_repo_url.present?
       redirect_to edit_project_path(@project), alert: "Add a valid GitHub Source Code URL before refreshing insights."
       return

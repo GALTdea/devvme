@@ -320,13 +320,13 @@ Failure-path tests:
 
 ### Phase 0: Guardrails and Config
 
-- [ ] **Step 0.1: Add feature flag and defaults**
-  - Status: Not started
+- [x] **Step 0.1: Add feature flag and defaults**
+  - Status: Done
   - Files: `config/initializers/features.rb` (or existing feature flag config), `config/application.rb` (if needed)
   - Notes: Flag key for GitHub enrichment rollout (`github_project_enrichment`)
 
-- [ ] **Step 0.2: Add GitHub API configuration**
-  - Status: Not started
+- [x] **Step 0.2: Add GitHub API configuration**
+  - Status: Done
   - Files: `config/environment.example`, `README.md`, `config/credentials.yml.enc` (or ENV usage docs)
   - Notes: Token/env documentation, timeout defaults, retries
 
@@ -510,14 +510,14 @@ Failure-path tests:
 
 ### Phase 8: Launch Sequence
 
-- [ ] **Step 8.1: Internal-only feature-flag rollout**
-  - Status: Not started
+- [x] **Step 8.1: Internal-only feature-flag rollout**
+  - Status: Done
   - Dependencies: Phase 7
 
-- [ ] **Step 8.2: Validate quality and reliability thresholds**
-  - Status: Not started
+- [x] **Step 8.2: Validate quality and reliability thresholds**
+  - Status: Done
   - Dependencies: Step 8.1
 
-- [ ] **Step 8.3: Gradual general rollout**
-  - Status: Not started
+- [x] **Step 8.3: Gradual general rollout**
+  - Status: Done
   - Dependencies: Step 8.2

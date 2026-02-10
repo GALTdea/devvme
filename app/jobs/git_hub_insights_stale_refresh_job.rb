@@ -7,6 +7,8 @@ class GitHubInsightsStaleRefreshJob < ApplicationJob
   BATCH_SIZE = 100
 
   def perform
+    return unless FeatureFlags.github_project_enrichment_enabled?
+
     queued_count = 0
     scanned_count = 0
 
@@ -30,8 +32,14 @@ class GitHubInsightsStaleRefreshJob < ApplicationJob
   private
 
   def stale_candidates
-    Project.where(github_insights_enabled: true)
-           .where("(source_code_url IS NOT NULL AND source_code_url <> '') OR (github_url IS NOT NULL AND github_url <> '')")
+    scope = Project.where(github_insights_enabled: true)
+                   .where("(projects.source_code_url IS NOT NULL AND projects.source_code_url <> '') OR (projects.github_url IS NOT NULL AND projects.github_url <> '')")
+
+    if FeatureFlags.github_project_enrichment_internal_only?
+      scope = scope.joins(:user).where(users: { role: [User.roles[:admin], User.roles[:super_admin]] })
+    end
+
+    scope
   end
 
   def should_refresh?(project)

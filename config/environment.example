@@ -70,6 +70,11 @@ IPINFO_TOKEN=your_ipinfo_token
 # OPENAI_API_KEY=sk-...
 # ANTHROPIC_API_KEY=sk-ant-...
 
+# GitHub project enrichment rollout mode (Optional)
+# Values: off | internal | all
+# production default is internal; non-production default is all
+# GITHUB_PROJECT_ENRICHMENT_ROLLOUT=internal
+
 # =============================================================================
 # OPTIONAL - Performance & Monitoring
 # =============================================================================

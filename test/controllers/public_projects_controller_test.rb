@@ -328,6 +328,21 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "p", text: /signals are not available yet/i
   end
 
+  test "should hide github enrichment for non-admin when rollout is internal" do
+    @published_project.update_columns(
+      github_insights_enabled: true,
+      github_insights_sync_status: "ready",
+      github_insights_summary: { "project_overview" => { "stars" => 1 } }
+    )
+
+    with_github_enrichment_rollout("internal") do
+      get public_project_url(@published_project)
+    end
+
+    assert_response :success
+    assert_select "h3", { text: /github project signals/i, count: 0 }
+  end
+
   test "should handle project with images" do
     # Attach a test image
     @published_project.images.attach(
@@ -413,6 +428,14 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
         password: "password123"
       }
     }
+  end
+
+  def with_github_enrichment_rollout(value)
+    original = ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"]
+    ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"] = value
+    yield
+  ensure
+    ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"] = original
   end
 
   test "should require authentication to ask project insight" do

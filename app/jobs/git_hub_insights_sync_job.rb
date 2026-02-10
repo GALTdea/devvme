@@ -10,6 +10,7 @@ class GitHubInsightsSyncJob < ApplicationJob
   def perform(project_id, sync_type: "light", source: "auto")
     project = Project.find_by(id: project_id)
     return if project.blank?
+    return unless FeatureFlags.github_project_enrichment_enabled_for_project?(project)
 
     GitHubInsights::SyncService.call(
       project: project,

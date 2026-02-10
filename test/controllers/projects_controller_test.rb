@@ -335,6 +335,17 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "You don't have permission to perform this action.", flash[:alert]
   end
 
+  test "should block github insights refresh when rollout is internal for non-admin" do
+    @project1.update_columns(source_code_url: "https://github.com/rails/rails")
+
+    with_github_enrichment_rollout("internal") do
+      post refresh_github_insights_project_url(@project1)
+    end
+
+    assert_redirected_to edit_project_path(@project1)
+    assert_equal "GitHub enrichment is not enabled for your account yet.", flash[:alert]
+  end
+
   # ADMIN TESTS
   test "should allow admin to view any project" do
     admin = users(:test_admin)
@@ -458,5 +469,13 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
 
   def sign_out(user)
     delete destroy_user_session_path
+  end
+
+  def with_github_enrichment_rollout(value)
+    original = ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"]
+    ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"] = value
+    yield
+  ensure
+    ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"] = original
   end
 end

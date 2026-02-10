@@ -236,17 +236,19 @@
       </div>
 
       <!-- GitHub Enrichment -->
-      <div>
-        <div class="flex items-center h-9">
-          <%= form.check_box :github_insights_enabled,
-              class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
-          <%= form.label :github_insights_enabled, "Enable GitHub Enrichment", class: "ml-2 block text-sm text-gray-900" %>
+      <% if FeatureFlags.github_project_enrichment_enabled_for?(current_user) %>
+        <div>
+          <div class="flex items-center h-9">
+            <%= form.check_box :github_insights_enabled,
+                class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+            <%= form.label :github_insights_enabled, "Enable GitHub Enrichment", class: "ml-2 block text-sm text-gray-900" %>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">Collects recruiter-friendly activity, stack, and delivery signals from GitHub.</p>
         </div>
-        <p class="mt-1 text-xs text-gray-500">Collects recruiter-friendly activity, stack, and delivery signals from GitHub.</p>
-      </div>
+      <% end %>
     </div>
 
-    <% if project.persisted? %>
+    <% if project.persisted? && FeatureFlags.github_project_enrichment_enabled_for?(current_user) %>
       <div class="mt-6 p-4 border border-gray-200 rounded-md bg-gray-50">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
