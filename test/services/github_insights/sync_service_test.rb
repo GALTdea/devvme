@@ -90,6 +90,7 @@ module GitHubInsights
 
     test "maps repository not found to permanent sync error and marks project failed" do
       project = projects(:test_project_one)
+      project.user.update_columns(github_oauth_token: nil)
 
       resolver = Class.new do
         def self.resolve_project!(_project)
@@ -112,6 +113,7 @@ module GitHubInsights
       end
 
       assert_match(/Repository not found/i, error.message)
+      assert_match(/Connect GitHub OAuth/i, error.message)
       assert_equal "failed", project.reload.github_insights_sync_status
       assert_match(/Repository not found/i, project.github_insights_last_error)
     end

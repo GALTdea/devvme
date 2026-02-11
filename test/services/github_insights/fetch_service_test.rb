@@ -2,6 +2,24 @@ require "test_helper"
 
 module GitHubInsights
   class FetchServiceTest < ActiveSupport::TestCase
+    test "uses oauth token in headers when provided" do
+      service = FetchService.new(oauth_token: "owner-token")
+      headers = service.send(:headers)
+
+      assert_equal "Bearer owner-token", headers["Authorization"]
+    end
+
+    test "falls back to app github token when oauth token is absent" do
+      service = FetchService.new
+      original = GitHubContextService.method(:api_token)
+      GitHubContextService.define_singleton_method(:api_token) { "app-token" }
+
+      headers = service.send(:headers)
+      assert_equal "Bearer app-token", headers["Authorization"]
+    ensure
+      GitHubContextService.define_singleton_method(:api_token, original)
+    end
+
     test "returns baseline payload for light sync" do
       service = stubbed_service do |path, _params|
         case path

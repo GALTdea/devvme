@@ -278,7 +278,7 @@ Devise.setup do |config|
     ENV["GITHUB_CLIENT_SECRET"].to_s.strip.presence ||
     Rails.application.credentials.dig(:github, :client_secret).to_s.strip.presence
   if github_client_id.present? && github_client_secret.present?
-    config.omniauth :github, github_client_id, github_client_secret, scope: "read:user,user:email"
+    config.omniauth :github, github_client_id, github_client_secret, scope: "read:user,user:email,repo,read:org"
   end
 
   # ==> Warden configuration

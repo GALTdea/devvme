@@ -33,10 +33,10 @@ module GitHubInsights
       end
 
       repo_identity = @repo_resolver.resolve_project!(project)
-      raw_payload = @fetch_service.call(
-        owner: repo_identity[:owner],
-        repo: repo_identity[:repo],
-        sync_type: sync_type
+      raw_payload = fetch_payload(
+        repo_identity: repo_identity,
+        sync_type: sync_type,
+        oauth_token: project.user&.github_oauth_token_for_insights
       )
       computed = @compute_service.call(
         project: project,
@@ -94,9 +94,10 @@ module GitHubInsights
       result["queue_wait_seconds"] = queue_wait_seconds if queue_wait_seconds.present?
       result
     rescue RepoResolver::InvalidRepositoryUrlError, FetchService::RepositoryNotFoundError, ArgumentError => e
-      mark_failed(project, e.message)
+      message = repository_access_message(e.message, project)
+      mark_failed(project, message)
       instrument_failure(project:, sync_type:, source:, started_at:, error: e, queue_wait_seconds: queue_wait_seconds, failure_type: "permanent")
-      raise PermanentSyncError, e.message
+      raise PermanentSyncError, message
     rescue FetchService::GitHubRateLimitError, FetchService::TemporaryFetchError => e
       mark_failed(project, e.message)
       instrument_failure(project:, sync_type:, source:, started_at:, error: e, queue_wait_seconds: queue_wait_seconds, failure_type: "retryable")
@@ -137,6 +138,23 @@ module GitHubInsights
       (Time.current - project.updated_at).round(2)
     end
 
+    def fetch_payload(repo_identity:, sync_type:, oauth_token:)
+      @fetch_service.call(
+        owner: repo_identity[:owner],
+        repo: repo_identity[:repo],
+        sync_type: sync_type,
+        oauth_token: oauth_token
+      )
+    rescue ArgumentError => e
+      raise unless e.message.to_s.include?("unknown keyword: :oauth_token")
+
+      @fetch_service.call(
+        owner: repo_identity[:owner],
+        repo: repo_identity[:repo],
+        sync_type: sync_type
+      )
+    end
+
     def instrument_failure(project:, sync_type:, source:, started_at:, error:, queue_wait_seconds:, failure_type:)
       duration_ms = duration_ms_since(started_at)
       instrument_event(
@@ -161,6 +179,14 @@ module GitHubInsights
         error_message: error.message,
         failure_type: failure_type
       ))
+    end
+
+    def repository_access_message(original_message, project)
+      return original_message unless original_message.to_s.match?(/not found|publicly accessible/i)
+
+      return original_message if project.user&.github_oauth_connected?
+
+      "#{original_message} Connect GitHub OAuth from your account to analyze private repositories."
     end
 
     def instrument_event(result, project:, sync_type:, source:, duration_ms:, queue_wait_seconds:, error_class: nil, error_message: nil, failure_type: nil)

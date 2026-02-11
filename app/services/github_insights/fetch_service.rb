@@ -30,8 +30,12 @@ module GitHubInsights
     class RepositoryNotFoundError < FetchError; end
     class GitHubRateLimitError < TemporaryFetchError; end
 
-    def self.call(owner:, repo:, sync_type: "light")
-      new.call(owner:, repo:, sync_type:)
+    def self.call(owner:, repo:, sync_type: "light", oauth_token: nil)
+      new(oauth_token: oauth_token).call(owner:, repo:, sync_type:)
+    end
+
+    def initialize(oauth_token: nil)
+      @oauth_token = oauth_token.to_s.presence
     end
 
     def call(owner:, repo:, sync_type: "light")
@@ -215,7 +219,7 @@ module GitHubInsights
         "X-GitHub-Api-Version" => "2022-11-28"
       }
 
-      token = GitHubContextService.api_token
+      token = @oauth_token || GitHubContextService.api_token
       base["Authorization"] = "Bearer #{token}" if token.present?
       base
     end

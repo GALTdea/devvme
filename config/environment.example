@@ -75,6 +75,11 @@ IPINFO_TOKEN=your_ipinfo_token
 # production default is internal; non-production default is all
 # GITHUB_PROJECT_ENRICHMENT_ROLLOUT=internal
 
+# GitHub OAuth app credentials (required for owner OAuth token flow / private repos)
+# Request scopes include: read:user,user:email,repo,read:org
+# GITHUB_CLIENT_ID=your_github_oauth_client_id
+# GITHUB_CLIENT_SECRET=your_github_oauth_client_secret
+
 # =============================================================================
 # OPTIONAL - Performance & Monitoring
 # =============================================================================

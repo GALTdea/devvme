@@ -62,28 +62,30 @@ class ProjectsController < ApplicationController
   end
 
   def refresh_github_insights
+    redirect_path = refresh_github_insights_redirect_path
+
     unless FeatureFlags.github_project_enrichment_enabled_for?(current_user)
-      redirect_to edit_project_path(@project), alert: "GitHub enrichment is not enabled for your account yet."
+      redirect_to redirect_path, alert: "GitHub enrichment is not enabled for your account yet."
       return
     end
 
     unless @project.project_github_repo_url.present?
-      redirect_to edit_project_path(@project), alert: "Add a valid GitHub Source Code URL before refreshing insights."
+      redirect_to redirect_path, alert: "Add a valid GitHub Source Code URL before refreshing insights."
       return
     end
 
     if @project.github_insights_sync_status == "syncing"
-      redirect_to edit_project_path(@project), alert: "GitHub insights sync is already in progress."
+      redirect_to redirect_path, alert: "GitHub insights sync is already in progress."
       return
     end
 
     GitHubInsightsSyncJob.perform_later(@project.id, sync_type: "deep", source: "manual")
     @project.update!(github_insights_sync_status: "queued", github_insights_last_error: nil)
 
-    redirect_to edit_project_path(@project), notice: "GitHub insights refresh started."
+    redirect_to redirect_path, notice: "GitHub insights refresh started."
   rescue StandardError => e
     Rails.logger.error("ProjectsController#refresh_github_insights failed for project #{@project.id}: #{e.message}")
-    redirect_to edit_project_path(@project), alert: "Could not start GitHub insights refresh. Please try again."
+    redirect_to redirect_path, alert: "Could not start GitHub insights refresh. Please try again."
   end
 
   private
@@ -96,6 +98,18 @@ class ProjectsController < ApplicationController
     unless can_edit_project?(@project)
       redirect_to projects_path, alert: "You don't have permission to perform this action."
     end
+  end
+
+  def refresh_github_insights_redirect_path
+    fallback = edit_project_path(@project)
+    referer = request.referer
+    return fallback if referer.blank?
+
+    referer_path = URI.parse(referer).path
+    allowed_paths = [project_path(@project), edit_project_path(@project)]
+    allowed_paths.include?(referer_path) ? referer_path : fallback
+  rescue URI::InvalidURIError
+    fallback
   end
 
   def project_params

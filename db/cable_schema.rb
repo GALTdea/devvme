@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_09_100001) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_10_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -441,10 +441,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_09_100001) do
     t.boolean "allow_career_architect", default: false, null: false
     t.string "provider"
     t.string "uid"
+    t.text "github_oauth_token"
+    t.string "github_oauth_scope"
+    t.datetime "github_oauth_connected_at"
     t.index ["account_status"], name: "index_users_on_account_status"
     t.index ["allow_career_architect"], name: "index_users_on_allow_career_architect", where: "(allow_career_architect = true)"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["featured"], name: "index_users_on_featured"
+    t.index ["github_oauth_connected_at"], name: "index_users_on_github_oauth_connected_at"
     t.index ["invitation_accepted_at"], name: "index_users_on_invitation_accepted_at"
     t.index ["invitation_access_code"], name: "index_users_on_invitation_access_code"
     t.index ["invitation_sent_at"], name: "index_users_on_invitation_sent_at"

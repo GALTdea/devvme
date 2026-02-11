@@ -32,8 +32,8 @@ Primary audience:
 ## Locked v1 Decisions
 
 1. **Repository support**
-   - v1 supports public GitHub repositories only.
-   - Private repository ingestion is deferred.
+   - v1 supports public repositories and private repositories via owner OAuth token.
+   - Owner must connect GitHub via OAuth with repo-read scopes for private repositories.
 
 2. **Canonical source URL**
    - `projects.source_code_url` is canonical.
@@ -75,11 +75,52 @@ In scope:
 
 Out of scope (post-v1):
 
-- Private repositories and GitHub OAuth scope management.
 - Per-visitor conversational Q&A memory.
 - Manual editing of each computed metric.
 - Cross-repository benchmark comparisons.
 - Multi-provider VCS support (GitLab/Bitbucket).
+
+---
+
+## OAuth Owner Token Approach (Implemented)
+
+Private repo access is handled with user-scoped GitHub OAuth tokens:
+
+- Existing GitHub OAuth sign-in flow captures and stores user token/scope.
+- Token is stored encrypted on `users.github_oauth_token`.
+- GitHub enrichment sync uses owner token first, then falls back to app token when available.
+- If private repo access fails and owner has no OAuth token, user-facing error suggests connecting GitHub OAuth.
+
+Required OAuth scopes currently requested:
+
+- `read:user`
+- `user:email`
+- `repo`
+- `read:org`
+
+Operational notes:
+
+- Token is user-owned and tied to project owner identity.
+- Token storage uses Rails encrypted attributes.
+- Token should never be logged or surfaced in UI.
+
+---
+
+## Recommended Next Stage: GitHub App Per Owner
+
+OAuth user tokens are a pragmatic implementation, but GitHub App is the target architecture:
+
+- Repo-level installation permissions (least privilege).
+- Short-lived installation tokens by design.
+- Better enterprise/org compatibility and security posture.
+- Cleaner access revocation model per repo/organization.
+
+Migration direction:
+
+1. Add GitHub App install/connect UX per owner.
+2. Persist installation IDs and granted repos.
+3. Route enrichment fetch through installation token path.
+4. Keep OAuth fallback during transition, then deprecate.
 
 ---
 
