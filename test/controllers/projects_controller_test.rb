@@ -36,9 +36,11 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to public_projects_path
   end
 
-  # SHOW TESTS
-  test "should show project" do
+  # SHOW TESTS (redirects to canonical public project page)
+  test "should redirect show to public project page" do
     get project_url(@project1)
+    assert_redirected_to public_project_path(@project1)
+    follow_redirect!
     assert_response :success
     assert_select "h1", text: @project1.title
   end
@@ -47,6 +49,8 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     @project2.update!(status: :published)
     sign_out @user
     get project_url(@project2)
+    assert_redirected_to public_project_path(@project2)
+    follow_redirect!
     assert_response :success
     assert_select "h1", text: @project2.title
   end
@@ -55,13 +59,17 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     @project2.update!(status: :draft)
     sign_out @user
     get project_url(@project2)
+    assert_redirected_to public_project_path(@project2)
+    get public_project_path(@project2)
     assert_redirected_to public_projects_path
     assert_equal "Project not found.", flash[:alert]
   end
 
-  test "should show any project when authenticated as owner" do
+  test "should redirect to public projects when non-owner views other user draft" do
     @project2.update!(status: :draft)
     get project_url(@project2)
+    assert_redirected_to public_project_path(@project2)
+    get public_project_path(@project2)
     assert_redirected_to public_projects_path
     assert_equal "Project not found.", flash[:alert]
   end
@@ -100,7 +108,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @user, project.user
     assert_equal "New Test Project", project.title
     assert_equal ["Rails", "Ruby", "PostgreSQL"], project.technologies_used
-    assert_redirected_to project_path(project)
+    assert_redirected_to public_project_path(project)
     assert_equal "Project was successfully created.", flash[:notice]
   end
 
@@ -170,7 +178,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_equal ["Vue", "Node.js"], @project1.technologies_used
     assert @project1.featured?
     assert_not @project1.github_insights_enabled?
-    assert_redirected_to project_path(@project1)
+    assert_redirected_to public_project_path(@project1)
     assert_equal "Project was successfully updated.", flash[:notice]
   end
 
@@ -300,7 +308,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
 
     @project1.reload
     assert_equal "queued", @project1.github_insights_sync_status
-    assert_redirected_to edit_project_path(@project1)
+    assert_redirected_to public_project_path(@project1)
     assert_equal "GitHub insights refresh started.", flash[:notice]
   end
 
@@ -312,7 +320,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
       post refresh_github_insights_project_url(@project1)
     end
 
-    assert_redirected_to edit_project_path(@project1)
+    assert_redirected_to public_project_path(@project1)
     assert_equal "Add a valid GitHub Source Code URL before refreshing insights.", flash[:alert]
   end
 
@@ -324,7 +332,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
       post refresh_github_insights_project_url(@project1)
     end
 
-    assert_redirected_to edit_project_path(@project1)
+    assert_redirected_to public_project_path(@project1)
     assert_equal "GitHub insights sync is already in progress.", flash[:alert]
   end
 
@@ -342,7 +350,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
       post refresh_github_insights_project_url(@project1)
     end
 
-    assert_redirected_to edit_project_path(@project1)
+    assert_redirected_to public_project_path(@project1)
     assert_equal "GitHub enrichment is not enabled for your account yet.", flash[:alert]
   end
 
@@ -354,6 +362,8 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     sign_in admin
 
     get project_url(@project2)
+    assert_redirected_to public_project_path(@project2)
+    follow_redirect!
     assert_response :success
     assert_select "h1", text: @project2.title
   end
@@ -381,7 +391,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
 
     @project2.reload
     assert_equal "Admin Updated Title", @project2.title
-    assert_redirected_to project_path(@project2)
+    assert_redirected_to public_project_path(@project2)
   end
 
   test "should allow admin to delete any project" do

@@ -151,17 +151,20 @@ class ProductionReadinessTest < ActionDispatch::IntegrationTest
     assert_response :redirect
     assert_not Project.exists?(third_project.id)
 
-    # Test 10: Verify security - user cannot access other user's projects
+    # Test 10: Verify security - user cannot view other user's draft projects
     other_user = users(:test_user_two)
     other_project = other_user.projects.create!(
       title: "Other User Project",
       description: "Should not be accessible",
-      technologies_used: ["Rails"]
+      technologies_used: ["Rails"],
+      status: :draft
     )
 
     get project_path(other_project)
-    assert_response :redirect
-    assert_equal "You can only access your own projects.", flash[:alert]
+    assert_redirected_to public_project_path(other_project)
+    get public_project_path(other_project)
+    assert_redirected_to public_projects_path
+    assert_equal "Project not found.", flash[:alert]
 
     # Test 11: Test unauthorized reordering
     patch reorder_projects_path,
@@ -179,8 +182,10 @@ class ProductionReadinessTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "My Projects"
     assert_select ".project-card", count: 2 # project and second_project
 
-    # Test 13: Verify project show page displays correctly
+    # Test 13: Verify project show page displays correctly (canonical URL is explore)
     get project_path(project)
+    assert_redirected_to public_project_path(project)
+    follow_redirect!
     assert_response :success
     assert_select "h1", text: project.title
     assert_includes response.body, project.description

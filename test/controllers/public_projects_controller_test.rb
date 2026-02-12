@@ -147,6 +147,17 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Project not found.", flash[:alert]
   end
 
+  test "should show draft project to owner" do
+    @published_project.update!(status: :draft)
+    @user.update!(account_status: :active)
+    sign_in @user
+
+    get public_project_url(@published_project)
+    assert_response :success
+    assert_select "h1", text: @published_project.title
+    assert_select "span.bg-yellow-100", text: /draft/i
+  end
+
   test "should show project with all details" do
     get public_project_url(@published_project)
     assert_response :success
@@ -215,7 +226,7 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
 
     # Should show admin controls section
     assert_select ".bg-orange-50", text: /admin controls/i
-    assert_select "a[href='#{project_path(@published_project)}']", text: /edit project.*admin/i
+    assert_select "a[href='#{edit_project_path(@published_project)}']", text: /edit project.*admin/i
     assert_select "a[href='#{public_profile_path(@user.username)}']", text: /view owner profile/i
   end
 

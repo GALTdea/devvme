@@ -7,12 +7,16 @@ class ProjectsTest < ApplicationSystemTestCase
     @project1 = projects(:test_project_one)
     @project2 = projects(:test_project_two)
 
-    # Make project1 belong to current user
+    # Make project1 belong to current user and ensure user can access projects
     @project1.update!(user: @user)
+    @user.update!(account_status: :active)
   end
 
     test "user can view projects index" do
     sign_in_as(@user)
+    
+    # Wait for redirect to dashboard after sign-in and verify we're signed in
+    assert_text "Welcome back", wait: 5
 
     visit projects_path
 
@@ -23,9 +27,22 @@ class ProjectsTest < ApplicationSystemTestCase
 
   test "user can create a new project" do
     sign_in_as(@user)
-
+    
+    # After sign-in, Devise redirects to dashboard_path
+    # Wait for redirect and verify we're signed in by checking dashboard content
+    assert_text "Welcome back", wait: 5
+    
+    # Now navigate to projects page - user should be authenticated
     visit projects_path
-    click_on "New Project"
+
+    # Verify we're on the projects page (not redirected to explore)
+    # If redirected to explore, we'd see "Explore Projects" instead
+    assert_selector "h1", text: "My Projects", wait: 5
+    assert_no_selector "h1", text: "Explore Projects"
+
+    # The link contains SVG + text "New Project", so find by text content
+    # Capybara's click_link will find links containing the text, even with SVG children
+    click_link "New Project", wait: 5
 
     fill_in "Title", with: "My Awesome Project"
     fill_in "Description", with: "This is an awesome project description"
@@ -150,13 +167,15 @@ class ProjectsTest < ApplicationSystemTestCase
     end
   end
 
-  test "user cannot access other user's project" do
+  test "user cannot view other user's draft project" do
     sign_in_as(@user)
+    @project2.update!(status: :draft)
 
     visit project_path(@project2)
 
-    assert_text "You can only access your own projects"
-    assert_current_path projects_path
+    # Redirects to explore then to explore index with not found
+    assert_text "Project not found"
+    assert_current_path public_projects_path
   end
 
   test "guest user is redirected to login" do
@@ -201,6 +220,10 @@ class ProjectsTest < ApplicationSystemTestCase
     fill_in "Email", with: user.email
     fill_in "Password", with: "password123"
     click_on "Log in"
+    
+    # Wait for Devise redirect to complete (redirects to dashboard after sign-in)
+    # Capybara will wait for navigation, but we need to ensure the session is established
+    # The redirect happens automatically via after_sign_in_path_for
   end
 
   def resize_window_to(size)

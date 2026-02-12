@@ -69,8 +69,10 @@ class AdminProjectManagementTest < ActionDispatch::IntegrationTest
   test "admin can access all project management features" do
     sign_in @admin
 
-    # Can view any project
+    # Can view any project (redirects to public project page)
     get project_path(@user_project)
+    assert_redirected_to public_project_path(@user_project)
+    follow_redirect!
     assert_response :success
     assert_select "h1", text: @user_project.title
 
@@ -83,7 +85,7 @@ class AdminProjectManagementTest < ActionDispatch::IntegrationTest
     patch project_path(@user_project), params: {
       project: { title: "Admin Updated Title" }
     }
-    assert_redirected_to project_path(@user_project)
+    assert_redirected_to public_project_path(@user_project)
     assert_equal "Project was successfully updated.", flash[:notice]
 
     @user_project.reload
@@ -99,28 +101,30 @@ class AdminProjectManagementTest < ActionDispatch::IntegrationTest
 
     # Should see admin controls
     assert_select ".bg-orange-50", text: /admin controls/i
-    assert_select "a[href='#{project_path(@user_project)}']", text: /edit project.*admin/i
+    assert_select "a[href='#{edit_project_path(@user_project)}']", text: /edit project.*admin/i
 
-    # Can edit from public view
+    # Following project_path redirects to public project page
     get project_path(@user_project)
+    assert_redirected_to public_project_path(@user_project)
+    follow_redirect!
     assert_response :success
   end
 
   test "admin can see project ownership information" do
     sign_in @admin
 
-    get project_path(@user_project)
+    get public_project_path(@user_project)
     assert_response :success
 
     # Should see admin controls with owner info
-    assert_select "h4", text: /admin actions/i
+    assert_select ".bg-orange-50", text: /admin controls/i
     assert_select "a[href='#{public_profile_path(@regular_user.username)}']", text: /view owner profile/i
   end
 
   test "admin can access content moderation from project views" do
     sign_in @admin
 
-    get project_path(@user_project)
+    get public_project_path(@user_project)
     assert_response :success
 
     # Should see content moderation link
@@ -142,6 +146,8 @@ class AdminProjectManagementTest < ActionDispatch::IntegrationTest
     sign_in @admin
 
     get project_path(@draft_project)
+    assert_redirected_to public_project_path(@draft_project)
+    follow_redirect!
     assert_response :success
     assert_select "h1", text: @draft_project.title
   end
@@ -189,16 +195,22 @@ class AdminProjectManagementTest < ActionDispatch::IntegrationTest
   test "admin can manage projects across different users" do
     sign_in @admin
 
-    # Can manage admin's own projects
+    # Can manage admin's own projects (redirects to public project page)
     get project_path(@admin_project)
+    assert_redirected_to public_project_path(@admin_project)
+    follow_redirect!
     assert_response :success
 
     # Can manage regular user's projects
     get project_path(@user_project)
+    assert_redirected_to public_project_path(@user_project)
+    follow_redirect!
     assert_response :success
 
-    # Can manage other user's projects
+    # Can manage other user's projects (e.g. draft)
     get project_path(@draft_project)
+    assert_redirected_to public_project_path(@draft_project)
+    follow_redirect!
     assert_response :success
   end
 
@@ -215,6 +227,8 @@ class AdminProjectManagementTest < ActionDispatch::IntegrationTest
 
     # Super admin should have same permissions as admin
     get project_path(@user_project)
+    assert_redirected_to public_project_path(@user_project)
+    follow_redirect!
     assert_response :success
 
     get edit_project_path(@user_project)
@@ -223,7 +237,7 @@ class AdminProjectManagementTest < ActionDispatch::IntegrationTest
     patch project_path(@user_project), params: {
       project: { title: "Super Admin Updated" }
     }
-    assert_redirected_to project_path(@user_project)
+    assert_redirected_to public_project_path(@user_project)
   end
 
   test "regular users cannot access admin features" do

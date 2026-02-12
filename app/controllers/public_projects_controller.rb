@@ -48,16 +48,15 @@ class PublicProjectsController < ApplicationController
     @total_users = User.joins(:projects).where(projects: { status: :published }).distinct.count
   end
 
-  # GET /projects/:id
-  # Display individual published project
+  # GET /explore/:id
+  # Display individual project (published to all; draft/archived to owner/admin only)
   def show
-    # Only show published projects to public
-    unless @project.published?
+    unless can_view_project?
       redirect_to public_projects_path, alert: 'Project not found.'
       return
     end
 
-    # Get related projects from the same user
+    # Related projects: only published (so we don't leak draft titles)
     @related_projects = @project.user.projects
                                .published
                                .where.not(id: @project.id)
@@ -101,6 +100,10 @@ class PublicProjectsController < ApplicationController
   end
 
   private
+
+  def can_view_project?
+    @project.published? || (user_signed_in? && (@project.user == current_user || current_user.can_access_admin?))
+  end
 
   # Find project by ID with optimized includes
   def set_project

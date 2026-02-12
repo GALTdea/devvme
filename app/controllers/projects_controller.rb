@@ -14,11 +14,8 @@ class ProjectsController < ApplicationController
   end
 
   def show
-    # Allow public access to published projects, or owner/admin access to any project
-    unless @project.published? || can_edit_project?(@project)
-      redirect_to public_projects_path, alert: 'Project not found.'
-      return
-    end
+    # Single canonical view: redirect to public project page (explore/:id)
+    redirect_to public_project_path(@project)
   end
 
   def new
@@ -29,7 +26,7 @@ class ProjectsController < ApplicationController
     @project = current_user.projects.build(project_params)
 
     if @project.save
-      redirect_to @project, notice: "Project was successfully created."
+      redirect_to public_project_path(@project), notice: "Project was successfully created."
     else
       render :new, status: :unprocessable_content
     end
@@ -40,7 +37,7 @@ class ProjectsController < ApplicationController
 
   def update
     if @project.update(project_params)
-      redirect_to @project, notice: "Project was successfully updated."
+      redirect_to public_project_path(@project), notice: "Project was successfully updated."
     else
       render :edit, status: :unprocessable_content
     end
@@ -101,12 +98,12 @@ class ProjectsController < ApplicationController
   end
 
   def refresh_github_insights_redirect_path
-    fallback = edit_project_path(@project)
+    fallback = public_project_path(@project)
     referer = request.referer
     return fallback if referer.blank?
 
     referer_path = URI.parse(referer).path
-    allowed_paths = [project_path(@project), edit_project_path(@project)]
+    allowed_paths = [public_project_path(@project), edit_project_path(@project)]
     allowed_paths.include?(referer_path) ? referer_path : fallback
   rescue URI::InvalidURIError
     fallback
