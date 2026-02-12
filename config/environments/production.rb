@@ -58,11 +58,10 @@ Rails.application.configure do
   config.action_mailer.perform_deliveries = ENV.fetch("RAILS_MAILER_PERFORM_DELIVERIES", "true") == "true"
   # Delivery method is configured in config/initializers/mailersend.rb
 
-  # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = {
-    host: ENV.fetch("RAILS_HOST", "devv.me"),
-    protocol: "https"
-  }
+  # Set host for URL generation (controllers and mailers). Required for OAuth callbacks, links in emails, etc.
+  default_host = ENV.fetch("RAILS_HOST", "devv.me")
+  config.action_controller.default_url_options = { host: default_host, protocol: "https" }
+  config.action_mailer.default_url_options = { host: default_host, protocol: "https" }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
@@ -95,4 +94,7 @@ Rails.application.configure do
       preload: true
     }
   }
+
+
+  
 end
