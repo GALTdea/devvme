@@ -117,8 +117,14 @@ class PublicProjectsController < ApplicationController
   end
 
   # Set cache headers for better performance
+  # Skip public caching when signed in so navbar and session-dependent content are always correct
   def set_cache_headers
-    # Cache public projects for 15 minutes
+    if user_signed_in?
+      response.headers["Cache-Control"] = "private, no-cache, no-store, must-revalidate"
+      return
+    end
+
+    # Cache public projects for 15 minutes (guests only)
     expires_in 15.minutes, public: true
 
     # Add ETag based on project updated_at timestamp for individual projects
