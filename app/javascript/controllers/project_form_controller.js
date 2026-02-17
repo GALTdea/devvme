@@ -11,13 +11,64 @@ export default class extends Controller {
 
     connect() {
         console.log("Project form controller connected")
+        this.debugEnabled = this.isDebugEnabled()
         this.setupFormSubmission()
         this.initializeAnimations()
+        this.setupDebugListeners()
     }
 
     setupFormSubmission() {
         if (this.hasFormTarget) {
             this.formTarget.addEventListener("submit", this.handleFormSubmit.bind(this))
+        }
+    }
+
+    setupDebugListeners() {
+        if (!this.debugEnabled) return
+
+        // Log clicks on the submit button and whether it's inside the form element
+        if (this.hasSubmitButtonTarget) {
+            this.submitButtonTarget.addEventListener("click", (e) => {
+                const form = this.submitButtonTarget.form
+                // eslint-disable-next-line no-console
+                console.group("[devvme][project-form] submit button click")
+                // eslint-disable-next-line no-console
+                console.log("button.disabled:", this.submitButtonTarget.disabled)
+                // eslint-disable-next-line no-console
+                console.log("button.form exists:", !!form)
+                // eslint-disable-next-line no-console
+                console.log("button.form === this.formTarget:", this.hasFormTarget ? form === this.formTarget : "(no formTarget)")
+                // eslint-disable-next-line no-console
+                console.log("event.defaultPrevented:", e.defaultPrevented)
+                // eslint-disable-next-line no-console
+                console.log("form action/method:", form?.action, form?.method)
+                // eslint-disable-next-line no-console
+                console.groupEnd()
+            })
+        }
+
+        // Capture submit events (bubble) to confirm the browser is attempting submission
+        if (this.hasFormTarget) {
+            this.formTarget.addEventListener("submit", (e) => {
+                // eslint-disable-next-line no-console
+                console.group("[devvme][project-form] form submit")
+                // eslint-disable-next-line no-console
+                console.log("event.defaultPrevented:", e.defaultPrevented)
+                // eslint-disable-next-line no-console
+                console.log("form action/method:", this.formTarget.action, this.formTarget.method)
+                // eslint-disable-next-line no-console
+                console.log("form elements:", this.formTarget.elements?.length)
+                // eslint-disable-next-line no-console
+                console.groupEnd()
+            })
+        }
+    }
+
+    isDebugEnabled() {
+        try {
+            return window?.localStorage?.getItem("devvme_debug_project_form") === "1"
+        } catch (_) {
+            return false
         }
     }
 
@@ -36,6 +87,14 @@ export default class extends Controller {
     }
 
     handleFormSubmit(event) {
+        if (this.debugEnabled) {
+            // eslint-disable-next-line no-console
+            console.log("[devvme][project-form] handleFormSubmit fired", {
+                defaultPrevented: event.defaultPrevented,
+                action: this.hasFormTarget ? this.formTarget.action : undefined,
+                method: this.hasFormTarget ? this.formTarget.method : undefined
+            })
+        }
         if (this.hasSubmitButtonTarget) {
             this.showLoadingState()
         }

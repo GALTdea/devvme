@@ -13,15 +13,17 @@ Rails.application.configure do
     policy.font_src    :self, :https, :data
     policy.img_src     :self, :https, :data, "blob:"
     policy.object_src  :none
-    policy.script_src  :self, :https, :unsafe_inline, :unsafe_eval
-    policy.style_src   :self, :https, :unsafe_inline
+    # Allow Flowbite CDN and eval (required for Flowbite and some JS libraries)
+    policy.script_src  :self, :https, :unsafe_inline, :unsafe_eval, "https://cdn.jsdelivr.net"
+    policy.style_src   :self, :https, :unsafe_inline, "https://cdn.jsdelivr.net"
     policy.connect_src :self, :https
     policy.frame_src   :none
     policy.base_uri    :self
 
     # Allow specific external domains for analytics and social sharing
+    # Note: script_src is additive, so this adds to the base policy above
     if ENV["GOOGLE_ANALYTICS_ID"].present?
-      policy.script_src :self, :https, :unsafe_inline, "https://www.googletagmanager.com"
+      policy.script_src :self, :https, :unsafe_inline, :unsafe_eval, "https://cdn.jsdelivr.net", "https://www.googletagmanager.com"
       policy.connect_src :self, :https, "https://www.google-analytics.com"
     end
 

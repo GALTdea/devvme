@@ -73,6 +73,28 @@ export default class extends Controller {
                 this.hideSuggestions()
             }
         })
+
+        // Close on mousedown on dropdown background so overlapped elements (e.g. Submit button)
+        // can receive the subsequent click once the dropdown is hidden
+        document.addEventListener('mousedown', this.boundHandleDropdownBackdropMousedown)
+    }
+
+    disconnect() {
+        document.removeEventListener('mousedown', this.boundHandleDropdownBackdropMousedown)
+    }
+
+    get boundHandleDropdownBackdropMousedown() {
+        if (!this._boundHandleDropdownBackdropMousedown) {
+            this._boundHandleDropdownBackdropMousedown = this.handleDropdownBackdropMousedown.bind(this)
+        }
+        return this._boundHandleDropdownBackdropMousedown
+    }
+
+    handleDropdownBackdropMousedown(e) {
+        if (!this.hasSuggestionsTarget || this.suggestionsTarget.classList.contains('hidden')) return
+        if (this.suggestionsTarget.contains(e.target) && !e.target.closest('.cursor-pointer')) {
+            this.hideSuggestions()
+        }
     }
 
     handleInput() {

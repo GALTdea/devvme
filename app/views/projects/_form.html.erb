@@ -136,7 +136,7 @@
     <h3 class="text-lg font-medium text-gray-900 mb-4">Technologies Used</h3>
     
     <div>
-      <%= form.label :technologies_display, "Technologies", class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <label for="project_technologies_input" class="block text-sm font-medium text-gray-700 mb-2">Technologies</label>
       <div class="relative"
            data-controller="technology-tags"
            data-technology-tags-technologies-value="<%= (project.technologies_used || []).to_json %>">
@@ -156,12 +156,15 @@
             <!-- Existing tags will be rendered here -->
           </div>
           
-          <!-- Input field -->
-          <input type="text" 
+          <!-- Input field (id for a11y/autofill; value submitted via hidden project_technologies_display) -->
+          <input type="text"
+                 id="project_technologies_input"
+                 autocomplete="off"
                  placeholder="Type technology name and press Enter..."
                  class="border-0 outline-none flex-1 min-w-[200px] text-sm"
                  data-technology-tags-target="input"
-                 data-action="keydown->technology-tags#handleKeydown blur->technology-tags#handleBlur">
+                 data-action="keydown->technology-tags#handleKeydown blur->technology-tags#handleBlur"
+                 aria-label="Technologies">
         </div>
         
         <p class="mt-1 text-sm text-gray-500">Press Enter to add a technology. Maximum 10 technologies.</p>
@@ -277,19 +280,27 @@
           </div>
 
           <div>
-            <%= button_to "Refresh GitHub Insights",
-                refresh_github_insights_project_path(project),
-                method: :post,
-                class: "inline-flex items-center px-3 py-2 border border-blue-600 text-sm font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 disabled:opacity-60 disabled:cursor-not-allowed",
-                disabled: !project.project_github_repo_url.present? || project.github_insights_sync_status == "syncing" %>
+            <% refresh_disabled = !project.project_github_repo_url.present? || project.github_insights_sync_status == "syncing" %>
+            <% if refresh_disabled %>
+              <button type="button"
+                      class="inline-flex items-center px-3 py-2 border border-blue-600 text-sm font-medium rounded-md text-blue-700 bg-white opacity-60 cursor-not-allowed"
+                      disabled>
+                Refresh GitHub Insights
+              </button>
+            <% else %>
+              <%= link_to "Refresh GitHub Insights",
+                  refresh_github_insights_project_path(project),
+                  data: { turbo_method: :post },
+                  class: "inline-flex items-center px-3 py-2 border border-blue-600 text-sm font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50" %>
+            <% end %>
           </div>
         </div>
       </div>
     <% end %>
   </div>
 
-  <!-- Action Buttons -->
-  <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+  <!-- Action Buttons (relative z-20 so button stays above overlays e.g. technology dropdown) -->
+  <div class="relative z-20 flex items-center justify-between pt-6 border-t border-gray-200">
     <div>
       <%= link_to projects_path, 
           class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
