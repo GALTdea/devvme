@@ -50,11 +50,13 @@
         <%= form.text_area :description, 
             rows: 4,
             class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
-            placeholder: "Describe your project..." %>
-        <p class="mt-1 text-sm text-gray-500">Maximum 1000 characters</p>
+            placeholder: "Short project summary for your portfolio..." %>
+        <p class="mt-1 text-sm text-gray-500">Maximum 1000 characters. Used as a fallback on the public page when no story overview is provided.</p>
       </div>
     </div>
   </div>
+
+  <%= render "story_fields", form: form, project: project %>
 
   <!-- Media Section -->
   <div class="form-section mb-8">

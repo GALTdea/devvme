@@ -142,13 +142,8 @@
           </div>
         <% end %>
 
-        <!-- Description -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">About This Project</h2>
-          <div class="prose prose-blue max-w-none">
-            <p class="text-gray-700 leading-relaxed whitespace-pre-wrap"><%= @project.description %></p>
-          </div>
-        </div>
+        <!-- Project Story -->
+        <%= render "project_story", project: @project %>
 
         <!-- Related Projects -->
         <% if @related_projects.any? %>

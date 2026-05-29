@@ -1,0 +1,18 @@
+<% lead_title = project.story_overview_from_story? ? "Overview" : "About This Project" %>
+<% detail_sections = project.public_story_sections.reject { |section| section[:key] == "overview" } %>
+
+<div class="bg-white rounded-lg shadow-md p-6">
+  <h2 class="text-xl font-semibold text-gray-900 mb-4"><%= lead_title %></h2>
+  <div class="prose prose-blue max-w-none">
+    <p class="text-gray-700 leading-relaxed whitespace-pre-wrap"><%= project.public_story_overview %></p>
+  </div>
+</div>
+
+<% detail_sections.each do |section| %>
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4"><%= section[:label] %></h2>
+    <div class="prose prose-blue max-w-none">
+      <p class="text-gray-700 leading-relaxed whitespace-pre-wrap"><%= section[:content] %></p>
+    </div>
+  </div>
+<% end %>

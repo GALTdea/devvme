@@ -177,6 +177,39 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{public_profile_path(@user.username)}']", text: @user.display_name
   end
 
+  test "should render project story sections when present" do
+    @published_project.update!(
+      project_story: {
+        overview: "Story overview text",
+        problem: "Hiring managers cannot see real work",
+        role: "Lead developer",
+        promotion_notes: "Private promotion note"
+      }
+    )
+
+    get public_project_url(@published_project)
+    assert_response :success
+
+    assert_select "h2", text: "Overview"
+    assert_select "p", text: "Story overview text"
+    assert_select "h2", text: "Problem Solved"
+    assert_select "p", text: "Hiring managers cannot see real work"
+    assert_select "h2", text: "Developer Role"
+    assert_select "p", text: "Lead developer"
+    assert_select "p", { text: "Private promotion note", count: 0 }
+  end
+
+  test "should not render empty story sections on public page" do
+    @published_project.update!(project_story: { overview: "", problem: "" })
+
+    get public_project_url(@published_project)
+    assert_response :success
+
+    assert_select "h2", { text: "Problem Solved", count: 0 }
+    assert_select "h2", { text: "Developer Role", count: 0 }
+    assert_select "p", text: @published_project.description
+  end
+
   test "should show project links when present" do
     @published_project.update!(
       live_url: "https://example.com",

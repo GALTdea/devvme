@@ -113,7 +113,8 @@ class ProjectsController < ApplicationController
     params.require(:project).permit(:title, :description, :live_url, :source_code_url,
                                    :featured, :status, :display_order, :technologies_display,
                                    :project_insight_enabled, :github_insights_enabled,
-                                   :thumbnail, images: [])
+                                   :thumbnail, images: [],
+                                   project_story: Project::STORY_FIELDS.map(&:to_sym))
   end
 
   # Permission helper methods

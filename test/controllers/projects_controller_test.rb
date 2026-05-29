@@ -182,6 +182,46 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Project was successfully updated.", flash[:notice]
   end
 
+  test "should create and update project story fields" do
+    post projects_url, params: {
+      project: {
+        title: "Story Project",
+        description: "Short summary",
+        technologies_display: "Rails",
+        project_story: {
+          overview: "Built a developer proof platform",
+          problem: "Portfolio sites hide real work",
+          role: "Solo full-stack developer"
+        }
+      }
+    }
+
+    project = Project.find_by!(title: "Story Project")
+    assert_equal "Built a developer proof platform", project.project_story["overview"]
+    assert_equal "Portfolio sites hide real work", project.project_story["problem"]
+    assert_equal "Solo full-stack developer", project.project_story["role"]
+
+    patch project_url(project), params: {
+      project: {
+        project_story: {
+          hardest_challenge: "Balancing structured stories with fast editing"
+        }
+      }
+    }
+
+    project.reload
+    assert_equal "Balancing structured stories with fast editing", project.project_story["hardest_challenge"]
+    assert_equal "Built a developer proof platform", project.project_story["overview"]
+  end
+
+  test "edit form includes project story fields" do
+    get edit_project_url(@project1)
+    assert_response :success
+    assert_select "textarea[name='project[project_story][overview]']"
+    assert_select "textarea[name='project[project_story][problem]']"
+    assert_select "textarea[name='project[project_story][promotion_notes]']"
+  end
+
   test "should not update project with invalid params" do
     original_title = @project1.title
     patch project_url(@project1), params: {
@@ -424,10 +464,12 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     sign_in admin
 
     get project_url(@project2)
+    assert_redirected_to public_project_path(@project2)
+    follow_redirect!
     assert_response :success
 
-    # Should show admin controls
-    assert_select "h4", text: /admin actions/i
+    # Should show admin controls on the public project page
+    assert_select "h3", text: /admin controls/i
     assert_select "a[href='#{public_profile_path(@project2.user.username)}']", text: /view owner profile/i
   end
 

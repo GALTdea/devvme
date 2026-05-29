@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_10_110000) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_29_193225) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -241,6 +241,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_10_110000) do
     t.datetime "github_insights_last_synced_at"
     t.text "github_insights_last_error"
     t.jsonb "github_insights_summary", default: {}, null: false
+    t.jsonb "project_story", default: {}, null: false
     t.index ["display_order"], name: "index_projects_on_display_order"
     t.index ["github_insights_enabled"], name: "index_projects_on_github_insights_enabled"
     t.index ["github_insights_sync_status"], name: "index_projects_on_github_insights_sync_status"

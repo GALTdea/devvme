@@ -1,9 +1,10 @@
 # Feature Brief: Project Stories Stage 1
 
-**Status:** Draft  
+**Status:** Completed  
 **Owner:** Gustavo  
 **Created:** 2026-05-29  
 **Updated:** 2026-05-29  
+**Completed:** 2026-05-29  
 **Related Strategy:** `docs/product/strategy-2026.md`  
 
 ## Summary
@@ -255,8 +256,18 @@ Revert plan depends on storage decision:
 
 - [x] Resolve storage approach.
 - [x] Define final v1 story section contract.
-- [ ] Update project forms.
-- [ ] Update project persistence and params.
-- [ ] Update public project story display.
-- [ ] Add/update tests.
-- [ ] Update docs with final decisions.
+- [x] Update project forms.
+- [x] Update project persistence and params.
+- [x] Update public project story display.
+- [x] Add/update tests.
+- [x] Update docs with final decisions.
+
+## Implementation Notes
+
+- Added `project_story` jsonb column on `projects` (default `{}`, not null).
+- Story contract and helpers live in `app/models/concerns/project_story.rb`.
+- Edit form story fields: `app/views/projects/_story_fields.html.erb`.
+- Public rendering: `app/views/public_projects/_project_story.html.erb`.
+- `description` remains separate; public pages use `overview` when present, otherwise `description`.
+- `promotion_notes` is owner-only and not rendered publicly.
+- Story field max length: 2000 characters per field (validation on `project_story`).

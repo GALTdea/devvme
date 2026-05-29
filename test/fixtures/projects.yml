@@ -20,6 +20,7 @@
 #  project_insight_analysis         :jsonb            not null
 #  project_insight_enabled          :boolean          default(FALSE), not null
 #  project_insight_last_analyzed_at :datetime
+#  project_story                    :jsonb            not null
 #  source_code_url                  :string
 #  status                           :integer
 #  technologies                     :text

@@ -18,6 +18,7 @@
 #  project_insight_analysis         :jsonb            not null
 #  project_insight_enabled          :boolean          default(FALSE), not null
 #  project_insight_last_analyzed_at :datetime
+#  project_story                    :jsonb            not null
 #  source_code_url                  :string
 #  status                           :integer
 #  technologies                     :text
@@ -596,5 +597,77 @@ class ProjectTest < ActiveSupport::TestCase
     assert_no_enqueued_jobs only: GitHubInsightsSyncJob do
       @project.update!(github_insights_enabled: false, source_code_url: "https://github.com/acme/demo")
     end
+  end
+
+  # Project story tests
+  test "default project story has version and empty fields" do
+    story = Project.default_project_story
+
+    assert_equal Project::STORY_VERSION, story["version"]
+    Project::STORY_FIELDS.each do |field|
+      assert_equal "", story[field]
+    end
+  end
+
+  test "project story merges stored values with defaults" do
+    @project.project_story = { "overview" => "Built a proof-of-work platform" }
+    @project.save!
+
+    assert_equal "Built a proof-of-work platform", @project.project_story["overview"]
+    assert_equal "", @project.project_story["problem"]
+    assert_equal Project::STORY_VERSION, @project.project_story["version"]
+  end
+
+  test "project story partial update preserves existing fields" do
+    @project.project_story = {
+      "overview" => "Initial overview",
+      "problem" => "Initial problem"
+    }
+    @project.save!
+
+    @project.project_story = { "hardest_challenge" => "New challenge" }
+    @project.save!
+
+    assert_equal "Initial overview", @project.project_story["overview"]
+    assert_equal "Initial problem", @project.project_story["problem"]
+    assert_equal "New challenge", @project.project_story["hardest_challenge"]
+  end
+
+  test "public story overview falls back to description" do
+    @project.description = "Legacy description"
+    @project.project_story = { "overview" => "" }
+
+    assert_equal "Legacy description", @project.public_story_overview
+    assert_not @project.story_overview_from_story?
+  end
+
+  test "public story overview prefers story overview over description" do
+    @project.description = "Legacy description"
+    @project.project_story = { "overview" => "Story overview" }
+
+    assert_equal "Story overview", @project.public_story_overview
+    assert @project.story_overview_from_story?
+  end
+
+  test "public story sections omit blank fields and promotion notes" do
+    @project.project_story = {
+      "overview" => "Summary",
+      "problem" => "Slow hiring",
+      "promotion_notes" => "Private note"
+    }
+
+    section_keys = @project.public_story_sections.map { |section| section[:key] }
+
+    assert_includes section_keys, "overview"
+    assert_includes section_keys, "problem"
+    assert_not_includes section_keys, "promotion_notes"
+    assert_not_includes section_keys, "why_built"
+  end
+
+  test "should validate project story field length" do
+    @project.project_story = { "overview" => "a" * (Project::STORY_FIELD_MAX_LENGTH + 1) }
+
+    assert_not @project.valid?
+    assert_includes @project.errors[:project_story].join, "Overview is too long"
   end
 end

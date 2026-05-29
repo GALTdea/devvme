@@ -18,6 +18,7 @@
 #  project_insight_analysis         :jsonb            not null
 #  project_insight_enabled          :boolean          default(FALSE), not null
 #  project_insight_last_analyzed_at :datetime
+#  project_story                    :jsonb            not null
 #  source_code_url                  :string
 #  status                           :integer
 #  technologies                     :text
@@ -42,6 +43,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Project < ApplicationRecord
+  include ProjectStory
+
   GITHUB_HOST_PATTERN = /\A(?:www\.)?github\.com\z/i
 
   belongs_to :user
