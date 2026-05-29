@@ -42,9 +42,10 @@ For any non-trivial change, read these first:
 2. `docs/process/ai-dev-flow.md`
 3. `docs/features/_constraints.md`
 4. `docs/product/strategy-2026.md`
-5. `README.md`
-6. The relevant feature brief under `docs/features/`
-7. The relevant architecture or data docs:
+5. `docs/product/mvp-product-goal.md`
+6. `README.md`
+7. The relevant feature brief under `docs/features/`
+8. The relevant architecture or data docs:
    - `docs/DATA_MODEL.md`
    - `docs/MODE_ARCHITECTURE_RFC.md`
    - Root-level implementation docs until they are migrated
@@ -130,6 +131,7 @@ Canonical docs should live under `docs/`:
 - `docs/process/ai-dev-flow.md` - staged AI development process
 - `docs/process/verification.md` - verification command reference
 - `docs/product/strategy-2026.md` - current strategic direction and open questions
+- `docs/product/mvp-product-goal.md` - concrete MVP destination and stage reference
 - `docs/features/` - feature briefs and implementation artifacts
 - `docs/architecture/` - architecture references and future migrated docs
 - `docs/decisions/` - ADR-style durable decisions

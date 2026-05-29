@@ -4,6 +4,8 @@
 **Owner:** Gustavo  
 **Purpose:** Capture the product direction for DevvMe before major implementation work begins.
 
+For the concrete MVP destination and staged path, see `docs/product/mvp-product-goal.md`.
+
 ## Core Product Goal
 
 Help developers turn real technical work into clear, public proof-of-work.
@@ -297,4 +299,3 @@ Likely tracks:
 - 2026-05-29: DevvMe's north star is to help developers turn real work into public proof.
 - 2026-05-29: Existing app capabilities should be reused and redirected rather than rebuilt from scratch.
 - 2026-05-29: Blog, follows, and email digest features are secondary until they support the proof-of-work loop.
-

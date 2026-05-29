@@ -19,6 +19,7 @@ Before implementation, gather the relevant context:
 - Read `docs/AGENTS.md`.
 - Read `docs/features/_constraints.md`.
 - Read `docs/product/strategy-2026.md` for product-direction work.
+- Read `docs/product/mvp-product-goal.md` for MVP-stage product work.
 - Read the relevant feature brief.
 - Read nearby code and tests.
 - Read relevant architecture docs or root-level historical implementation docs.
