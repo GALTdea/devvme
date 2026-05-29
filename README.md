@@ -66,6 +66,10 @@ DevvMe is a modern, feature-rich platform that empowers developers to create stu
 
 ## 📚 Documentation
 
+- **AI/developer operating guide**: [docs/AGENTS.md](docs/AGENTS.md) — shared starting point for AI-assisted development in this repo.
+- **AI development flow**: [docs/process/ai-dev-flow.md](docs/process/ai-dev-flow.md) — staged, artifact-driven process for planning, implementing, and verifying work.
+- **Verification reference**: [docs/process/verification.md](docs/process/verification.md) — repo-specific test, lint, and security check commands.
+- **Product strategy**: [docs/product/strategy-2026.md](docs/product/strategy-2026.md) — working document for the next strategic direction.
 - **Data model**: [docs/DATA_MODEL.md](docs/DATA_MODEL.md) — one-page overview of main entities, relationships, and enums.
 - **Project Insight source of truth**: [PROJECT_INSIGHT_IMPLEMENTATION.md](PROJECT_INSIGHT_IMPLEMENTATION.md) — finalized v1 scope, architecture, constraints, and rollout plan.
 - **Schema in models**: [AnnotateRb](https://github.com/drwl/annotaterb) adds schema comments to the top of each model file. Run `bundle exec annotaterb models` to annotate; annotations also run automatically after `bin/rails db:migrate` in development (see `lib/tasks/annotate_rb.rake`). Use `ANNOTATERB_SKIP_ON_DB_TASKS=1` to skip annotation when migrating.
