@@ -4,14 +4,20 @@ This is the shared starting point for AI-assisted development in DevvMe. Use it 
 
 ## Project Snapshot
 
-DevvMe is a Rails 8 developer portfolio platform. It helps developers publish professional profiles, projects, blog posts, GitHub-backed project evidence, and AI-assisted career/profile content.
+DevvMe is a Rails 8 AI-powered proof-of-work platform for developers. It helps developers turn real technical work into clear, honest, public, shareable proof-of-work.
+
+North star:
+
+```text
+Does this help a developer turn real work into public proof?
+```
 
 Current major product areas:
 
-- Public developer profiles and project portfolios
+- Public proof-of-work profiles and project stories
 - Blog publishing and profile activity
 - Admin/user management, invitation access, and featured profiles
-- Career Architect AI profile-building flows
+- Career Architect / future proof-of-work story-building flows
 - Project GitHub enrichment and Project Insight features
 - Visitor/profile analytics and email digests
 
@@ -35,9 +41,10 @@ For any non-trivial change, read these first:
 1. `docs/AGENTS.md`
 2. `docs/process/ai-dev-flow.md`
 3. `docs/features/_constraints.md`
-4. `README.md`
-5. The relevant feature brief under `docs/features/`
-6. The relevant architecture or data docs:
+4. `docs/product/strategy-2026.md`
+5. `README.md`
+6. The relevant feature brief under `docs/features/`
+7. The relevant architecture or data docs:
    - `docs/DATA_MODEL.md`
    - `docs/MODE_ARCHITECTURE_RFC.md`
    - Root-level implementation docs until they are migrated
@@ -47,6 +54,7 @@ If there is no feature brief for meaningful product or architecture work, create
 ## Working Rules
 
 - Start with context. Do not jump from vague product language straight to code.
+- Evaluate product changes against the proof-of-work north star.
 - Keep changes small enough to review and verify.
 - Prefer Rails conventions and existing local patterns.
 - Keep controllers thin. Put business logic in models, services, jobs, or policies.
@@ -56,6 +64,7 @@ If there is no feature brief for meaningful product or architecture work, create
 - Use Tailwind/Flowbite conventions already present in the app.
 - Update durable docs when decisions change. Chat history is not project memory.
 - Stop and ask when open questions affect product direction, security, data model, cost, or user privacy.
+- Do not let secondary features such as blog, follows, or digests distract from the core proof-of-work loop unless the brief says why.
 
 ## Planning Modes
 
@@ -126,4 +135,3 @@ Canonical docs should live under `docs/`:
 - `docs/decisions/` - ADR-style durable decisions
 
 Root-level implementation docs are historical and should be migrated gradually as related areas are touched.
-

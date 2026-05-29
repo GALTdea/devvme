@@ -6,12 +6,19 @@ DevvMe uses an artifact-driven, staged AI development flow. The goal is to let A
 
 AI tools are collaborators, not project memory. Durable context belongs in docs, feature briefs, tests, commits, and code.
 
+Every meaningful product decision should also be checked against the DevvMe north star:
+
+```text
+Does this help a developer turn real work into public proof?
+```
+
 ## Stage 1: Orient
 
 Before implementation, gather the relevant context:
 
 - Read `docs/AGENTS.md`.
 - Read `docs/features/_constraints.md`.
+- Read `docs/product/strategy-2026.md` for product-direction work.
 - Read the relevant feature brief.
 - Read nearby code and tests.
 - Read relevant architecture docs or root-level historical implementation docs.
@@ -145,4 +152,3 @@ Gemini:
 - Alternative strategy exploration
 
 No tool owns the truth. All durable decisions should land in repository docs.
-
