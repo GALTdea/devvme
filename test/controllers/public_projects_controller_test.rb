@@ -525,4 +525,11 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "p", text: /multi-layer rails architecture/i
     assert_select "li", text: /Gemfile includes Rails 8/i
   end
+
+  test "public project page does not show resume bullet generation UI" do
+    get public_project_url(@published_project)
+    assert_response :success
+    assert_select "#resume-bullets", count: 0
+    assert_select "input[type=submit][value=?]", "Generate resume bullets", count: 0
+  end
 end

@@ -89,13 +89,18 @@ module Dashboard
     end
 
     def secondary_cta_label
-      return "Improve your strongest story" if state == :share_proof_of_work_profile
+      return "Generate resume bullets" if state == :share_project_story
+      return "Generate resume bullets" if state == :share_proof_of_work_profile
 
       nil
     end
 
     def secondary_cta_path
-      return edit_project_path(strongest_story_project, anchor: "story-builder") if state == :share_proof_of_work_profile
+      if state == :share_project_story
+        return edit_project_path(published_story_project, anchor: "resume-bullets")
+      end
+
+      return edit_project_path(strongest_story_project, anchor: "resume-bullets") if state == :share_proof_of_work_profile
 
       nil
     end

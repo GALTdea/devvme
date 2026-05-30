@@ -1,9 +1,9 @@
 # Feature Brief: Promotion Assets Stage 4
 
-**Status:** Draft  
+**Status:** Implemented  
 **Owner:** Gustavo  
 **Created:** 2026-05-29  
-**Updated:** 2026-05-29  
+**Updated:** 2026-05-30  
 **Related Strategy:** `docs/product/strategy-2026.md`  
 **Related MVP Goal:** `docs/product/mvp-product-goal.md`  
 **Depends On:** `docs/features/completed/project-stories-stage-1.md`, `docs/features/active/dashboard-profile-reframe-stage-2.md`, `docs/features/active/ai-project-story-assistant-stage-3.md`
@@ -382,12 +382,22 @@ Revert plan:
 
 ## Progress
 
-- [ ] Inspect existing Stage 3 generation/apply architecture.
-- [ ] Decide transient vs persisted bullet behavior.
-- [ ] Define final structured response contract.
-- [ ] Add resume bullet generation service/result parser.
-- [ ] Add owner-only project-scoped controller action(s).
-- [ ] Add review/copy UI.
-- [ ] Add rate limits/failure states.
-- [ ] Add targeted tests.
-- [ ] Update this brief with final decisions and verification results.
+- [x] Inspect existing Stage 3 generation/apply architecture.
+- [x] Decide transient vs persisted bullet behavior — transient, copy-only via session.
+- [x] Define final structured response contract — `resume_bullets[]` with `text`, `focus`, `source_notes`.
+- [x] Add resume bullet generation service/result parser — `ProjectResumeBullets::GenerationService`, `ResultParser`, `RateLimiter`.
+- [x] Add owner-only project-scoped controller action(s) — `POST generate_resume_bullets`.
+- [x] Add review/copy UI — `_resume_bullets`, `_resume_bullets_review`, Stimulus copy controller.
+- [x] Add rate limits/failure states — 10/day, 30s cooldown per project.
+- [x] Add targeted tests — service, controller, presenter, public non-leakage.
+- [x] Update this brief with final decisions and verification results.
+
+## Verification Results (2026-05-30)
+
+```bash
+bundle exec bin/rails test test/services/project_resume_bullets/
+bundle exec bin/rails test test/controllers/projects_controller_test.rb
+bundle exec bin/rails test test/presenters/dashboard/proof_of_work_next_action_test.rb
+bundle exec bin/rails test test/controllers/public_projects_controller_test.rb
+# 105 runs, 356 assertions, 0 failures
+```

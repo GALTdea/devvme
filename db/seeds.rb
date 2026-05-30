@@ -1218,6 +1218,421 @@ if Rails.env.development?
     end
   end
 
+  # Mature product-demo user: exercises project stories, AI surfaces, GitHub evidence,
+  # resume bullets, blog activity, follows, digests, and profile analytics.
+  puts "\n🌿 Seeding mature proof-of-work demo user..."
+
+  mature_user = User.find_or_initialize_by(email: "maya.demo@example.com")
+  mature_user.assign_attributes(
+    password: "password123",
+    username: "maya_builds",
+    full_name: "Maya Chen",
+    job_title: "Full-stack Rails Developer",
+    headline: "Full-stack developer turning product ideas into shipped Rails, Hotwire, and AI-assisted workflows.",
+    bio: "I build pragmatic Rails products with thoughtful UX, reliable data models, and enough AI automation to make useful work easier to explain.",
+    location: "Austin, TX",
+    github_url: "https://github.com/mayabuilds",
+    linkedin_url: "https://linkedin.com/in/mayachen-dev",
+    website_url: "https://maya-builds.dev",
+    twitter_url: "https://x.com/maya_builds",
+    contact_email: "maya.demo@example.com",
+    resume_url: "https://maya-builds.dev/resume",
+    account_status: "active",
+    allow_career_architect: true,
+    open_for_work: true,
+    featured: true,
+    featured_at: 2.months.ago,
+    last_login_at: 3.hours.ago,
+    skills: [
+      "Ruby on Rails",
+      "Hotwire",
+      "PostgreSQL",
+      "Tailwind CSS",
+      "AI product workflows",
+      "GitHub API",
+      "Background jobs",
+      "Product design"
+    ],
+    work_preferences: {
+      "remote_preference" => "hybrid",
+      "availability" => "immediate",
+      "work_types" => [ "full_time", "contract" ],
+      "preferred_roles" => [ "Full-stack Developer", "Product Engineer", "Rails Developer" ],
+      "message" => "Open to strong product teams building developer tools, civic products, or AI-assisted workflows."
+    }
+  )
+  mature_user.save!
+  mature_user.active!
+  mature_user.update_columns(created_at: 8.months.ago, updated_at: 1.hour.ago)
+  created_users << mature_user unless created_users.include?(mature_user)
+
+  mature_projects = [
+    {
+      title: "AnchorCRM Field Notes",
+      description: "A Rails and Hotwire CRM workspace for independent consultants to capture client context, follow-ups, and project signals without maintaining a heavyweight sales pipeline.",
+      technologies_used: [ "Ruby on Rails", "Hotwire", "PostgreSQL", "Tailwind CSS", "Solid Queue", "Pundit" ],
+      source_code_url: "https://github.com/mayabuilds/anchorcrm-field-notes",
+      live_url: "https://anchorcrm-demo.example.com",
+      status: "published",
+      featured: true,
+      display_order: 1,
+      project_insight_enabled: true,
+      github_insights_enabled: true,
+      github_insights_sync_status: "ready",
+      github_insights_last_synced_at: 1.day.ago,
+      github_insights_summary: {
+        "project_overview" => "Rails CRM workspace focused on lightweight client follow-up and proof-of-work context.",
+        "tech_stack" => [ "Ruby on Rails", "Hotwire", "PostgreSQL", "Tailwind CSS", "Solid Queue" ],
+        "highlights" => [
+          "Uses Hotwire for low-JavaScript interaction patterns",
+          "Separates tenant-scoped records with explicit authorization checks",
+          "Includes background digest preparation for follow-up reminders"
+        ],
+        "caveats" => [ "Demo data uses seeded client records rather than production traffic" ]
+      },
+      project_insight_analysis: {
+        "repository" => { "name" => "anchorcrm-field-notes", "default_branch" => "main" },
+        "languages" => { "Ruby" => 71, "HTML" => 16, "JavaScript" => 8, "CSS" => 5 },
+        "manifests" => [ "Gemfile", "package.json" ],
+        "readme_excerpt" => "AnchorCRM Field Notes helps consultants keep client context, tasks, and relationship signals close to the work.",
+        "recent_commits" => [
+          "Add proof-of-work summary panel",
+          "Introduce scoped project notes policy",
+          "Refine Hotwire follow-up composer"
+        ],
+        "structure" => [ "app/controllers", "app/models", "app/views", "app/services", "test" ]
+      },
+      project_story: {
+        "version" => 1,
+        "overview" => "AnchorCRM Field Notes is a focused CRM workspace for independent consultants who need just enough structure to remember client context and act on follow-ups.",
+        "problem" => "Most CRM tools felt too sales-heavy for small consulting relationships. The project explores a lighter way to connect people, projects, notes, and next actions.",
+        "intended_users" => "Independent consultants, freelance developers, and small service teams managing a handful of high-context relationships.",
+        "why_built" => "I wanted a product-shaped Rails project that forced me to think through authorization, product hierarchy, and daily-use ergonomics instead of only CRUD screens.",
+        "role" => "I designed the data model, built the Rails/Hotwire workflows, added Pundit authorization, and shaped the UI around repeated daily use.",
+        "technical_decisions" => "I kept controllers thin, pushed relationship logic into models/services, used Turbo Frames for contextual updates, and made tenant ownership explicit at query boundaries.",
+        "hardest_challenge" => "The hardest part was keeping the product useful without letting it become a full enterprise CRM. I had to keep trimming features back to the core follow-up loop.",
+        "lessons_learned" => "I learned how much product clarity affects architecture. A small, repeated workflow benefits more from precise boundaries than from broad feature coverage.",
+        "demonstrates" => "This project demonstrates Rails product engineering, authorization discipline, Hotwire interaction design, and comfort turning a fuzzy workflow into a usable product surface.",
+        "promotion_notes" => "Good for resume bullets about product thinking, Rails architecture, tenant scoping, and Hotwire UX."
+      }
+    },
+    {
+      title: "DevProof Story Builder",
+      description: "An AI-assisted proof-of-work tool that helps developers turn project notes, GitHub signals, and technical decisions into structured portfolio stories.",
+      technologies_used: [ "Ruby on Rails", "OpenAI API", "Hotwire", "PostgreSQL", "Tailwind CSS", "JSONB" ],
+      source_code_url: "https://github.com/mayabuilds/devproof-story-builder",
+      live_url: "https://devproof-demo.example.com",
+      status: "published",
+      featured: true,
+      display_order: 2,
+      project_insight_enabled: true,
+      github_insights_enabled: true,
+      github_insights_sync_status: "ready",
+      github_insights_last_synced_at: 2.days.ago,
+      github_insights_summary: {
+        "project_overview" => "AI-assisted project story workflow that turns structured inputs into reviewable proof-of-work content.",
+        "tech_stack" => [ "Rails", "OpenAI API", "Hotwire", "PostgreSQL JSONB" ],
+        "highlights" => [
+          "Uses strict JSON parsing for AI suggestions",
+          "Keeps generated content reviewable before applying it",
+          "Separates public story content from owner-only asset generation"
+        ],
+        "caveats" => [ "AI output is intentionally conservative and owner-reviewed" ]
+      },
+      project_insight_analysis: {
+        "repository" => { "name" => "devproof-story-builder", "default_branch" => "main" },
+        "languages" => { "Ruby" => 68, "HTML" => 18, "JavaScript" => 9, "CSS" => 5 },
+        "manifests" => [ "Gemfile", "package.json" ],
+        "readme_excerpt" => "DevProof Story Builder helps developers explain what they built, why it matters, and what it demonstrates.",
+        "recent_commits" => [
+          "Add review-before-apply story suggestions",
+          "Normalize AI response contract",
+          "Add copy-only resume bullet generator"
+        ],
+        "structure" => [ "app/services/project_story_builder", "app/services/project_resume_bullets", "app/views/projects" ]
+      },
+      project_story: {
+        "version" => 1,
+        "overview" => "DevProof Story Builder is an AI-assisted workflow for turning rough project context into structured proof-of-work stories.",
+        "problem" => "Developers often build meaningful projects but struggle to explain the problem, their role, the hard parts, and the evidence behind the work.",
+        "intended_users" => "Early-career developers, career changers, independent builders, and engineers preparing for interviews or portfolio reviews.",
+        "why_built" => "I built it to explore how AI could support storytelling without taking away user control or inventing unsupported accomplishments.",
+        "role" => "I designed the story schema, built the project-scoped AI services, implemented strict response parsing, and created the review/apply UI.",
+        "technical_decisions" => "The project uses versioned JSONB story fields, single-turn AI services, defensive parsers, session-backed transient suggestions, and explicit source-field protection.",
+        "hardest_challenge" => "The hardest challenge was making AI useful without making it too magical. The system needed to help with phrasing while preserving user review and factual boundaries.",
+        "lessons_learned" => "I learned to treat AI output as suggestions that need product constraints, parsing contracts, and conservative defaults.",
+        "demonstrates" => "This project demonstrates AI product design, Rails service architecture, JSONB modeling, prompt-contract thinking, and user-centered review flows.",
+        "promotion_notes" => "Good for bullets about AI workflows, strict JSON parsing, review-before-apply UX, and grounded content generation."
+      }
+    },
+    {
+      title: "Neighborhood Pantry Map",
+      description: "A community resource map that lets volunteers publish pantry hours, donation needs, accessibility notes, and neighborhood-level updates.",
+      technologies_used: [ "Ruby on Rails", "PostgreSQL", "Mapbox", "Stimulus", "Tailwind CSS" ],
+      source_code_url: "https://github.com/mayabuilds/neighborhood-pantry-map",
+      live_url: "https://pantry-map-demo.example.com",
+      status: "published",
+      featured: false,
+      display_order: 3,
+      project_insight_enabled: true,
+      github_insights_enabled: true,
+      github_insights_sync_status: "ready",
+      github_insights_last_synced_at: 4.days.ago,
+      github_insights_summary: {
+        "project_overview" => "Volunteer-maintained map for local pantry availability and donation needs.",
+        "tech_stack" => [ "Rails", "PostgreSQL", "Mapbox", "Stimulus" ],
+        "highlights" => [
+          "Models recurring schedules and temporary closure notices",
+          "Includes moderation states for community-submitted updates",
+          "Uses simple map filters for accessibility and hours"
+        ],
+        "caveats" => [ "Location data in demo is fictional" ]
+      },
+      project_insight_analysis: {
+        "repository" => { "name" => "neighborhood-pantry-map", "default_branch" => "main" },
+        "languages" => { "Ruby" => 62, "HTML" => 20, "JavaScript" => 13, "CSS" => 5 },
+        "manifests" => [ "Gemfile", "package.json" ],
+        "readme_excerpt" => "A volunteer-friendly way to keep local food pantry information accurate and easy to browse.",
+        "recent_commits" => [
+          "Add moderation queue for pantry updates",
+          "Improve schedule rendering for closures",
+          "Add accessible map filter labels"
+        ],
+        "structure" => [ "app/models/pantry", "app/models/update_submission", "app/javascript/controllers" ]
+      },
+      project_story: {
+        "version" => 1,
+        "overview" => "Neighborhood Pantry Map is a volunteer-friendly resource map for keeping pantry availability and donation needs current.",
+        "problem" => "Community resource information often becomes stale, especially when hours or needs change quickly.",
+        "intended_users" => "Local volunteers, pantry coordinators, and residents looking for accurate nearby resources.",
+        "why_built" => "I wanted to practice building a civic-tech workflow where trust, moderation, and clarity mattered as much as the map itself.",
+        "role" => "I built the Rails data model, schedule logic, moderation states, and Stimulus map interactions.",
+        "technical_decisions" => "I separated pantry records from update submissions so volunteers could suggest changes without immediately changing public information.",
+        "hardest_challenge" => "The hardest part was modeling recurring hours, one-off closures, and donation needs without making the editing flow confusing.",
+        "lessons_learned" => "I learned to model uncertainty directly: community updates need review states, timestamps, and clear public context.",
+        "demonstrates" => "This project demonstrates product-minded data modeling, civic-tech UX, moderation workflows, and accessible map interactions.",
+        "promotion_notes" => "Good for bullets about data modeling, moderation, accessibility, and civic product thinking."
+      }
+    },
+    {
+      title: "Interview Prep Companion",
+      description: "A draft AI practice tool for turning project stories into interview talking points, follow-up questions, and reflection prompts.",
+      technologies_used: [ "Ruby on Rails", "OpenAI API", "PostgreSQL", "Hotwire" ],
+      source_code_url: "https://github.com/mayabuilds/interview-prep-companion",
+      status: "draft",
+      featured: false,
+      display_order: 4,
+      project_insight_enabled: false,
+      github_insights_enabled: false,
+      github_insights_sync_status: "never",
+      project_story: {
+        "version" => 1,
+        "overview" => "Interview Prep Companion is an early draft tool for helping developers practice explaining their projects in interviews.",
+        "problem" => "Developers often have project details available but need help turning them into confident spoken explanations.",
+        "role" => "I am prototyping the project-scoped prompt flow and deciding which outputs should come after resume bullets.",
+        "hardest_challenge" => "The biggest challenge is keeping the tool focused on practice instead of becoming a generic chat assistant.",
+        "lessons_learned" => "",
+        "demonstrates" => "",
+        "promotion_notes" => "Draft project that should show partial story guidance and unpublished owner-only behavior."
+      }
+    }
+  ]
+
+  mature_projects.each do |project_attrs|
+    story = project_attrs.delete(:project_story)
+    project = mature_user.projects.find_or_initialize_by(title: project_attrs[:title])
+    project.assign_attributes(project_attrs.merge(project_story: story))
+    project.save!
+    project.update_columns(created_at: rand(2..7).months.ago, updated_at: rand(1..18).days.ago)
+
+    if project.github_insights_ready?
+      project.project_github_insight_snapshots.destroy_all
+      project.project_github_insight_snapshots.create!(
+        sync_type: "deep",
+        source: "manual",
+        captured_at: project.github_insights_last_synced_at || 1.day.ago,
+        duration_ms: rand(1_200..3_800),
+        repo_payload: {
+          "url" => project.project_github_repo_url,
+          "default_branch" => "main",
+          "visibility" => "public"
+        },
+        metrics_payload: {
+          "commits_analyzed" => rand(32..96),
+          "files_seen" => rand(45..140),
+          "languages" => project.project_insight_analysis["languages"] || {}
+        },
+        highlights_payload: {
+          "highlights" => project.github_insights_summary["highlights"] || [],
+          "tech_stack" => project.github_insights_summary["tech_stack"] || []
+        },
+        errors_payload: {}
+      )
+    end
+
+    puts "✅ Seeded mature project: #{project.title}"
+  end
+
+  mature_blog_posts = [
+    {
+      title: "What AI Should and Should Not Do in a Developer Portfolio",
+      content: <<~MARKDOWN,
+        # What AI Should and Should Not Do in a Developer Portfolio
+
+        AI is useful when it helps developers explain real work more clearly. It becomes risky when it invents impact, smooths over uncertainty, or turns every project into the same polished story.
+
+        In my own proof-of-work experiments, the best pattern has been review-before-apply. The model can suggest structure, summarize evidence, and make rough notes easier to read. The developer still owns the claims.
+
+        ## Useful constraints
+
+        - Ground suggestions in real project fields.
+        - Keep generated copy editable.
+        - Separate GitHub-derived observations from personal claims.
+        - Prefer conservative phrasing when context is thin.
+
+        That combination makes AI feel like a writing partner instead of a brag generator.
+      MARKDOWN
+      excerpt: "A practical note on using AI to clarify real developer work without inventing accomplishments.",
+      published: true,
+      published_at: 6.weeks.ago,
+      featured: true,
+      views_count: 248
+    },
+    {
+      title: "Designing Rails Features Around the Smallest Useful Loop",
+      content: <<~MARKDOWN,
+        # Designing Rails Features Around the Smallest Useful Loop
+
+        The fastest way for me to lose product clarity is to build every adjacent feature at once. The better pattern is to find the smallest useful loop and make that path obvious.
+
+        For a proof-of-work app, that loop is simple:
+
+        1. Pick a real project.
+        2. Explain what it is and why it matters.
+        3. Publish the story.
+        4. Reuse the story somewhere practical.
+
+        Rails works well for this style of product development because the domain model can stay close to the UI. A small model helper, a presenter, and a focused service can often do more than a large abstraction.
+      MARKDOWN
+      excerpt: "Notes on keeping Rails product work centered on one useful loop at a time.",
+      published: true,
+      published_at: 3.weeks.ago,
+      featured: false,
+      views_count: 176
+    },
+    {
+      title: "Sketches for Interview Practice from Project Stories",
+      content: <<~MARKDOWN,
+        # Sketches for Interview Practice from Project Stories
+
+        This is a draft note about using project stories as interview preparation material.
+
+        The idea is not to memorize perfect answers. The better goal is to understand the real decisions behind a project well enough to explain tradeoffs naturally.
+      MARKDOWN
+      excerpt: "Draft thoughts on turning project stories into interview preparation.",
+      published: false,
+      published_at: nil,
+      featured: false,
+      views_count: 0
+    }
+  ]
+
+  mature_blog_posts.each do |attrs|
+    post = mature_user.blog_posts.find_or_initialize_by(title: attrs[:title])
+    post.assign_attributes(attrs)
+    post.save!
+    post.update_columns(created_at: (attrs[:published_at] || 5.days.ago) - 2.days, updated_at: rand(1..10).days.ago)
+    puts "✅ Seeded mature blog post: #{post.title}"
+  end
+
+  mature_user.create_digest_preference! unless mature_user.digest_preference
+  mature_user.digest_preference.update!(
+    enabled: true,
+    frequency: "weekly",
+    include_projects: true,
+    include_blog_posts: true,
+    include_profile_updates: true,
+    timezone: "America/Chicago",
+    digest_time: "08:30",
+    last_sent_at: 1.week.ago
+  )
+
+  GitHubProfileSnapshot.find_or_initialize_by(user: mature_user).tap do |snapshot|
+    snapshot.assign_attributes(
+      username: "mayabuilds",
+      fetched_at: 2.days.ago,
+      payload: {
+        "login" => "mayabuilds",
+        "name" => "Maya Chen",
+        "public_repos" => 34,
+        "followers" => 214,
+        "following" => 89,
+        "top_languages" => [ "Ruby", "JavaScript", "HTML", "CSS" ],
+        "recent_repositories" => [ "devproof-story-builder", "anchorcrm-field-notes", "neighborhood-pantry-map" ]
+      }
+    )
+    snapshot.save!
+  end
+
+  architect_session = mature_user.architect_sessions.find_or_initialize_by(mode: "profile_builder", goal: "both")
+  architect_session.assign_attributes(
+    status: "completed",
+    question_count: 3,
+    context_version: 1,
+    target_type: nil,
+    target_data: {},
+    context_snapshot: {
+      "profile" => {
+        "headline" => mature_user.headline,
+        "skills" => mature_user.skills,
+        "projects" => mature_user.projects.published.pluck(:title)
+      },
+      "source" => "seeded mature demo"
+    },
+    generated_headline: "Rails product engineer building proof-of-work tools with Hotwire, PostgreSQL, and grounded AI workflows.",
+    generated_bio: "Maya is a full-stack Rails developer focused on product workflows that make complex work easier to understand. Her recent projects combine Hotwire, PostgreSQL, GitHub-derived evidence, and AI-assisted writing flows with careful review and authorization boundaries.",
+    result_data: {
+      "summary" => "Completed profile builder session",
+      "suggested_skills" => [ "Rails", "Hotwire", "AI-assisted UX", "PostgreSQL", "Product engineering" ]
+    }
+  )
+  architect_session.save!
+  architect_session.architect_messages.destroy_all
+  [
+    [ "assistant", "What kind of developer story do you want your profile to tell?", "profile_direction" ],
+    [ "user", "I want it to show that I can turn ambiguous product ideas into focused Rails workflows.", "profile_direction" ],
+    [ "assistant", "Which projects best prove that?", "proof_points" ],
+    [ "user", "AnchorCRM, DevProof Story Builder, and the pantry map all show different parts of that.", "proof_points" ],
+    [ "assistant", "Generated a concise profile direction centered on Rails product engineering and grounded AI workflows.", "final_summary" ]
+  ].each_with_index do |(role, content, topic), index|
+    architect_session.architect_messages.create!(
+      role: role,
+      content: content,
+      topic: topic,
+      insight_type: index == 4 ? "summary" : nil,
+      metadata: { "seeded" => true },
+      sequence: index
+    )
+  end
+
+  # Social graph and analytics for a user who has been active for a while.
+  (created_users - [ mature_user ]).first(4).each do |other_user|
+    mature_user.follow!(other_user)
+    other_user.follow!(mature_user)
+  end
+
+  mature_user.profile_views.delete_all
+  36.times do |index|
+    mature_user.profile_views.create!(
+      visitor_ip: "198.51.100.#{index + 10}",
+      user_agent: index.even? ? "Mozilla/5.0 Chrome Demo" : "Mozilla/5.0 Safari Demo",
+      referrer: [ "https://github.com", "https://linkedin.com", "https://google.com", "https://dev.to" ].sample,
+      visited_at: rand(1..60).days.ago
+    )
+  end
+
+  puts "✅ Mature demo user ready: maya.demo@example.com / password123"
+
   puts "\n🎉 Seeding completed!"
   puts "\nSample users created:"
   puts "Email: john@example.com | Username: johndoe | Password: password123"
@@ -1225,6 +1640,7 @@ if Rails.env.development?
   puts "Email: alex@example.com | Username: alexdev | Password: password123"
   puts "Email: sarah@example.com | Username: sarahcode | Password: password123"
   puts "Email: demo@example.com | Username: demouser | Password: password123"
+  puts "Email: maya.demo@example.com | Username: maya_builds | Password: password123"
   puts "\nYou can sign in with any of these accounts to explore the application!"
 
   # Load visitor data

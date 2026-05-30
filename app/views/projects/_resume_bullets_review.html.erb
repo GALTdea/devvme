@@ -1,0 +1,65 @@
+<% bullets = Array(resume_bullets["resume_bullets"]) %>
+<% missing_questions = Array(resume_bullets["missing_context_questions"]) %>
+<% all_bullet_text = bullets.map { |b| b["text"] }.join("\n") %>
+
+<div class="mt-8 border-t border-emerald-200 pt-6"
+     data-controller="resume-bullets-copy"
+     data-resume-bullets-copy-all-text-value="<%= all_bullet_text %>">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h4 class="text-base font-semibold text-gray-900">Review resume bullets</h4>
+      <p class="mt-1 text-sm text-gray-600">
+        Copy individual bullets or all at once. Regenerate if you want a fresh set.
+      </p>
+    </div>
+    <% if bullets.any? %>
+      <button type="button"
+              data-resume-bullets-copy-target="button"
+              data-action="click->resume-bullets-copy#copyAll"
+              class="inline-flex items-center px-3 py-2 border border-emerald-600 text-sm font-medium rounded-md text-emerald-700 bg-white hover:bg-emerald-50">
+        Copy all bullets
+      </button>
+    <% end %>
+  </div>
+
+  <% if missing_questions.any? %>
+    <div class="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4">
+      <p class="text-sm font-medium text-amber-900">Missing context to strengthen these bullets</p>
+      <ul class="mt-2 space-y-1 text-sm text-amber-900 list-disc pl-5">
+        <% missing_questions.each do |question| %>
+          <li><%= question %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if bullets.empty? %>
+    <p class="mt-4 text-sm text-gray-600">No resume bullets were generated. Try adding more story context or regenerating.</p>
+  <% else %>
+    <ul class="mt-6 space-y-4">
+      <% bullets.each_with_index do |bullet, index| %>
+        <li class="rounded-md border border-gray-200 bg-white p-4">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div class="flex-1">
+              <p class="text-sm text-gray-900"
+                 data-resume-bullets-copy-target="bulletText"><%= bullet["text"] %></p>
+              <% if bullet["source_notes"].present? %>
+                <p class="mt-2 text-xs text-gray-500">
+                  <% bullet["source_notes"].each do |note| %>
+                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 mr-1"><%= note %></span>
+                  <% end %>
+                </p>
+              <% end %>
+            </div>
+            <button type="button"
+                    data-action="click->resume-bullets-copy#copyBullet"
+                    data-resume-bullets-copy-index-param="<%= index %>"
+                    class="shrink-0 inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              Copy
+            </button>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

@@ -72,6 +72,7 @@ Rails.application.routes.draw do
     post :refresh_github_insights, on: :member
     post :generate_story_suggestions, on: :member
     post :apply_story_suggestions, on: :member
+    post :generate_resume_bullets, on: :member
   end
 
   # Public blog routes (no authentication required)

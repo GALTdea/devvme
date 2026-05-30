@@ -80,8 +80,18 @@ class Dashboard::ProofOfWorkNextActionTest < ActiveSupport::TestCase
     assert_equal :share_proof_of_work_profile, action.state
     assert_equal "Share your proof-of-work profile", action.cta_label
     assert_equal "/#{@user.friendly_id}", action.cta_path
-    assert_equal "Improve your strongest story", action.secondary_cta_label
-    assert_equal "/projects/#{newer_project.id}/edit#story-builder", action.secondary_cta_path
+    assert_equal "Generate resume bullets", action.secondary_cta_label
+    assert_equal "/projects/#{newer_project.id}/edit#resume-bullets", action.secondary_cta_path
+  end
+
+  test "returns generate resume bullets secondary action for one published meaningful story" do
+    project = create_project(title: "Published Story", status: :published, story: meaningful_story)
+
+    action = Dashboard::ProofOfWorkNextAction.new(@user)
+
+    assert_equal :share_project_story, action.state
+    assert_equal "Generate resume bullets", action.secondary_cta_label
+    assert_equal "/projects/#{project.id}/edit#resume-bullets", action.secondary_cta_path
   end
 
   private

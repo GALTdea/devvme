@@ -61,6 +61,10 @@
                project: project,
                story_suggestions: @story_suggestions,
                rough_notes: @rough_notes %>
+    <%= render "resume_bullets",
+               project: project,
+               resume_bullets: @resume_bullets,
+               emphasis: @emphasis %>
   <% end %>
 
   <%= render "story_fields", form: form, project: project %>

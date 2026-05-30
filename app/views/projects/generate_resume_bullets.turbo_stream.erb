@@ -1,0 +1,7 @@
+<%= turbo_stream.replace "project_resume_bullets" do %>
+  <%= render "resume_bullets",
+             project: @project,
+             resume_bullets: @resume_bullets,
+             emphasis: @emphasis,
+             resume_bullets_error: @resume_bullets_error %>
+<% end %>

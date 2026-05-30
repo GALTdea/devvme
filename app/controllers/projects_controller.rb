@@ -1,11 +1,12 @@
 class ProjectsController < ApplicationController
   # Authentication required for management actions only
   before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy, :reorder, :refresh_github_insights,
-                                            :generate_story_suggestions, :apply_story_suggestions]
+                                            :generate_story_suggestions, :apply_story_suggestions, :generate_resume_bullets]
   before_action :set_project, only: [:show, :edit, :update, :destroy, :refresh_github_insights,
-                                     :generate_story_suggestions, :apply_story_suggestions]
+                                     :generate_story_suggestions, :apply_story_suggestions, :generate_resume_bullets]
   before_action :ensure_owner_or_admin, only: [:edit, :update, :destroy, :refresh_github_insights,
-                                                 :generate_story_suggestions, :apply_story_suggestions]
+                                                 :generate_story_suggestions, :apply_story_suggestions,
+                                                 :generate_resume_bullets]
 
   def index
     # Show user's own projects if authenticated, otherwise redirect to public
@@ -37,6 +38,7 @@ class ProjectsController < ApplicationController
 
   def edit
     @story_suggestions = session.dig(:project_story_builder_suggestions, @project.id.to_s)
+    @resume_bullets = session.dig(:project_resume_bullets, @project.id.to_s)
   end
 
   def update
@@ -116,6 +118,33 @@ class ProjectsController < ApplicationController
     render_story_builder_error(e.message)
   end
 
+  def generate_resume_bullets
+    limiter = ProjectResumeBullets::RateLimiter.new
+    allowed, message = limiter.allowed?(user: current_user, project: @project)
+    unless allowed
+      render_resume_bullets_error(message)
+      return
+    end
+
+    @resume_bullets = ProjectResumeBullets::GenerationService.call(
+      project: @project,
+      user: current_user,
+      emphasis: resume_bullets_emphasis_param
+    )
+    limiter.track!(user: current_user, project: @project)
+    store_resume_bullets(@resume_bullets)
+    @emphasis = resume_bullets_emphasis_param
+
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to edit_project_path(@project, anchor: "resume-bullets"), notice: "Resume bullets generated." }
+    end
+  rescue ProjectResumeBullets::GenerationService::GenerationError,
+         ProjectResumeBullets::ResultParser::ParseError,
+         ArchitectService::MissingApiKeysError => e
+    render_resume_bullets_error(e.message)
+  end
+
   def apply_story_suggestions
     suggestions = fetch_story_builder_suggestions
     if suggestions.blank?
@@ -170,6 +199,30 @@ class ProjectsController < ApplicationController
 
   def story_builder_rough_notes_param
     params[:rough_notes].to_s.strip
+  end
+
+  def resume_bullets_emphasis_param
+    params[:emphasis].to_s.strip
+  end
+
+  def store_resume_bullets(bullets)
+    session[:project_resume_bullets] ||= {}
+    session[:project_resume_bullets][@project.id.to_s] = bullets
+  end
+
+  def fetch_resume_bullets
+    session.dig(:project_resume_bullets, @project.id.to_s)
+  end
+
+  def render_resume_bullets_error(message)
+    @resume_bullets_error = message
+    @resume_bullets = fetch_resume_bullets
+    @emphasis = resume_bullets_emphasis_param
+
+    respond_to do |format|
+      format.turbo_stream { render :generate_resume_bullets, status: :unprocessable_content }
+      format.html { redirect_to edit_project_path(@project, anchor: "resume-bullets"), alert: message }
+    end
   end
 
   def store_story_builder_suggestions(suggestions)

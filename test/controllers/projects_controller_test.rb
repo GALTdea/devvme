@@ -570,6 +570,57 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Fill blank", @project1.project_story["problem"]
   end
 
+  test "edit page shows resume bullets generator for project owner" do
+    get edit_project_url(@project1)
+    assert_response :success
+    assert_select "#resume-bullets", count: 1
+    assert_select "input[type=submit][value=?]", "Generate resume bullets"
+  end
+
+  test "generate resume bullets requires authentication" do
+    sign_out @user
+    post generate_resume_bullets_project_url(@project1)
+    assert_redirected_to new_user_session_path
+  end
+
+  test "generate resume bullets requires project ownership" do
+    sign_out @user
+    sign_in @other_user
+    post generate_resume_bullets_project_url(@project1)
+    assert_redirected_to projects_path
+    assert_equal "You don't have permission to perform this action.", flash[:alert]
+  end
+
+  test "generate resume bullets stores bullets in session without modifying project story" do
+    original_story = @project1.project_story.dup
+    bullet_payload = {
+      "version" => 1,
+      "resume_bullets" => [
+        { "text" => "Built a portfolio platform with Rails.", "focus" => "technical_depth", "source_notes" => [] }
+      ],
+      "missing_context_questions" => []
+    }
+
+    with_stubbed_resume_bullet_generation(bullet_payload) do
+      post generate_resume_bullets_project_url(@project1), params: { emphasis: "backend" }, as: :turbo_stream
+      assert_response :success
+    end
+
+    @project1.reload
+    assert_equal original_story, @project1.project_story
+
+    get edit_project_url(@project1)
+    assert_response :success
+    assert_select "[data-resume-bullets-copy-target='bulletText']", text: /Built a portfolio platform/
+  end
+
+  test "generate resume bullets renders friendly error for invalid response" do
+    with_stubbed_resume_bullet_generation_raise(ProjectResumeBullets::ResultParser::ParseError.new("bad json")) do
+      post generate_resume_bullets_project_url(@project1), as: :turbo_stream
+      assert_response :unprocessable_content
+    end
+  end
+
   private
 
   def sign_in(user)
@@ -603,5 +654,29 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     yield
   ensure
     ProjectStoryBuilder::GenerationService.singleton_class.define_method(:call, original)
+  end
+
+  def with_stubbed_resume_bullet_generation(payload)
+    original = ProjectResumeBullets::GenerationService.method(:call)
+    ProjectResumeBullets::GenerationService.singleton_class.define_method(:call) do |**_kwargs|
+      payload
+    end
+    Rails.cache.clear
+    ProjectResumeBullets::RateLimiter::FALLBACK_STORE.clear
+    yield
+  ensure
+    ProjectResumeBullets::GenerationService.singleton_class.define_method(:call, original)
+  end
+
+  def with_stubbed_resume_bullet_generation_raise(error)
+    original = ProjectResumeBullets::GenerationService.method(:call)
+    ProjectResumeBullets::GenerationService.singleton_class.define_method(:call) do |**_kwargs|
+      raise error
+    end
+    Rails.cache.clear
+    ProjectResumeBullets::RateLimiter::FALLBACK_STORE.clear
+    yield
+  ensure
+    ProjectResumeBullets::GenerationService.singleton_class.define_method(:call, original)
   end
 end
