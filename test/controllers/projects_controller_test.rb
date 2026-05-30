@@ -508,6 +508,68 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert project.thumbnail.attached?
   end
 
+  test "edit page shows project story builder for project owner" do
+    get edit_project_url(@project1)
+    assert_response :success
+    assert_select "#story-builder", count: 1
+    assert_select "input[type=submit][value=?]", "Generate story suggestions"
+  end
+
+  test "generate story suggestions requires authentication" do
+    sign_out @user
+    post generate_story_suggestions_project_url(@project1)
+    assert_redirected_to new_user_session_path
+  end
+
+  test "generate story suggestions requires project ownership" do
+    sign_out @user
+    sign_in @other_user
+    post generate_story_suggestions_project_url(@project1)
+    assert_redirected_to projects_path
+    assert_equal "You don't have permission to perform this action.", flash[:alert]
+  end
+
+  test "generate story suggestions stores suggestions in session" do
+    suggestion_payload = {
+      "version" => 1,
+      "fields" => { "overview" => "Suggested overview", "problem" => "Suggested problem" },
+      "evidence_notes" => [],
+      "missing_context_questions" => []
+    }
+
+    with_stubbed_generation(suggestion_payload) do
+      post generate_story_suggestions_project_url(@project1), params: { rough_notes: "I built the API" }, as: :turbo_stream
+      assert_response :success
+    end
+
+    get edit_project_url(@project1)
+    assert_response :success
+    assert_select ".whitespace-pre-wrap", text: /Suggested overview/
+  end
+
+  test "apply story suggestions updates only selected blank fields" do
+    @project1.update!(project_story: { "overview" => "Keep me", "problem" => "" })
+
+    suggestions = {
+      "version" => 1,
+      "fields" => { "overview" => "Replace me", "problem" => "Fill blank" },
+      "evidence_notes" => [],
+      "missing_context_questions" => []
+    }
+
+    with_stubbed_generation(suggestions) do
+      post generate_story_suggestions_project_url(@project1), params: { rough_notes: "notes" }
+    end
+
+    post apply_story_suggestions_project_url(@project1),
+         params: { selections: { problem: "blank_only" } }
+
+    assert_redirected_to edit_project_path(@project1, anchor: "story-builder")
+    @project1.reload
+    assert_equal "Keep me", @project1.project_story["overview"]
+    assert_equal "Fill blank", @project1.project_story["problem"]
+  end
+
   private
 
   def sign_in(user)
@@ -529,5 +591,17 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     yield
   ensure
     ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"] = original
+  end
+
+  def with_stubbed_generation(payload)
+    original = ProjectStoryBuilder::GenerationService.method(:call)
+    ProjectStoryBuilder::GenerationService.singleton_class.define_method(:call) do |**_kwargs|
+      payload
+    end
+    Rails.cache.clear
+    ProjectStoryBuilder::RateLimiter::FALLBACK_STORE.clear
+    yield
+  ensure
+    ProjectStoryBuilder::GenerationService.singleton_class.define_method(:call, original)
   end
 end

@@ -26,7 +26,7 @@ class Dashboard::ProofOfWorkNextActionTest < ActiveSupport::TestCase
 
     assert_equal :add_story_context, action.state
     assert_equal "Add story context", action.cta_label
-    assert_equal "/projects/#{newer_project.id}/edit", action.cta_path
+    assert_equal "/projects/#{newer_project.id}/edit#story-builder", action.cta_path
     assert_not_equal "/projects/#{project.id}/edit", action.cta_path
   end
 
@@ -48,7 +48,7 @@ class Dashboard::ProofOfWorkNextActionTest < ActiveSupport::TestCase
 
     assert_equal :publish_project_story, action.state
     assert_equal "Publish your project story", action.cta_label
-    assert_equal "/projects/#{newer_project.id}/edit", action.cta_path
+    assert_equal "/projects/#{newer_project.id}/edit#story-builder", action.cta_path
   end
 
   test "returns improve action when published projects have weak story content" do
@@ -58,7 +58,7 @@ class Dashboard::ProofOfWorkNextActionTest < ActiveSupport::TestCase
 
     assert_equal :improve_published_story, action.state
     assert_equal "Improve your published story", action.cta_label
-    assert_equal "/projects/#{project.id}/edit", action.cta_path
+    assert_equal "/projects/#{project.id}/edit#story-builder", action.cta_path
   end
 
   test "returns share story action for one published meaningful story" do
@@ -81,7 +81,7 @@ class Dashboard::ProofOfWorkNextActionTest < ActiveSupport::TestCase
     assert_equal "Share your proof-of-work profile", action.cta_label
     assert_equal "/#{@user.friendly_id}", action.cta_path
     assert_equal "Improve your strongest story", action.secondary_cta_label
-    assert_equal "/projects/#{newer_project.id}/edit", action.secondary_cta_path
+    assert_equal "/projects/#{newer_project.id}/edit#story-builder", action.secondary_cta_path
   end
 
   private

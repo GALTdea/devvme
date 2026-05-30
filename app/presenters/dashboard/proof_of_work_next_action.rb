@@ -76,11 +76,11 @@ module Dashboard
       when :no_projects
         new_project_path
       when :add_story_context
-        edit_project_path(project_without_meaningful_story)
+        edit_project_path(project_without_meaningful_story, anchor: "story-builder")
       when :publish_project_story
-        edit_project_path(draft_meaningful_project)
+        edit_project_path(draft_meaningful_project, anchor: "story-builder")
       when :improve_published_story
-        edit_project_path(published_project_without_meaningful_story)
+        edit_project_path(published_project_without_meaningful_story, anchor: "story-builder")
       when :share_project_story
         public_project_path(published_story_project)
       when :share_proof_of_work_profile
@@ -95,7 +95,7 @@ module Dashboard
     end
 
     def secondary_cta_path
-      return edit_project_path(strongest_story_project) if state == :share_proof_of_work_profile
+      return edit_project_path(strongest_story_project, anchor: "story-builder") if state == :share_proof_of_work_profile
 
       nil
     end

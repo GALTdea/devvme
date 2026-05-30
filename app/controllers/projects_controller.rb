@@ -1,8 +1,11 @@
 class ProjectsController < ApplicationController
   # Authentication required for management actions only
-  before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy, :reorder, :refresh_github_insights]
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :refresh_github_insights]
-  before_action :ensure_owner_or_admin, only: [:edit, :update, :destroy, :refresh_github_insights]
+  before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy, :reorder, :refresh_github_insights,
+                                            :generate_story_suggestions, :apply_story_suggestions]
+  before_action :set_project, only: [:show, :edit, :update, :destroy, :refresh_github_insights,
+                                     :generate_story_suggestions, :apply_story_suggestions]
+  before_action :ensure_owner_or_admin, only: [:edit, :update, :destroy, :refresh_github_insights,
+                                                 :generate_story_suggestions, :apply_story_suggestions]
 
   def index
     # Show user's own projects if authenticated, otherwise redirect to public
@@ -33,6 +36,7 @@ class ProjectsController < ApplicationController
   end
 
   def edit
+    @story_suggestions = session.dig(:project_story_builder_suggestions, @project.id.to_s)
   end
 
   def update
@@ -85,6 +89,53 @@ class ProjectsController < ApplicationController
     redirect_to redirect_path, alert: "Could not start GitHub insights refresh. Please try again."
   end
 
+  def generate_story_suggestions
+    limiter = ProjectStoryBuilder::RateLimiter.new
+    allowed, message = limiter.allowed?(user: current_user, project: @project)
+    unless allowed
+      render_story_builder_error(message)
+      return
+    end
+
+    @story_suggestions = ProjectStoryBuilder::GenerationService.call(
+      project: @project,
+      user: current_user,
+      rough_notes: story_builder_rough_notes_param
+    )
+    limiter.track!(user: current_user, project: @project)
+    store_story_builder_suggestions(@story_suggestions)
+    @rough_notes = story_builder_rough_notes_param
+
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to edit_project_path(@project, anchor: "story-builder"), notice: "Story suggestions generated." }
+    end
+  rescue ProjectStoryBuilder::GenerationService::GenerationError,
+         ProjectStoryBuilder::ResultParser::ParseError,
+         ArchitectService::MissingApiKeysError => e
+    render_story_builder_error(e.message)
+  end
+
+  def apply_story_suggestions
+    suggestions = fetch_story_builder_suggestions
+    if suggestions.blank?
+      redirect_to edit_project_path(@project, anchor: "story-builder"), alert: "Story suggestions expired. Generate a new draft first."
+      return
+    end
+
+    applied_fields = ProjectStoryBuilder::ApplyService.call(
+      project: @project,
+      suggestions: suggestions,
+      selections: params[:selections]
+    )
+    clear_story_builder_suggestions
+
+    redirect_to edit_project_path(@project, anchor: "story-builder"),
+                notice: "Applied #{applied_fields.size} story #{'field'.pluralize(applied_fields.size)}."
+  rescue ProjectStoryBuilder::ApplyService::ApplyError => e
+    redirect_to edit_project_path(@project, anchor: "story-builder"), alert: e.message
+  end
+
   private
 
   def set_project
@@ -115,6 +166,34 @@ class ProjectsController < ApplicationController
                                    :project_insight_enabled, :github_insights_enabled,
                                    :thumbnail, images: [],
                                    project_story: Project::STORY_FIELDS.map(&:to_sym))
+  end
+
+  def story_builder_rough_notes_param
+    params[:rough_notes].to_s.strip
+  end
+
+  def store_story_builder_suggestions(suggestions)
+    session[:project_story_builder_suggestions] ||= {}
+    session[:project_story_builder_suggestions][@project.id.to_s] = suggestions
+  end
+
+  def fetch_story_builder_suggestions
+    session.dig(:project_story_builder_suggestions, @project.id.to_s)
+  end
+
+  def clear_story_builder_suggestions
+    session[:project_story_builder_suggestions]&.delete(@project.id.to_s)
+  end
+
+  def render_story_builder_error(message)
+    @story_builder_error = message
+    @story_suggestions = fetch_story_builder_suggestions
+    @rough_notes = story_builder_rough_notes_param
+
+    respond_to do |format|
+      format.turbo_stream { render :generate_story_suggestions, status: :unprocessable_content }
+      format.html { redirect_to edit_project_path(@project, anchor: "story-builder"), alert: message }
+    end
   end
 
   # Permission helper methods

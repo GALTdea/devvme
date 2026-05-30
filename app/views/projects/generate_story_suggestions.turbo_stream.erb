@@ -1,0 +1,7 @@
+<%= turbo_stream.replace "project_story_builder" do %>
+  <%= render "story_builder",
+             project: @project,
+             story_suggestions: @story_suggestions,
+             rough_notes: @rough_notes,
+             story_builder_error: @story_builder_error %>
+<% end %>

@@ -1,6 +1,6 @@
 # Feature Brief: AI Project Story Assistant Stage 3
 
-**Status:** Draft  
+**Status:** Implemented  
 **Owner:** Gustavo  
 **Created:** 2026-05-29  
 **Updated:** 2026-05-29  
@@ -411,15 +411,26 @@ Revert plan:
 - 2026-05-29: Generated story content must require user review/confirmation before saving.
 - 2026-05-29: Generated suggestions remain transient; no AI draft/suggestion table in Stage 3.
 - 2026-05-29: Stage 3 starts from project-scoped member actions rather than a global AI route.
+- 2026-05-29: Implemented `ProjectStoryBuilder::*` services and owner-only generate/apply actions on `ProjectsController`.
 
 ## Progress
 
-- [ ] Inspect project owner entry points.
-- [ ] Decide service vs `ArchitectSession` mode.
-- [ ] Define final structured response contract.
-- [ ] Add generation service/result parsing.
-- [ ] Add owner-only controller action(s).
-- [ ] Add review/apply UI.
-- [ ] Add rate limits/failure states.
-- [ ] Add targeted tests.
-- [ ] Update this brief with final decisions.
+- [x] Inspect project owner entry points.
+- [x] Decide service vs `ArchitectSession` mode.
+- [x] Define final structured response contract.
+- [x] Add generation service/result parsing.
+- [x] Add owner-only controller action(s).
+- [x] Add review/apply UI.
+- [x] Add rate limits/failure states.
+- [x] Add targeted tests.
+- [x] Update this brief with final decisions.
+
+## Implementation Notes
+
+- **Architecture:** Single-turn `ProjectStoryBuilder::GenerationService` with `ContextBuilder`, `ResultParser`, `ApplyService`, and `RateLimiter`. No `ArchitectSession` mode or draft table.
+- **Routes:** `POST /projects/:id/generate_story_suggestions` and `POST /projects/:id/apply_story_suggestions` (owner/admin only).
+- **Entry point:** Project edit form `#story-builder` panel above story fields. Dashboard proof-of-work CTAs link to `edit_project_path(..., anchor: "story-builder")`.
+- **Transient drafts:** Generated suggestions stored in session keyed by project id until applied or regenerated.
+- **Apply rules:** Blank fields default to apply (`blank_only`); existing content requires explicit `replace` selection.
+- **Rate limits:** 10 generations/day/user and 30-second per-project cooldown (mirrors Project Insight pattern).
+- **Verification:** `bundle exec rails test test/services/project_story_builder/ test/controllers/projects_controller_test.rb test/presenters/dashboard/proof_of_work_next_action_test.rb` — 62 runs, 0 failures.

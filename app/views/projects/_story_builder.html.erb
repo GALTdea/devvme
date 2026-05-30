@@ -1,0 +1,56 @@
+<%= turbo_frame_tag "project_story_builder" do %>
+  <div id="story-builder" class="form-section mb-8 scroll-mt-24">
+    <div class="rounded-lg border border-indigo-200 bg-indigo-50/60 p-6">
+      <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700">Project Story Builder</p>
+          <h3 class="mt-1 text-lg font-medium text-gray-900">Turn rough context into a clearer project story</h3>
+          <p class="mt-2 text-sm text-gray-600">
+            Generate suggestions for your public story fields using this project's title, description, technologies,
+            existing story content, and available GitHub signals. Nothing is saved until you apply selected fields.
+          </p>
+          <p class="mt-2 text-sm text-gray-700">
+            Story completeness:
+            <span class="font-semibold"><%= project.story_completion_count %>/<%= project.story_completion_total %></span>
+            core sections filled.
+          </p>
+        </div>
+      </div>
+
+      <% if local_assigns[:story_builder_error].present? %>
+        <div class="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          <%= story_builder_error %>
+        </div>
+      <% end %>
+
+      <%= form_with url: generate_story_suggestions_project_path(project),
+                    method: :post,
+                    class: "mt-5",
+                    data: { turbo_frame: "project_story_builder" } do |form| %>
+        <div>
+          <%= form.label :rough_notes, "Optional rough notes", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <p class="text-sm text-gray-500 mb-2">
+            Add missing context the project metadata does not capture — your role, constraints, tradeoffs, or what was hard.
+          </p>
+          <%= form.text_area :rough_notes,
+              rows: 4,
+              maxlength: ProjectStoryBuilder::GenerationService::MAX_ROUGH_NOTES_CHARS,
+              value: local_assigns[:rough_notes],
+              class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500",
+              placeholder: "Example: I owned the API layer and migration from a monolith. The hardest part was keeping deploys safe while users were active." %>
+        </div>
+
+        <div class="mt-4">
+          <%= form.submit "Generate story suggestions",
+              class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+      <% end %>
+
+      <% if local_assigns[:story_suggestions].present? %>
+        <%= render "story_builder_review",
+                   project: project,
+                   story_suggestions: story_suggestions %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

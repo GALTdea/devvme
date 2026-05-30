@@ -56,6 +56,13 @@
     </div>
   </div>
 
+  <% if project.persisted? %>
+    <%= render "story_builder",
+               project: project,
+               story_suggestions: @story_suggestions,
+               rough_notes: @rough_notes %>
+  <% end %>
+
   <%= render "story_fields", form: form, project: project %>
 
   <!-- Media Section -->

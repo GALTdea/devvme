@@ -1,0 +1,88 @@
+<% suggested_fields = story_suggestions.fetch("fields", {}) %>
+<% evidence_notes = Array(story_suggestions["evidence_notes"]) %>
+<% missing_questions = Array(story_suggestions["missing_context_questions"]) %>
+
+<div class="mt-8 border-t border-indigo-200 pt-6">
+  <h4 class="text-base font-semibold text-gray-900">Review suggestions</h4>
+  <p class="mt-1 text-sm text-gray-600">
+    Blank fields are preselected to apply. Existing content is kept unless you explicitly choose to replace it.
+  </p>
+
+  <% if evidence_notes.any? %>
+    <div class="mt-4 rounded-md border border-gray-200 bg-white p-4">
+      <p class="text-sm font-medium text-gray-900">Signals considered</p>
+      <ul class="mt-2 space-y-1 text-sm text-gray-600 list-disc pl-5">
+        <% evidence_notes.each do |note| %>
+          <li>
+            <% if note["source"].present? %>
+              <span class="font-medium text-gray-700"><%= note["source"].humanize %>:</span>
+            <% end %>
+            <%= note["summary"] %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if missing_questions.any? %>
+    <div class="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4">
+      <p class="text-sm font-medium text-amber-900">Missing context to strengthen this story</p>
+      <ul class="mt-2 space-y-1 text-sm text-amber-900 list-disc pl-5">
+        <% missing_questions.each do |question| %>
+          <li><%= question %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form_with url: apply_story_suggestions_project_path(project), method: :post, class: "mt-6 space-y-6" do |form| %>
+    <% Project::PUBLIC_STORY_FIELDS.each do |field| %>
+      <% config = Project::FORM_STORY_SECTIONS.fetch(field) %>
+      <% existing_content = project.project_story[field].to_s.strip %>
+      <% suggested_content = suggested_fields[field].to_s.strip %>
+      <% next if suggested_content.blank? %>
+
+      <div class="rounded-md border border-gray-200 bg-white p-4">
+        <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p class="text-sm font-semibold text-gray-900"><%= config[:label] %></p>
+            <% if existing_content.present? %>
+              <p class="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500">Existing content</p>
+              <p class="mt-1 text-sm text-gray-700 whitespace-pre-wrap"><%= existing_content %></p>
+            <% else %>
+              <p class="mt-1 text-xs text-gray-500">Currently blank</p>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <p class="text-xs font-medium uppercase tracking-wide text-indigo-700">Suggested content</p>
+          <p class="mt-1 text-sm text-gray-900 whitespace-pre-wrap"><%= suggested_content %></p>
+        </div>
+
+        <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <% if existing_content.blank? %>
+            <label class="inline-flex items-center gap-2 text-sm text-gray-800">
+              <%= check_box_tag "selections[#{field}]", "blank_only", true,
+                  class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+              Apply to blank field
+            </label>
+          <% else %>
+            <label class="inline-flex items-center gap-2 text-sm text-gray-800">
+              <%= check_box_tag "selections[#{field}]", "replace", false,
+                  class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+              Replace existing content
+            </label>
+            <span class="text-sm text-gray-500">Leave unchecked to keep existing content</span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <%= form.submit "Apply selected suggestions",
+          class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+      <p class="text-sm text-gray-500">Applied fields update your project story. You can still edit them below before saving the project.</p>
+    </div>
+  <% end %>
+</div>
