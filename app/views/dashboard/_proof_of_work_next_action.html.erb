@@ -1,0 +1,15 @@
+<div class="mb-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-200 dark:border-blue-900 overflow-hidden">
+  <div class="p-6 sm:flex sm:items-center sm:justify-between">
+    <div class="max-w-3xl">
+      <p class="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">Next proof-of-work step</p>
+      <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-white"><%= action.title %></h2>
+      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400"><%= action.body %></p>
+    </div>
+    <div class="mt-5 sm:mt-0 sm:ml-6 flex flex-col sm:items-end gap-2">
+      <%= link_to action.cta_label, action.cta_path, class: "inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors" %>
+      <% if action.secondary_cta_label.present? && action.secondary_cta_path.present? %>
+        <%= link_to action.secondary_cta_label, action.secondary_cta_path, class: "inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 dark:text-blue-200 dark:bg-blue-950 dark:hover:bg-blue-900 transition-colors" %>
+      <% end %>
+    </div>
+  </div>
+</div>

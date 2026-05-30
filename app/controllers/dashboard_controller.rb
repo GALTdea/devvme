@@ -7,6 +7,7 @@ class DashboardController < ApplicationController
 
     # Set the public profile URL for sharing (moved from profiles controller)
     @public_profile_url = public_profile_url(@user.friendly_id)
+    @proof_of_work_next_action = Dashboard::ProofOfWorkNextAction.new(@user)
 
     # Calculate key metrics for dashboard widgets
     @projects_count = @user.projects_count

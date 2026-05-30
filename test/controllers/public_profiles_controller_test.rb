@@ -9,7 +9,7 @@ class PublicProfilesControllerTest < ActionDispatch::IntegrationTest
     get public_profile_path(@user.username)
     assert_response :success
     assert_select "h1", @user.display_name
-    assert_select "p", text: /@#{@user.username}/
+    assert_select "div[aria-label='Username']", text: /#{@user.username}/
   end
 
   test "should show public profile by friendly_id slug" do
@@ -52,6 +52,28 @@ class PublicProfilesControllerTest < ActionDispatch::IntegrationTest
 
     # Should not show draft project
     assert_select "h3", text: draft_project.title, count: 0
+  end
+
+  test "should present public projects as project stories without owner guidance" do
+    project = projects(:test_project_one)
+    project.update!(
+      status: :published,
+      user: @user,
+      description: "Fallback description",
+      project_story: {
+        overview: "Story overview for public card",
+        problem: "Hard to explain project work"
+      }
+    )
+
+    get public_profile_path(@user.username)
+    assert_response :success
+
+    assert_select "h2", text: /Project Stories/
+    assert_select "p", text: /Story overview for public card/
+    assert_select "p", text: /Fallback description/, count: 0
+    assert_no_match "Your story has", response.body
+    assert_no_match "Story 2/6", response.body
   end
 
   test "should display share profile button with correct data attributes" do
@@ -120,27 +142,30 @@ class PublicProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", active_user.display_name
   end
 
-  test "should redirect pending activation user to their limited access page" do
+  test "should allow pending activation user to view public profile" do
     pending_user = users(:pending_user)
     sign_in pending_user
     get public_profile_path(pending_user.username)
-    assert_redirected_to pending_activation_path
+    assert_response :success
+    assert_select "h1", pending_user.display_name
   end
 
-  test "should show 404 for pending activation account when not signed in" do
+  test "should allow pending activation account when not signed in" do
     pending_user = users(:pending_user)
     get public_profile_path(pending_user.username)
-    assert_response :not_found
+    assert_response :success
+    assert_select "h1", pending_user.display_name
   end
 
-  test "should show 404 for pending activation account when signed in as different user" do
+  test "should allow pending activation account when signed in as different user" do
     pending_user = users(:pending_user)
     other_user = users(:test_user_two)
     other_user.update!(account_status: :active)
 
     sign_in other_user
     get public_profile_path(pending_user.username)
-    assert_response :not_found
+    assert_response :success
+    assert_select "h1", pending_user.display_name
   end
 
   test "should redirect suspended user to their limited access page" do

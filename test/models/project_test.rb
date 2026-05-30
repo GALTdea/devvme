@@ -664,6 +664,44 @@ class ProjectTest < ActiveSupport::TestCase
     assert_not_includes section_keys, "why_built"
   end
 
+  test "story completion sections use core proof of work fields" do
+    @project.project_story = {
+      "overview" => "Story overview",
+      "problem" => "Problem solved",
+      "intended_users" => "Developers",
+      "why_built" => "Needed it",
+      "promotion_notes" => "Private note"
+    }
+
+    section_keys = @project.story_completion_sections.map { |section| section[:key] }
+
+    assert_equal %w[overview problem role hardest_challenge lessons_learned demonstrates], section_keys
+    assert_equal 2, @project.story_completion_count
+    assert_equal 6, @project.story_completion_total
+  end
+
+  test "story meaningful requires at least two core sections" do
+    @project.project_story = { "overview" => "Story overview" }
+    assert_not @project.story_meaningful?
+
+    @project.project_story = { "problem" => "Problem solved" }
+    assert @project.story_meaningful?
+  end
+
+  test "story complete enough to share requires published meaningful story" do
+    @project.status = :draft
+    @project.project_story = {
+      "overview" => "Story overview",
+      "problem" => "Problem solved"
+    }
+
+    assert @project.story_meaningful?
+    assert_not @project.story_complete_enough_to_share?
+
+    @project.status = :published
+    assert @project.story_complete_enough_to_share?
+  end
+
   test "should validate project story field length" do
     @project.project_story = { "overview" => "a" * (Project::STORY_FIELD_MAX_LENGTH + 1) }
 

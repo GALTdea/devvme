@@ -11,7 +11,7 @@
             Welcome back, <%= @user.display_name %>!
           </h1>
           <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Here's what's happening with your developer portfolio today.
+            Turn real project work into clear proof-of-work stories you can publish and share.
           </p>
         </div>
         <div class="mt-4 sm:mt-0 flex items-center space-x-3">
@@ -56,13 +56,15 @@
               </p>
               <p class="mt-2">
                 <strong>Good news:</strong> You can still explore your dashboard, complete your profile, 
-                and start building your portfolio while you wait!
+                and start turning your projects into proof-of-work while you wait!
               </p>
             </div>
           </div>
         </div>
       </div>
     <% end %>
+
+    <%= render "proof_of_work_next_action", action: @proof_of_work_next_action %>
 
     <!-- User Navigation Bar -->
     <div class="mb-6">
@@ -113,7 +115,7 @@
               </svg>
             </div>
             <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= @projects_count %></div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Projects</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Project Stories</div>
             <div class="text-xs text-green-600 dark:text-green-400 mt-1">
               <%= @published_projects_count %> published
             </div>
@@ -208,7 +210,10 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
       <div class="p-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Follow & Network</h2>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Follow & Network</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Secondary tools for updates and discovery.</p>
+          </div>
           <%= link_to digest_preferences_path, class: "text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 flex items-center" do %>
             <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -337,7 +342,7 @@
 
     <!-- Quick Actions -->
     <div class="mb-6">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Supporting Actions</h2>
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         
         <% if current_user.allow_career_architect? || current_user.admin? || current_user.super_admin? %>
@@ -372,10 +377,10 @@
           </div>
           <div class="ml-3 min-w-0 flex-1">
             <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-              New Project
+              New Project Story
             </p>
             <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-              Add project
+              Add proof-of-work
             </p>
           </div>
         <% end %>
@@ -445,11 +450,11 @@
 
     <!-- Social Media Cards Section -->
     <div class="mb-6">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📱 Share Your Profile</h2>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Share Your Proof-of-Work Profile</h2>
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="p-6">
           <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Share different versions of your profile card on social media. These URLs automatically generate beautiful Twitter Card previews when shared on Twitter, LinkedIn, or other platforms.
+            Share your public profile when you want to point people to your project stories and proof-of-work.
           </p>
           
           <div class="space-y-4">
@@ -582,7 +587,7 @@
     <!-- Recent Projects Section -->
     <div class="mb-6">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Projects</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Project Stories</h2>
         <% if @recent_projects.any? %>
           <%= link_to projects_path, class: "text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 flex items-center" do %>
             View all
@@ -607,6 +612,9 @@
                     <div class="flex items-center space-x-2 ml-4">
                       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                         Published
+                      </span>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-200">
+                        Story <%= project.story_completion_count %>/<%= project.story_completion_total %>
                       </span>
                       <div class="flex space-x-1">
                         <% if project.github_url.present? %>

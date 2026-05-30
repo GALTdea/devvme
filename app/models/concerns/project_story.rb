@@ -20,6 +20,15 @@ module ProjectStory
   ].freeze
 
   PUBLIC_STORY_FIELDS = (STORY_FIELDS - %w[promotion_notes]).freeze
+  CORE_STORY_FIELDS = %w[
+    overview
+    problem
+    role
+    hardest_challenge
+    lessons_learned
+    demonstrates
+  ].freeze
+  MEANINGFUL_STORY_SECTION_THRESHOLD = 2
 
   PUBLIC_STORY_SECTIONS = {
     "overview" => { label: "Overview", prompt: nil },
@@ -136,6 +145,32 @@ module ProjectStory
 
   def has_public_story_content?
     public_story_sections.any? || story_overview_from_story?
+  end
+
+  def story_completion_sections
+    CORE_STORY_FIELDS.map do |field|
+      {
+        key: field,
+        label: PUBLIC_STORY_SECTIONS.fetch(field)[:label],
+        present: project_story[field].to_s.strip.present?
+      }
+    end
+  end
+
+  def story_completion_count
+    story_completion_sections.count { |section| section[:present] }
+  end
+
+  def story_completion_total
+    CORE_STORY_FIELDS.size
+  end
+
+  def story_meaningful?
+    story_completion_count >= MEANINGFUL_STORY_SECTION_THRESHOLD
+  end
+
+  def story_complete_enough_to_share?
+    published? && story_meaningful?
   end
 
   private

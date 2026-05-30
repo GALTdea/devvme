@@ -1,6 +1,6 @@
 # Feature Brief: Dashboard and Profile Reframe Stage 2
 
-**Status:** Draft  
+**Status:** Implemented  
 **Owner:** Gustavo  
 **Created:** 2026-05-29  
 **Updated:** 2026-05-29  
@@ -385,14 +385,45 @@ Revert plan:
 - 2026-05-29: Meaningful story content means at least two of six core story sections are present.
 - 2026-05-29: Story completeness guidance is owner-facing only and should not appear on public profiles.
 - 2026-05-29: Blog/network/digest dashboard surfaces remain available but visually secondary during Stage 2.
+- 2026-05-29: Dashboard next-action branching is implemented in `Dashboard::ProofOfWorkNextAction`.
+- 2026-05-29: Project-level story completeness helpers are implemented in `ProjectStory`.
+- 2026-05-29: Public profile project cards use story overview as summary with description fallback.
+- 2026-05-29: Targeted Stage 2 tests pass; RuboCop passes on app files and new presenter test.
 
 ## Progress
 
-- [ ] Audit dashboard/profile hierarchy.
-- [ ] Define story completeness helper approach.
-- [ ] Define next-action dashboard states.
-- [ ] Update dashboard copy and CTAs.
-- [ ] Demote secondary surfaces.
-- [ ] Update public profile project-story presentation.
-- [ ] Add/update targeted tests.
-- [ ] Update this brief with final decisions.
+- [x] Audit dashboard/profile hierarchy.
+- [x] Define story completeness helper approach.
+- [x] Define next-action dashboard states.
+- [x] Update dashboard copy and CTAs.
+- [x] Demote secondary surfaces.
+- [x] Update public profile project-story presentation.
+- [x] Add/update targeted tests.
+- [x] Update this brief with final decisions.
+
+## Implementation Notes
+
+- Added `Dashboard::ProofOfWorkNextAction` presenter for the six dashboard states.
+- Added project story completion helpers to `ProjectStory`.
+- Added a dashboard proof-of-work guidance panel.
+- Reframed dashboard project language around project stories.
+- Kept blog, network, digest, and social-card features present but visually secondary.
+- Updated public profile project section language to "Project Stories."
+- Kept public cards concise and free of owner-only completion guidance.
+
+## Verification Results
+
+Passed:
+
+```bash
+bin/rails test test/models/project_test.rb test/presenters/dashboard/proof_of_work_next_action_test.rb test/controllers/dashboard_controller_test.rb test/controllers/public_profiles_controller_test.rb
+bin/rails test test/controllers/public_projects_controller_test.rb test/integration/projects_management_test.rb
+bin/rails test test/models/project_test.rb test/presenters/dashboard/proof_of_work_next_action_test.rb test/controllers/dashboard_controller_test.rb test/controllers/public_profiles_controller_test.rb test/controllers/public_projects_controller_test.rb test/integration/projects_management_test.rb
+RUBOCOP_CACHE_ROOT=tmp/rubocop_cache bin/rubocop app/models/concerns/project_story.rb app/presenters/dashboard/proof_of_work_next_action.rb app/controllers/dashboard_controller.rb test/presenters/dashboard/proof_of_work_next_action_test.rb
+bin/rails db:migrate:status
+```
+
+Notes:
+
+- `test/integration/projects_management_test.rb` currently reports existing skipped tests.
+- Running RuboCop across existing touched controller/model test files also reports pre-existing array-spacing offenses outside the Stage 2 app code path.

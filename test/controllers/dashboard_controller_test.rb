@@ -53,7 +53,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_select "div", text: /#{@user.profile_completion_percentage}%/
 
     # Should display recent projects section
-    assert_select "h2", text: /Recent Projects/
+    assert_select "h2", text: /Recent Project Stories/
     assert_select "h3", text: /Published Project/
   end
 
@@ -72,6 +72,25 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
 
     # Should show welcome message
     assert_select "h1", text: /Welcome back/
+    assert_select "h2", text: /Turn your work into proof/
+    assert_select "a", text: /Create your first project story/
+  end
+
+  test "should show proof of work guidance for projects needing story context" do
+    sign_in @user
+
+    @user.projects.create!(
+      title: "Weak Project",
+      description: "A project without story fields",
+      technologies_used: [ "Rails" ],
+      status: "draft"
+    )
+
+    get dashboard_path
+    assert_response :success
+
+    assert_select "p", text: /Next proof-of-work step/
+    assert_select "a", text: /Add story context/
   end
 
   test "should display profile completion percentage" do
@@ -138,7 +157,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Should show published project
-    assert_select "h2", text: /Recent Projects/
+    assert_select "h2", text: /Recent Project Stories/
     assert_select "h3", text: /Published Project/
 
     # Should not show draft project
@@ -163,9 +182,9 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
 
     # Should only show 3 projects in recent section
     # Check that we have exactly 3 project title links in the recent projects section
-    assert_select "h2", text: /Recent Projects/
+    assert_select "h2", text: /Recent Project Stories/
     # Count project title links (not edit links or new project links)
-    project_title_links = css_select("a[href*='/projects/']").select { |link| link.text.strip.match?(/Project \d+/) }
+    project_title_links = css_select("h3 a").select { |link| link.text.strip.match?(/Project \d+/) }
     assert_equal 3, project_title_links.length
   end
 
