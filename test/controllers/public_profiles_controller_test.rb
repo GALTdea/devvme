@@ -88,6 +88,14 @@ class PublicProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_select "div[data-share-button-title-value='#{@user.display_name}\\'s Profile']"
   end
 
+  test "should include proof-of-work aligned social metadata" do
+    get public_profile_path(@user.username)
+    assert_response :success
+
+    assert_select "meta[property='og:title'][content*='Proof-of-Work Profile']"
+    assert_select "title", text: /Proof-of-Work Profile/
+  end
+
   # Tests for deactivated account access control
   test "should show 404 for deactivated account when not signed in" do
     deactivated_user = users(:deactivated_user)

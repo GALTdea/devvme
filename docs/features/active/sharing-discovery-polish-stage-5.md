@@ -1,6 +1,6 @@
 # Feature Brief: Sharing and Discovery Polish Stage 5
 
-**Status:** Draft  
+**Status:** Implemented  
 **Owner:** Gustavo  
 **Created:** 2026-05-30  
 **Updated:** 2026-06-01  
@@ -416,11 +416,21 @@ Revert:
 
 ## Progress
 
-- [ ] Inspect current metadata/social/share implementation.
-- [ ] Define public project metadata behavior.
-- [ ] Add/polish public project share controls.
-- [ ] Confirm public profile share behavior remains aligned.
-- [ ] Reframe Explore around project stories.
-- [ ] Decide whether existing featured project data is safe for a Featured Project Stories section.
-- [ ] Add/update targeted tests.
-- [ ] Update this brief with implementation decisions and verification results.
+- [x] Inspect current metadata/social/share implementation.
+- [x] Define public project metadata behavior.
+- [x] Add/polish public project share controls.
+- [x] Confirm public profile share behavior remains aligned.
+- [x] Reframe Explore around project stories.
+- [x] Decide whether existing featured project data is safe for a Featured Project Stories section.
+- [x] Add/update targeted tests.
+- [x] Update this brief with implementation decisions and verification results.
+
+## Implementation Notes
+
+- **Public project metadata:** `ApplicationHelper` helpers (`public_project_page_title`, `public_project_meta_description`, `public_project_social_image_url`, `public_project_social_image_alt`) plus `PublicProjectsController#prepare_project_seo_data`. Description uses `public_story_overview` with `description` fallback. Image uses thumbnail/images, then profile social image, then site social image.
+- **Share controls:** `share-button` on published public project pages with owner-aware label (`Share your story` vs `Share this project story`). Clipboard message is configurable via `copiedMessage` Stimulus value (default: "Link copied to clipboard!").
+- **Explore polish:** Index reframed to "Project Stories"; cards and search use `public_story_overview`; ordering via `Project.by_explore_relevance` (core story field count, then featured, then recency).
+- **Highlighted section:** Optional "Highlighted Project Stories" section reuses owner-controlled `projects.featured` (labeled neutrally, not editorial). Hidden when filters are active.
+- **Profile metadata:** OG title/description reframed to proof-of-work language.
+- **Dashboard:** Share guidance already present in `Dashboard::ProofOfWorkNextAction`; added dashboard integration tests for share states.
+- **Verification:** `bundle exec rails test test/controllers/public_projects_controller_test.rb test/controllers/public_profiles_controller_test.rb test/controllers/dashboard_controller_test.rb test/presenters/dashboard/proof_of_work_next_action_test.rb` — 83 runs, 0 failures.

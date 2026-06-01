@@ -199,7 +199,9 @@ class PublicProfilesController < ApplicationController
         sanitized_bio = ActionView::Base.full_sanitizer.sanitize(@user.bio)
         @seo_description = sanitized_bio.length > 155 ? "#{sanitized_bio[0..152]}..." : sanitized_bio
       else
-        @seo_description = "View #{@user.display_name}'s profile and projects on Devvme App. #{@user.published_projects_count} published projects."
+        published_count = @user.published_projects_count
+        story_label = published_count == 1 ? "published project story" : "published project stories"
+        @seo_description = "Proof-of-work profile for #{@user.display_name} on Devv.me. #{published_count} #{story_label}."
       end
 
       # Keywords based on user's profile
@@ -207,13 +209,14 @@ class PublicProfilesController < ApplicationController
         @user.username,
         @user.display_name,
         "developer",
+        "proof-of-work",
+        "project stories",
         "portfolio",
-        "projects",
         "profile"
       ].compact.join(", ")
 
       # Page title
-      @seo_title = "#{@user.display_name} (@#{@user.username})"
+      @seo_title = "#{@user.display_name} (@#{@user.username}) - Proof-of-Work Profile"
     end
 
     # Social media image URL for sharing (branded image)

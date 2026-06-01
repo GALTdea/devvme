@@ -82,6 +82,20 @@ class Project < ApplicationRecord
   scope :featured, -> { where(featured: true) }
   scope :published, -> { where(status: :published) }
   scope :for_user, ->(user) { where(user: user) }
+  scope :by_explore_relevance, lambda {
+    story_richness_sql = <<~SQL.squish
+      (
+        CASE WHEN COALESCE(project_story->>'overview', '') <> '' THEN 1 ELSE 0 END +
+        CASE WHEN COALESCE(project_story->>'problem', '') <> '' THEN 1 ELSE 0 END +
+        CASE WHEN COALESCE(project_story->>'role', '') <> '' THEN 1 ELSE 0 END +
+        CASE WHEN COALESCE(project_story->>'hardest_challenge', '') <> '' THEN 1 ELSE 0 END +
+        CASE WHEN COALESCE(project_story->>'lessons_learned', '') <> '' THEN 1 ELSE 0 END +
+        CASE WHEN COALESCE(project_story->>'demonstrates', '') <> '' THEN 1 ELSE 0 END
+      )
+    SQL
+
+    order(Arel.sql("#{story_richness_sql} DESC")).order(featured: :desc, created_at: :desc)
+  }
 
   # Class method to reorder projects for a user
   def self.reorder_for_user(user, project_ids)

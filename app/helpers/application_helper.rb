@@ -197,6 +197,36 @@ module ApplicationHelper
     content_for :canonical, tag.link(rel: "canonical", href: url)
   end
 
+  def public_project_page_title(project)
+    "#{project.title} - Project Story | Devv.me"
+  end
+
+  def public_project_meta_description(project)
+    truncate(strip_tags(project.public_story_overview), length: 160)
+  end
+
+  def public_project_social_image_url(project, host: nil)
+    url_options = host.present? ? { host: host } : {}
+
+    if project.thumbnail.attached?
+      return rails_blob_url(project.thumbnail, **url_options)
+    elsif project.images.attached?
+      return rails_blob_url(project.images.first, **url_options)
+    end
+
+    social_profile_image_url(
+      project.user.username,
+      project.user.social_image_cache_key,
+      **url_options
+    )
+  rescue StandardError
+    main_social_image_url(**url_options)
+  end
+
+  def public_project_social_image_alt(project)
+    "#{project.title} - proof-of-work project story by #{project.user.display_name}"
+  end
+
   # Generate public profile URL helper method
   def public_profile_url(username, options = {})
     if options[:full_url]

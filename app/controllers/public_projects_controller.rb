@@ -11,7 +11,7 @@ class PublicProjectsController < ApplicationController
   def index
     @projects = Project.published
                       .includes(:user, thumbnail_attachment: :blob)
-                      .order(created_at: :desc)
+                      .by_explore_relevance
 
     # Filter by author (exact username match)
     if params[:author].present?
@@ -25,8 +25,8 @@ class PublicProjectsController < ApplicationController
     if params[:search].present?
       search_term = "%#{params[:search]}%"
       @projects = @projects.where(
-        "title ILIKE ? OR description ILIKE ?",
-        search_term, search_term
+        "title ILIKE ? OR description ILIKE ? OR project_story->>'overview' ILIKE ?",
+        search_term, search_term, search_term
       )
     end
 
@@ -46,6 +46,8 @@ class PublicProjectsController < ApplicationController
     # Stats for header
     @total_projects = @author ? @author.projects.published.count : Project.published.count
     @total_users = User.joins(:projects).where(projects: { status: :published }).distinct.count
+
+    @featured_stories = featured_stories_for_index if explore_filters_blank?
   end
 
   # GET /explore/:id
@@ -62,6 +64,8 @@ class PublicProjectsController < ApplicationController
                                .where.not(id: @project.id)
                                .includes(thumbnail_attachment: :blob)
                                .limit(3)
+
+    prepare_project_seo_data if @project.published?
   end
 
   def ask_insight
@@ -100,6 +104,26 @@ class PublicProjectsController < ApplicationController
   end
 
   private
+
+  def explore_filters_blank?
+    params[:search].blank? && params[:technology].blank? && params[:user].blank? && params[:author].blank?
+  end
+
+  def featured_stories_for_index
+    Project.published
+           .featured
+           .includes(:user, thumbnail_attachment: :blob)
+           .by_explore_relevance
+           .limit(3)
+  end
+
+  def prepare_project_seo_data
+    @seo_title = helpers.public_project_page_title(@project)
+    @seo_description = helpers.public_project_meta_description(@project)
+    @seo_image_url = helpers.public_project_social_image_url(@project, host: request.base_url)
+    @seo_image_alt = helpers.public_project_social_image_alt(@project)
+    @seo_project_url = public_project_url(@project)
+  end
 
   def can_view_project?
     @project.published? || (user_signed_in? && (@project.user == current_user || current_user.can_access_admin?))

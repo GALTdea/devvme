@@ -4,7 +4,8 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
     static values = {
         url: String,
-        title: String
+        title: String,
+        copiedMessage: { type: String, default: "Link copied to clipboard!" }
     }
 
     async share(event) {
@@ -34,7 +35,7 @@ export default class extends Controller {
     fallbackShare(url) {
         // Copy to clipboard as fallback
         navigator.clipboard.writeText(url).then(() => {
-            this.showNotification('Profile URL copied to clipboard!')
+            this.showNotification(this.copiedMessageValue)
             // Track clipboard copy
             this.trackShare('clipboard_copy')
         }).catch((err) => {

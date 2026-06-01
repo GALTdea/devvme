@@ -1,3 +1,7 @@
+<% page_title("Project Stories") %>
+<% meta_description("Discover proof-of-work project stories from developers on Devv.me. Explore real work, technical decisions, and what each project demonstrates.") %>
+<% canonical_url(public_projects_url) %>
+
 <% content_for :head do %>
   <meta name="turbo-cache-control" content="no-cache">
 <% end %>
@@ -5,10 +9,9 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Header Section -->
     <div class="text-center mb-12">
-      <h1 class="text-4xl font-bold text-gray-900 mb-4">Explore Projects</h1>
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">Project Stories</h1>
       <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-        Discover amazing projects built by our community of developers. 
-        From web applications to mobile apps, find inspiration for your next project.
+        Explore proof-of-work project stories from developers. See what they built, why it mattered, and what it demonstrates.
       </p>
       
       <!-- Admin indicator -->
@@ -26,7 +29,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <div class="bg-white rounded-lg shadow-md p-6 text-center">
         <div class="text-3xl font-bold text-blue-600 mb-2"><%= @total_projects %></div>
-        <div class="text-gray-600">Published Projects</div>
+        <div class="text-gray-600">Published Project Stories</div>
       </div>
       <div class="bg-white rounded-lg shadow-md p-6 text-center">
         <div class="text-3xl font-bold text-green-600 mb-2"><%= @total_users %></div>
@@ -36,7 +39,7 @@
         <div class="text-3xl font-bold text-purple-600 mb-2">
           <%= Project.published.featured.count %>
         </div>
-        <div class="text-gray-600">Featured Projects</div>
+        <div class="text-gray-600">Highlighted Stories</div>
       </div>
     </div>
 
@@ -46,10 +49,10 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Search -->
           <div>
-            <%= form.label :search, "Search projects", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.label :search, "Search project stories", class: "block text-sm font-medium text-gray-700 mb-2" %>
             <%= form.text_field :search, 
                 value: params[:search],
-                placeholder: "Search by title or description...",
+                placeholder: "Search by title, story, or description...",
                 class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
           </div>
 
@@ -88,11 +91,49 @@
           </div>
 
           <div class="text-sm text-gray-500">
-            <%= pluralize(@projects.size, 'project') %> found
+            <%= pluralize(@projects.size, 'project story') %> found
           </div>
         </div>
       <% end %>
     </div>
+
+    <% if @featured_stories&.any? %>
+      <div class="mb-10">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-2xl font-bold text-gray-900">Highlighted Project Stories</h2>
+          <p class="text-sm text-gray-500">Owner-highlighted proof-of-work stories</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <% @featured_stories.each do |project| %>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden border border-purple-100 hover:shadow-lg transition-shadow duration-300">
+              <div class="p-6">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                    Highlighted
+                  </span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                  <%= link_to project.title, public_project_path(project), class: "hover:text-blue-600 transition-colors" %>
+                </h3>
+                <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                  <%= truncate(project.public_story_overview, length: 120) %>
+                </p>
+                <p class="text-sm text-gray-500 mb-4">
+                  by <%= link_to project.user.display_name, public_profile_path(project.user.username), class: "hover:text-blue-600 transition-colors" %>
+                </p>
+                <%= link_to public_project_path(project),
+                    class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors" do %>
+                  Read project story
+                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
 
     <% if @projects.any? %>
       <!-- Projects Grid -->
@@ -139,7 +180,7 @@
               </div>
               
               <p class="text-gray-600 text-sm mb-4 line-clamp-3">
-                <%= truncate(project.description, length: 120) %>
+                <%= truncate(project.public_story_overview, length: 120) %>
               </p>
 
               <!-- Developer Info -->
@@ -203,7 +244,7 @@
               <div class="pt-4 border-t border-gray-100">
                 <%= link_to public_project_path(project), 
                     class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
-                  View Project Details
+                  Read project story
                 <% end %>
               </div>
             </div>
@@ -226,19 +267,19 @@
           </svg>
         </div>
         
-        <h3 class="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No project stories found</h3>
         <p class="text-gray-600 mb-6 max-w-md mx-auto">
           <% if params[:search].present? || params[:technology].present? || params[:user].present? %>
-            Try adjusting your search criteria or clearing the filters to see more projects.
+            Try adjusting your search criteria or clearing the filters to see more project stories.
           <% else %>
-            No projects have been published yet. Check back soon for amazing projects from our community!
+            No project stories have been published yet. Check back soon for proof-of-work stories from our community.
           <% end %>
         </p>
         
         <% if params[:search].present? || params[:technology].present? || params[:user].present? %>
           <%= link_to public_projects_path, 
               class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
-            View All Projects
+            View all project stories
           <% end %>
         <% end %>
       </div>

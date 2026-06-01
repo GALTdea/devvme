@@ -5,12 +5,12 @@
 
 <%# Enhanced social sharing meta tags %>
 <% enhanced_open_graph_tags(
-  title: "#{@user.display_name} - Developer Profile | Devv.me",
+  title: "#{@user.display_name} - Proof-of-Work Profile | Devv.me",
   description: @seo_description,
   image: @seo_avatar_url,
   url: @seo_profile_url,
   type: "profile",
-  image_alt: "#{@user.display_name} - A developer profile worth sharing",
+  image_alt: "#{@user.display_name} - proof-of-work developer profile",
   twitter_creator: @user.twitter_url.present? ? "@#{@user.twitter_url.split('/').last}" : "@devvme_app"
 ) %>
 

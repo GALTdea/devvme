@@ -99,7 +99,7 @@ describe("ShareButtonController", () => {
 
             await controller.fallbackShare('https://example.com/test')
 
-            expect(controller.showNotification).toHaveBeenCalledWith('Profile URL copied to clipboard!')
+            expect(controller.showNotification).toHaveBeenCalledWith('Link copied to clipboard!')
         })
 
         it("shows error notification on copy failure", async () => {

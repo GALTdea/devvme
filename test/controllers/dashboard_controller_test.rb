@@ -93,6 +93,51 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: /Add story context/
   end
 
+  test "should show share project story guidance when one published story exists" do
+    sign_in @user
+
+    @user.projects.create!(
+      title: "Ready Story",
+      description: "Published proof-of-work story",
+      technologies_used: [ "Rails" ],
+      status: "published",
+      project_story: {
+        overview: "What I built",
+        problem: "Why it mattered",
+        role: "What I owned"
+      }
+    )
+
+    get dashboard_path
+    assert_response :success
+
+    assert_select "a", text: /Share your project story/
+  end
+
+  test "should show share profile guidance when multiple published stories exist" do
+    sign_in @user
+
+    2.times do |index|
+      @user.projects.create!(
+        title: "Published Story #{index + 1}",
+        description: "Published proof-of-work story #{index + 1}",
+        technologies_used: [ "Rails" ],
+        status: "published",
+        display_order: index + 10,
+        project_story: {
+          overview: "Overview #{index + 1}",
+          problem: "Problem #{index + 1}",
+          role: "Role #{index + 1}"
+        }
+      )
+    end
+
+    get dashboard_path
+    assert_response :success
+
+    assert_select "a", text: /Share your proof-of-work profile/
+  end
+
   test "should display profile completion percentage" do
     sign_in @user
     get dashboard_path

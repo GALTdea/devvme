@@ -40,7 +40,7 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
   test "should get index without authentication" do
     get public_projects_url
     assert_response :success
-    assert_select "h1", text: /explore projects/i
+    assert_select "h1", text: /project stories/i
     assert_select ".bg-white", minimum: 1 # Should show project cards
   end
 
@@ -118,8 +118,8 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
     get public_projects_url, params: { search: "nonexistent" }
     assert_response :success
 
-    assert_select "h3", text: /no projects found/i
-    assert_select "a", text: /view all projects/i
+    assert_select "h3", text: /no project stories found/i
+    assert_select "a", text: /view all project stories/i
   end
 
   test "should show admin indicator for authenticated admins" do
@@ -531,5 +531,80 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "#resume-bullets", count: 0
     assert_select "input[type=submit][value=?]", "Generate resume bullets", count: 0
+  end
+
+  test "should include social metadata using story overview with description fallback" do
+    @published_project.update!(
+      project_story: { overview: "Structured proof-of-work overview for sharing" },
+      description: "Fallback description text"
+    )
+
+    get public_project_url(@published_project)
+    assert_response :success
+
+    assert_select "meta[name='description'][content*='Structured proof-of-work overview for sharing']"
+    assert_select "meta[property='og:title'][content*='#{@published_project.title}']"
+    assert_select "meta[property='og:description'][content*='Structured proof-of-work overview for sharing']"
+    assert_select "meta[name='twitter:description'][content*='Structured proof-of-work overview for sharing']"
+    assert_select "link[rel='canonical'][href=?]", public_project_url(@published_project)
+  end
+
+  test "should fall back to description in social metadata when story overview is blank" do
+    @published_project.update!(
+      project_story: { overview: "" },
+      description: "Fallback description for social preview"
+    )
+
+    get public_project_url(@published_project)
+    assert_response :success
+
+    assert_select "meta[property='og:description'][content*='Fallback description for social preview']"
+  end
+
+  test "should show share control on published public project page" do
+    get public_project_url(@published_project)
+    assert_response :success
+
+    assert_select "div[data-controller='share-button']"
+    assert_select "button[data-action='click->share-button#share']", text: /share this project story/i
+    assert_select "div[data-share-button-url-value=?]", public_project_url(@published_project)
+  end
+
+  test "should show owner-specific share label to project owner" do
+    @user.update!(account_status: :active)
+    sign_in @user
+
+    get public_project_url(@published_project)
+    assert_response :success
+
+    assert_select "button[data-action='click->share-button#share']", text: /share your story/i
+  end
+
+  test "should prefer story overview on explore cards" do
+    @published_project.update!(
+      project_story: { overview: "Explore card story overview" },
+      description: "Generic project description"
+    )
+
+    get public_projects_url
+    assert_response :success
+
+    assert_select "p", text: /Explore card story overview/
+    assert_select "p", text: /Generic project description/, count: 0
+  end
+
+  test "should show highlighted project stories section when featured projects exist" do
+    get public_projects_url
+    assert_response :success
+
+    assert_select "h2", text: /Highlighted Project Stories/
+    assert_select "h3", text: @featured_project.title, minimum: 1
+  end
+
+  test "should not show highlighted section when filters are active" do
+    get public_projects_url, params: { search: "Published" }
+    assert_response :success
+
+    assert_select "h2", text: /Highlighted Project Stories/, count: 0
   end
 end
