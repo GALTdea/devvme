@@ -341,10 +341,18 @@ class Project < ApplicationRecord
     return unless should_enqueue_github_insights_sync?
     return unless defined?(GitHubInsightsSyncJob)
 
+    update_columns(
+      github_insights_sync_status: "queued",
+      github_insights_last_error: nil,
+      updated_at: Time.current
+    )
     GitHubInsightsSyncJob.perform_later(id, sync_type: "light", source: "auto")
-    update_columns(github_insights_sync_status: "queued", github_insights_last_error: nil)
   rescue StandardError => e
     Rails.logger.error("Failed to enqueue GitHub insights sync for project #{id}: #{e.message}")
+    update_columns(
+      github_insights_sync_status: "failed",
+      github_insights_last_error: "Could not queue GitHub insights sync."
+    )
   end
 
   def should_enqueue_github_insights_sync?

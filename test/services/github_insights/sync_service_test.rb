@@ -118,6 +118,36 @@ module GitHubInsights
       assert_match(/Repository not found/i, project.github_insights_last_error)
     end
 
+    test "maps authentication failures to permanent sync error and marks project failed" do
+      project = projects(:test_project_one)
+      project.user.update_columns(github_oauth_token: nil)
+
+      resolver = Class.new do
+        def self.resolve_project!(_project)
+          { owner: "example", repo: "private", canonical_url: "https://github.com/example/private" }
+        end
+      end
+
+      fetcher = Class.new do
+        def self.call(**)
+          raise GitHubInsights::FetchService::AuthenticationError, "GitHub authentication failed."
+        end
+      end
+
+      error = assert_raises(GitHubInsights::SyncService::PermanentSyncError) do
+        GitHubInsights::SyncService.new(
+          repo_resolver: resolver,
+          fetch_service: fetcher,
+          compute_service: Class.new
+        ).call(project: project, sync_type: "deep", source: "manual")
+      end
+
+      assert_match(/authentication failed/i, error.message)
+      assert_match(/Connect GitHub OAuth/i, error.message)
+      assert_equal "failed", project.reload.github_insights_sync_status
+      assert_match(/Connect GitHub OAuth/i, project.github_insights_last_error)
+    end
+
     test "maps temporary upstream failure to retryable sync error and marks project failed" do
       project = projects(:test_project_one)
       events = []

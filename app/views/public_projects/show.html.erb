@@ -343,12 +343,12 @@
               <% if user_signed_in? && FeatureFlags.github_project_enrichment_enabled_for?(current_user) %>
                 <%= button_to refresh_github_insights_project_path(@project),
                     method: :post,
-                    disabled: !@project.project_github_repo_url.present? || @project.github_insights_sync_status == "syncing",
+                    disabled: !@project.project_github_repo_url.present? || @project.github_insights_sync_status.in?(%w[queued syncing]),
                     class: "w-full inline-flex items-center justify-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-60 disabled:cursor-not-allowed" do %>
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m14.356-2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-14.357-2m14.357 2H15"/>
                   </svg>
-                  Refresh GitHub Insights
+                  <%= @project.github_insights_sync_status == "queued" ? "Refresh Queued" : "Refresh GitHub Insights" %>
                 <% end %>
               <% end %>
               <%= link_to edit_project_path(@project), 

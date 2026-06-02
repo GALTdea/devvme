@@ -28,6 +28,7 @@ module GitHubInsights
     class FetchError < StandardError; end
     class TemporaryFetchError < FetchError; end
     class RepositoryNotFoundError < FetchError; end
+    class AuthenticationError < FetchError; end
     class GitHubRateLimitError < TemporaryFetchError; end
 
     def self.call(owner:, repo:, sync_type: "light", oauth_token: nil)
@@ -189,9 +190,15 @@ module GitHubInsights
       uri.query = URI.encode_www_form(query) if query.present?
 
       response = connection.get(uri.request_uri, nil, headers)
+      if response.status == 401 && oauth_token.blank? && GitHubContextService.api_token.present?
+        Rails.logger.warn("GitHubInsights::FetchService global GITHUB_TOKEN was rejected; retrying without Authorization header.")
+        response = connection.get(uri.request_uri, nil, base_headers)
+      end
       return response.body if response.success?
 
       case response.status
+      when 401
+        raise AuthenticationError, "GitHub authentication failed. Reconnect GitHub OAuth or check the configured GITHUB_TOKEN."
       when 404
         return nil if allow_not_found
 
@@ -214,14 +221,21 @@ module GitHubInsights
     end
 
     def headers
-      base = {
+      base = base_headers
+      token = oauth_token || GitHubContextService.api_token
+      base["Authorization"] = "Bearer #{token}" if token.present?
+      base
+    end
+
+    def base_headers
+      {
         "Accept" => "application/vnd.github+json",
         "X-GitHub-Api-Version" => "2022-11-28"
       }
+    end
 
-      token = @oauth_token || GitHubContextService.api_token
-      base["Authorization"] = "Bearer #{token}" if token.present?
-      base
+    def oauth_token
+      @oauth_token
     end
 
     def escaped(value)

@@ -93,7 +93,8 @@ module GitHubInsights
       }
       result["queue_wait_seconds"] = queue_wait_seconds if queue_wait_seconds.present?
       result
-    rescue RepoResolver::InvalidRepositoryUrlError, FetchService::RepositoryNotFoundError, ArgumentError => e
+    rescue RepoResolver::InvalidRepositoryUrlError, FetchService::RepositoryNotFoundError,
+           FetchService::AuthenticationError, ArgumentError => e
       message = repository_access_message(e.message, project)
       mark_failed(project, message)
       instrument_failure(project:, sync_type:, source:, started_at:, error: e, queue_wait_seconds: queue_wait_seconds, failure_type: "permanent")
@@ -182,7 +183,7 @@ module GitHubInsights
     end
 
     def repository_access_message(original_message, project)
-      return original_message unless original_message.to_s.match?(/not found|publicly accessible/i)
+      return original_message unless original_message.to_s.match?(/not found|publicly accessible|authentication failed/i)
 
       return original_message if project.user&.github_oauth_connected?
 

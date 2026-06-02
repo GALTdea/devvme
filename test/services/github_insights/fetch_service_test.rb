@@ -98,6 +98,63 @@ module GitHubInsights
       end
     end
 
+    test "raises authentication error for unauthorized owner oauth response" do
+      service = FetchService.new(oauth_token: "owner-token")
+      response = Struct.new(:status, :body) do
+        def success?
+          false
+        end
+      end.new(401, { "message" => "Bad credentials" })
+      connection = Struct.new(:response) do
+        attr_reader :requests
+
+        def initialize(response)
+          super(response)
+          @requests = []
+        end
+
+        def get(*request)
+          requests << request
+          response
+        end
+      end.new(response)
+
+      service.define_singleton_method(:connection) { connection }
+
+      error = assert_raises(FetchService::AuthenticationError) do
+        service.send(:get, "/repos/acme/demo")
+      end
+
+      assert_match(/authentication failed/i, error.message)
+      assert_match(/GITHUB_TOKEN/i, error.message)
+      assert_equal 1, connection.requests.size
+    end
+
+    test "retries without authorization when configured app token is rejected" do
+      service = FetchService.new
+      responses = [
+        Struct.new(:status, :body) { def success? = false }.new(401, { "message" => "Bad credentials" }),
+        Struct.new(:status, :body) { def success? = true }.new(200, { "name" => "demo" })
+      ]
+      requests = []
+      connection = Struct.new(:responses, :requests) do
+        def get(*request)
+          requests << request
+          responses.shift
+        end
+      end.new(responses, requests)
+
+      original = GitHubContextService.method(:api_token)
+      GitHubContextService.define_singleton_method(:api_token) { "bad-app-token" }
+      service.define_singleton_method(:connection) { connection }
+
+      assert_equal({ "name" => "demo" }, service.send(:get, "/repos/acme/demo"))
+      assert_equal "Bearer bad-app-token", requests.first.last["Authorization"]
+      assert_nil requests.second.last["Authorization"]
+    ensure
+      GitHubContextService.define_singleton_method(:api_token, original) if original
+    end
+
     test "raises for unsupported sync type" do
       assert_raises(FetchService::FetchError) do
         FetchService.call(owner: "acme", repo: "demo", sync_type: "invalid")

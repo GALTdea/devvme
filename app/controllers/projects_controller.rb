@@ -82,12 +82,16 @@ class ProjectsController < ApplicationController
       return
     end
 
-    GitHubInsightsSyncJob.perform_later(@project.id, sync_type: "deep", source: "manual")
     @project.update!(github_insights_sync_status: "queued", github_insights_last_error: nil)
+    GitHubInsightsSyncJob.perform_later(@project.id, sync_type: "deep", source: "manual")
 
     redirect_to redirect_path, notice: "GitHub insights refresh started."
   rescue StandardError => e
     Rails.logger.error("ProjectsController#refresh_github_insights failed for project #{@project.id}: #{e.message}")
+    @project.update_columns(
+      github_insights_sync_status: "failed",
+      github_insights_last_error: "Could not start GitHub insights refresh. Please try again."
+    ) if @project&.persisted?
     redirect_to redirect_path, alert: "Could not start GitHub insights refresh. Please try again."
   end
 

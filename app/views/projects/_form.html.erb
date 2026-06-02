@@ -293,12 +293,12 @@
           </div>
 
           <div>
-            <% refresh_disabled = !project.project_github_repo_url.present? || project.github_insights_sync_status == "syncing" %>
+            <% refresh_disabled = !project.project_github_repo_url.present? || project.github_insights_sync_status.in?(%w[queued syncing]) %>
             <% if refresh_disabled %>
               <button type="button"
                       class="inline-flex items-center px-3 py-2 border border-blue-600 text-sm font-medium rounded-md text-blue-700 bg-white opacity-60 cursor-not-allowed"
                       disabled>
-                Refresh GitHub Insights
+                <%= project.github_insights_sync_status == "queued" ? "Refresh Queued" : "Refresh GitHub Insights" %>
               </button>
             <% else %>
               <%= link_to "Refresh GitHub Insights",
