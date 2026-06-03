@@ -490,6 +490,18 @@ class PublicProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_user_session_path
   end
 
+  test "guest sees disabled project insight form" do
+    @published_project.update!(project_insight_enabled: false)
+
+    get public_project_url(@published_project)
+
+    assert_response :success
+    assert_select "h3", text: /project insight/i
+    assert_select "textarea[name='question'][disabled]"
+    assert_select "input[type=submit][value=?][disabled]", "Ask Project Insight"
+    assert_select "button[aria-label='Sign in to use Project Insight']"
+  end
+
   test "should block project insight when disabled" do
     @published_project.update!(project_insight_enabled: false)
     @user.update!(account_status: :active)
