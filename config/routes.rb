@@ -69,6 +69,8 @@ Rails.application.routes.draw do
   end
   resources :projects do
     patch :reorder, on: :collection
+    get :github_repositories, on: :collection
+    post :github_prefill, on: :collection
     post :refresh_github_insights, on: :member
     post :generate_story_suggestions, on: :member
     post :apply_story_suggestions, on: :member

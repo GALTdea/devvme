@@ -16,6 +16,10 @@
       <p class="mt-2 text-gray-600">Add a new project to showcase your development work</p>
     </div>
 
+    <% if FeatureFlags.github_project_enrichment_enabled_for?(current_user) %>
+      <%= render "github_import", project: @project %>
+    <% end %>
+
     <!-- Project Form -->
     <%= render 'form', project: @project %>
   </div>

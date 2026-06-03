@@ -59,6 +59,15 @@ export default class extends Controller {
         this.updateHiddenField()
     }
 
+    importTechnologies(tags) {
+        const normalized = Array.isArray(tags)
+            ? tags.map((tag) => tag.toString().trim()).filter(Boolean).slice(0, 10)
+            : []
+        this.tags = normalized
+        this.renderTags()
+        this.updateHiddenField()
+    }
+
     focusInput() {
         this.inputTarget.focus()
     }

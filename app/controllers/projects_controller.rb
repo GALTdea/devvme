@@ -1,7 +1,9 @@
 class ProjectsController < ApplicationController
   # Authentication required for management actions only
-  before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy, :reorder, :refresh_github_insights,
+  before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy, :reorder, :github_repositories,
+                                            :github_prefill, :refresh_github_insights,
                                             :generate_story_suggestions, :apply_story_suggestions, :generate_resume_bullets]
+  before_action :ensure_github_project_import_enabled, only: [:github_repositories, :github_prefill]
   before_action :set_project, only: [:show, :edit, :update, :destroy, :refresh_github_insights,
                                      :generate_story_suggestions, :apply_story_suggestions, :generate_resume_bullets]
   before_action :ensure_owner_or_admin, only: [:edit, :update, :destroy, :refresh_github_insights,
@@ -52,6 +54,38 @@ class ProjectsController < ApplicationController
   def destroy
     @project.destroy!
     redirect_to projects_path, notice: "Project was successfully deleted."
+  end
+
+  def github_repositories
+    unless current_user.github_oauth_connected?
+      render json: { error: "Connect GitHub to browse your repositories." }, status: :unprocessable_content
+      return
+    end
+
+    repositories = GitHubProject::RepositoryListService.call(
+      user: current_user,
+      include_forks: ActiveModel::Type::Boolean.new.cast(params[:include_forks])
+    )
+    render json: { repositories: repositories }
+  rescue GitHubProject::RepositoryListService::NotConnectedError => e
+    render json: { error: e.message }, status: :unprocessable_content
+  rescue GitHubProject::RepositoryListService::AuthenticationError,
+         GitHubProject::RepositoryListService::GitHubRateLimitError,
+         GitHubProject::RepositoryListService::ListError => e
+    render json: { error: e.message }, status: :unprocessable_content
+  end
+
+  def github_prefill
+    repository_url = params[:repository_url].to_s.strip
+    if repository_url.blank?
+      render json: { error: "Repository URL is required." }, status: :unprocessable_content
+      return
+    end
+
+    payload = GitHubProjectPrefillService.call(user: current_user, repository_url: repository_url)
+    render json: payload
+  rescue GitHubProjectPrefillService::PrefillError => e
+    render json: { error: e.message }, status: :unprocessable_content
   end
 
   def reorder
@@ -191,6 +225,12 @@ class ProjectsController < ApplicationController
     allowed_paths.include?(referer_path) ? referer_path : fallback
   rescue URI::InvalidURIError
     fallback
+  end
+
+  def ensure_github_project_import_enabled
+    return if FeatureFlags.github_project_enrichment_enabled_for?(current_user)
+
+    render json: { error: "GitHub project import is not enabled for your account yet." }, status: :forbidden
   end
 
   def project_params

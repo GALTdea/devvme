@@ -419,15 +419,23 @@ Revert plan:
 - 2026-06-03: First slice should use deterministic README extraction only; LLM story drafting remains optional future scope.
 - 2026-06-03: Repository list payloads should be cached per user for about 5 minutes; tokens must not be cached.
 
+## Implementation Notes
+
+- **Feature flag:** Reuses `GITHUB_PROJECT_ENRICHMENT_ROLLOUT` via `FeatureFlags.github_project_enrichment_enabled_for?` for import panel visibility and JSON endpoints.
+- **Services:** `GitHubProjectPrefillService` (deterministic prefill contract) and `GitHubProject::RepositoryListService` (owner repos, 5-minute cache, forks hidden by default).
+- **Routes:** `GET /projects/github_repositories`, `POST /projects/github_prefill` (authenticated, owner-only new-project flow).
+- **UI:** `_github_import.html.erb` on `projects/new` with `github-project-import` Stimulus controller; fills empty fields only and summarizes filled/skipped fields.
+- **Verification:** `bin/rails test test/services/github_project_prefill_service_test.rb test/services/github_project/repository_list_service_test.rb test/controllers/projects_controller_test.rb -n "/github/"` — 13 runs, 0 failures.
+
 ## Progress
 
 - [x] Brief created.
 - [x] Resolve initial product defaults for owner repos, forks, Project Insight, attribution UI, README handling, and repo-list caching.
-- [ ] Decide feature flag and rollout scope.
-- [ ] Implement GitHub project prefill service.
-- [ ] Implement repository listing service.
-- [ ] Add controller routes and authorization.
-- [ ] Add new project import panel and Stimulus behavior.
-- [ ] Add targeted tests.
-- [ ] Run targeted and baseline verification.
-- [ ] Update this brief with final implementation decisions and verification results.
+- [x] Decide feature flag and rollout scope.
+- [x] Implement GitHub project prefill service.
+- [x] Implement repository listing service.
+- [x] Add controller routes and authorization.
+- [x] Add new project import panel and Stimulus behavior.
+- [x] Add targeted tests.
+- [x] Run targeted and baseline verification.
+- [x] Update this brief with final implementation decisions and verification results.

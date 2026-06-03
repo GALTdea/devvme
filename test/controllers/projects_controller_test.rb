@@ -394,6 +394,75 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "GitHub enrichment is not enabled for your account yet.", flash[:alert]
   end
 
+  # GITHUB PROJECT IMPORT TESTS
+  test "new project shows github import panel when rollout enabled" do
+    with_github_enrichment_rollout("all") do
+      get new_project_url
+    end
+
+    assert_response :success
+    assert_select "[data-controller='github-project-import']", count: 1
+  end
+
+  test "github prefill returns json payload for authenticated owner" do
+    payload = {
+      "repository" => { "canonical_url" => "https://github.com/acme/demo" },
+      "project" => { "title" => "Demo" },
+      "project_story" => {},
+      "evidence" => [],
+      "warnings" => []
+    }
+
+    with_github_enrichment_rollout("all") do
+      with_stubbed_github_prefill(payload) do
+        post github_prefill_projects_url, params: { repository_url: "https://github.com/acme/demo" }, as: :json
+      end
+    end
+
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "Demo", body.dig("project", "title")
+  end
+
+  test "github prefill requires authentication" do
+    sign_out @user
+
+    post github_prefill_projects_url, params: { repository_url: "https://github.com/acme/demo" }, as: :json
+    assert_response :unauthorized
+  end
+
+  test "github prefill returns error for inaccessible repository" do
+    with_github_enrichment_rollout("all") do
+      with_stubbed_github_prefill_error(GitHubProjectPrefillService::PrefillError, "Repository not found.") do
+        post github_prefill_projects_url, params: { repository_url: "https://github.com/acme/missing" }, as: :json
+      end
+    end
+
+    assert_response :unprocessable_content
+    body = JSON.parse(response.body)
+    assert_equal "Repository not found.", body["error"]
+  end
+
+  test "github repositories requires github oauth connection" do
+    @user.update!(github_oauth_token: nil, github_oauth_connected_at: nil)
+
+    with_github_enrichment_rollout("all") do
+      get github_repositories_projects_url, as: :json
+    end
+
+    assert_response :unprocessable_content
+    body = JSON.parse(response.body)
+    assert_match(/connect github/i, body["error"])
+  end
+
+  test "github import endpoints blocked when rollout disabled for user" do
+    with_github_enrichment_rollout("internal") do
+      post github_prefill_projects_url, params: { repository_url: "https://github.com/acme/demo" }, as: :json
+    end
+
+    assert_response :forbidden
+  end
+
   # ADMIN TESTS
   test "should allow admin to view any project" do
     admin = users(:test_admin)
@@ -642,6 +711,22 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     yield
   ensure
     ENV["GITHUB_PROJECT_ENRICHMENT_ROLLOUT"] = original
+  end
+
+  def with_stubbed_github_prefill(payload)
+    original = GitHubProjectPrefillService.method(:call)
+    GitHubProjectPrefillService.singleton_class.define_method(:call) { |**_| payload }
+    yield
+  ensure
+    GitHubProjectPrefillService.singleton_class.define_method(:call, original)
+  end
+
+  def with_stubbed_github_prefill_error(error_class, message)
+    original = GitHubProjectPrefillService.method(:call)
+    GitHubProjectPrefillService.singleton_class.define_method(:call) { |**_| raise error_class, message }
+    yield
+  ensure
+    GitHubProjectPrefillService.singleton_class.define_method(:call, original)
   end
 
   def with_stubbed_generation(payload)

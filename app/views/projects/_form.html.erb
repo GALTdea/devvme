@@ -1,4 +1,5 @@
-<%= form_with model: project, local: true, multipart: true, 
+<%= form_with model: project, local: true, multipart: true,
+    html: { id: "project_form" },
     class: "max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6",
     data: { 
       controller: "project-form loading notification", 
