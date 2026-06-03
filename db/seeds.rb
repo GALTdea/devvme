@@ -16,7 +16,11 @@ if Rails.env.development?
       bio: "Full-stack developer passionate about Ruby on Rails and modern web technologies. I love building clean, scalable applications that solve real-world problems.",
       github_url: "https://github.com/johndoe",
       linkedin_url: "https://linkedin.com/in/johndoe",
-      website_url: "https://johndoe.dev"
+      website_url: "https://johndoe.dev",
+      account_status: "active",
+      skills: [ "Ruby on Rails", "PostgreSQL", "Hotwire", "Tailwind CSS" ],
+      featured: true,
+      last_login_at: 2.days.ago
     },
     {
       email: "jane@example.com",
@@ -26,7 +30,11 @@ if Rails.env.development?
       bio: "Frontend developer and UI/UX designer. I create beautiful, accessible user experiences with React, Vue, and modern CSS frameworks.",
       github_url: "https://github.com/janesmith",
       linkedin_url: "https://linkedin.com/in/janesmith",
-      website_url: "https://janesmith.design"
+      website_url: "https://janesmith.design",
+      account_status: "active",
+      skills: [ "React", "Vue", "CSS", "Design Systems" ],
+      featured: true,
+      last_login_at: 3.days.ago
     },
     {
       email: "alex@example.com",
@@ -35,7 +43,11 @@ if Rails.env.development?
       full_name: "Alex Rodriguez",
       bio: "Backend engineer specializing in API design and database optimization. Experienced with Rails, PostgreSQL, and cloud infrastructure.",
       github_url: "https://github.com/alexdev",
-      linkedin_url: "https://linkedin.com/in/alexrodriguez"
+      linkedin_url: "https://linkedin.com/in/alexrodriguez",
+      account_status: "active",
+      skills: [ "Rails API", "PostgreSQL", "Redis", "Docker" ],
+      featured: true,
+      last_login_at: 5.days.ago
     },
     {
       email: "sarah@example.com",
@@ -43,27 +55,37 @@ if Rails.env.development?
       username: "sarahcode",
       full_name: "Sarah Wilson",
       bio: "Mobile app developer and computer science student. Building the future one app at a time.",
-      github_url: "https://github.com/sarahcode"
+      github_url: "https://github.com/sarahcode",
+      account_status: "active",
+      skills: [ "React Native", "TypeScript", "Firebase", "Expo" ],
+      featured: false,
+      last_login_at: 1.week.ago
     },
     {
       email: "demo@example.com",
       password: "password123",
       username: "demouser",
       full_name: "Demo User",
-      bio: "This is a demo account for testing purposes."
+      bio: "This is a demo account for testing purposes.",
+      account_status: "active",
+      skills: [ "Ruby on Rails", "Markdown", "Product Testing" ],
+      featured: false,
+      last_login_at: 1.day.ago
     }
   ]
 
   created_users = []
 
   users.each do |user_attrs|
-    user = User.find_or_create_by(email: user_attrs[:email]) do |u|
-      u.assign_attributes(user_attrs)
-    end
+    desired_status = user_attrs.delete(:account_status)
+    user = User.find_or_initialize_by(email: user_attrs[:email])
+    user.assign_attributes(user_attrs)
+    user.save!
+    user.update!(account_status: desired_status) if desired_status.present?
 
     if user.persisted?
       created_users << user
-      puts "✅ Created user: #{user.username} (#{user.email})"
+      puts "✅ Seeded user: #{user.username} (#{user.email})"
     else
       puts "❌ Failed to create user #{user_attrs[:username]}: #{user.errors.full_messages.join(', ')}"
     end
@@ -1440,9 +1462,20 @@ if Rails.env.development?
 
   mature_projects.each do |project_attrs|
     story = project_attrs.delete(:project_story)
+    seeded_github_status = project_attrs[:github_insights_sync_status]
+    seeded_github_synced_at = project_attrs[:github_insights_last_synced_at]
+    seeded_github_summary = project_attrs[:github_insights_summary]
+    seeded_github_error = project_attrs[:github_insights_last_error]
     project = mature_user.projects.find_or_initialize_by(title: project_attrs[:title])
     project.assign_attributes(project_attrs.merge(project_story: story))
     project.save!
+    project.update_columns(
+      github_insights_sync_status: seeded_github_status,
+      github_insights_last_synced_at: seeded_github_synced_at,
+      github_insights_summary: seeded_github_summary || {},
+      github_insights_last_error: seeded_github_error
+    )
+    project.reload
     project.update_columns(created_at: rand(2..7).months.ago, updated_at: rand(1..18).days.ago)
 
     if project.github_insights_ready?
@@ -1631,6 +1664,420 @@ if Rails.env.development?
     )
   end
 
+  # Workflow coverage fixtures: deliberately named accounts and content for testing
+  # every major route family without hunting through organic demo data.
+  puts "\n🧭 Seeding workflow coverage fixtures..."
+
+  def seed_workflow_user(attrs)
+    attrs = attrs.dup
+    desired_status = attrs.delete(:account_status)
+    suspended_at = attrs.delete(:suspended_at)
+    suspension_reason = attrs.delete(:suspension_reason)
+    invitation_token = attrs.delete(:invitation_token)
+    invitation_access_code = attrs.delete(:invitation_access_code)
+    invitation_sent_at = attrs.delete(:invitation_sent_at)
+    invitation_accepted_at = attrs.delete(:invitation_accepted_at)
+
+    user = User.find_or_initialize_by(email: attrs[:email])
+    user.assign_attributes(attrs)
+    user.password = attrs[:password] || "password123"
+    user.password_confirmation = attrs[:password] || "password123"
+    user.account_status = desired_status if desired_status == "invited"
+    user.save!
+    user.update!(account_status: desired_status) if desired_status.present? && user.account_status != desired_status
+
+    user.update_columns(
+      suspended_at: suspended_at,
+      suspension_reason: suspension_reason,
+      invitation_token: invitation_token,
+      invitation_access_code: invitation_access_code,
+      invitation_sent_at: invitation_sent_at,
+      invitation_accepted_at: invitation_accepted_at,
+      updated_at: Time.current
+    )
+
+    user
+  end
+
+  workflow_superadmin = seed_workflow_user(
+    email: "workflow_superadmin@example.com",
+    password: "password123",
+    username: "workflow_superadmin",
+    full_name: "Workflow Super Admin",
+    job_title: "Platform Owner",
+    headline: "Super admin account for exercising high-risk admin flows.",
+    bio: "Use this account to test user creation, bulk operations, role management, invitation cleanup, exports, and moderation.",
+    location: "Admin Console",
+    role: "super_admin",
+    account_status: "active",
+    allow_career_architect: true,
+    skills: [ "Operations", "User Management", "Analytics", "Moderation" ],
+    last_login_at: 30.minutes.ago
+  )
+
+  workflow_admin = seed_workflow_user(
+    email: "workflow_admin@example.com",
+    password: "password123",
+    username: "workflow_admin",
+    full_name: "Workflow Admin",
+    job_title: "Community Moderator",
+    headline: "Admin account for dashboard, analytics, moderation, and invitation review.",
+    bio: "Use this account to test admin access without super-admin-only destructive permissions.",
+    location: "Admin Console",
+    role: "admin",
+    account_status: "active",
+    allow_career_architect: true,
+    skills: [ "Moderation", "Analytics", "Support" ],
+    last_login_at: 45.minutes.ago
+  )
+
+  workflow_user = seed_workflow_user(
+    email: "workflow_user@example.com",
+    password: "password123",
+    username: "workflow_user",
+    full_name: "Workflow Active User",
+    job_title: "Product Engineer",
+    headline: "Active creator account with projects, posts, follows, digests, and social cards.",
+    bio: "Use this account to test the standard signed-in creator experience from dashboard through public profile sharing.",
+    location: "San Francisco, CA",
+    role: "user",
+    account_status: "active",
+    allow_career_architect: true,
+    open_for_work: true,
+    contact_email: "workflow_user@example.com",
+    github_url: "https://github.com/workflow-user",
+    linkedin_url: "https://linkedin.com/in/workflow-user",
+    website_url: "https://workflow-user.example.com",
+    twitter_url: "https://x.com/workflow_user",
+    resume_url: "https://workflow-user.example.com/resume",
+    skills: [ "Rails", "Hotwire", "PostgreSQL", "OpenAI API", "Tailwind CSS" ],
+    work_preferences: {
+      "remote_preference" => "remote_only",
+      "availability" => "2_weeks",
+      "work_types" => [ "full_time", "contract" ],
+      "preferred_roles" => [ "Product Engineer", "Rails Developer" ],
+      "message" => "Available for product engineering teams building developer tools."
+    },
+    featured: true,
+    featured_at: 1.week.ago,
+    last_login_at: 10.minutes.ago
+  )
+
+  workflow_pending = seed_workflow_user(
+    email: "workflow_pending@example.com",
+    password: "password123",
+    username: "workflow_pending",
+    full_name: "Workflow Pending User",
+    headline: "Pending activation test account.",
+    bio: "Use this account to verify pending activation messaging and allowed dashboard/profile flows.",
+    role: "user",
+    account_status: "pending_activation",
+    skills: [ "Rails", "Testing" ],
+    last_login_at: 2.hours.ago
+  )
+
+  workflow_suspended = seed_workflow_user(
+    email: "workflow_suspended@example.com",
+    password: "password123",
+    username: "workflow_suspended",
+    full_name: "Workflow Suspended User",
+    headline: "Suspended account test fixture.",
+    bio: "Use this account to verify suspended-account redirects and messaging.",
+    role: "user",
+    account_status: "suspended",
+    suspended_at: 2.days.ago,
+    suspension_reason: "Seeded suspension for workflow testing.",
+    skills: [ "Testing" ]
+  )
+
+  workflow_deactivated = seed_workflow_user(
+    email: "workflow_deactivated@example.com",
+    password: "password123",
+    username: "workflow_deactivated",
+    full_name: "Workflow Deactivated User",
+    headline: "Deactivated account test fixture.",
+    bio: "Use this account to verify deactivated-account limited access behavior.",
+    role: "user",
+    account_status: "deactivated",
+    suspended_at: 3.days.ago,
+    suspension_reason: "Seeded deactivation for workflow testing.",
+    skills: [ "Testing" ]
+  )
+
+  workflow_invited = seed_workflow_user(
+    email: "workflow_invited@example.com",
+    username: "workflow_invited",
+    full_name: "Workflow Invited User",
+    headline: "Unclaimed invited profile test account.",
+    bio: "Use this profile to test public unclaimed profile UI and invitation claiming.",
+    role: "user",
+    account_status: "invited",
+    invitation_token: "workflow-invited-token",
+    invitation_access_code: "123456",
+    invitation_sent_at: 2.days.ago,
+    skills: [ "Rails", "Portfolio" ],
+    featured: true
+  )
+
+  workflow_invited_expired = seed_workflow_user(
+    email: "workflow_invited_expired@example.com",
+    username: "workflow_invited_expired",
+    full_name: "Workflow Expired Invitation",
+    headline: "Expired invitation test account.",
+    bio: "Use this profile to test expired invitation messaging and admin resend flows.",
+    role: "user",
+    account_status: "invited",
+    invitation_token: "workflow-expired-token",
+    invitation_access_code: "654321",
+    invitation_sent_at: 45.days.ago,
+    skills: [ "Testing", "Invitations" ]
+  )
+
+  workflow_claimed = seed_workflow_user(
+    email: "workflow_claimed@example.com",
+    password: "password123",
+    username: "workflow_claimed",
+    full_name: "Workflow Claimed Invite",
+    headline: "Previously invited and claimed account.",
+    bio: "Use this account to verify already-claimed invitation behavior and normal sign-in.",
+    role: "user",
+    account_status: "active",
+    invitation_token: "workflow-claimed-token",
+    invitation_access_code: "112233",
+    invitation_sent_at: 12.days.ago,
+    invitation_accepted_at: 10.days.ago,
+    skills: [ "Rails", "Onboarding" ],
+    last_login_at: 1.day.ago
+  )
+
+  workflow_projects = [
+    {
+      title: "Workflow Published Project",
+      description: "Published project for testing public explore, project detail, project insight, GitHub insight, and owner edit flows.",
+      technologies_used: [ "Ruby on Rails", "Hotwire", "PostgreSQL", "OpenAI API" ],
+      source_code_url: "https://github.com/workflow-user/published-project",
+      live_url: "https://workflow-project.example.com",
+      status: "published",
+      featured: true,
+      display_order: 1,
+      project_insight_enabled: true,
+      github_insights_enabled: true,
+      github_insights_sync_status: "ready",
+      github_insights_last_synced_at: 12.hours.ago,
+      github_insights_summary: {
+        "project_overview" => "Seeded project with ready GitHub insight data.",
+        "tech_stack" => [ "Rails", "Hotwire", "PostgreSQL", "OpenAI API" ],
+        "highlights" => [ "Published public story", "Project Insight enabled", "GitHub insights ready" ],
+        "caveats" => [ "Seeded repository data for local testing" ]
+      },
+      project_insight_analysis: {
+        "repository" => { "name" => "published-project", "default_branch" => "main" },
+        "languages" => { "Ruby" => 72, "HTML" => 16, "JavaScript" => 8, "CSS" => 4 },
+        "manifests" => [ "Gemfile", "package.json" ],
+        "readme_excerpt" => "Workflow Published Project is a seeded proof-of-work story.",
+        "recent_commits" => [ "Add project insight panel", "Publish project story", "Improve dashboard CTA" ]
+      },
+      project_story: {
+        "version" => 1,
+        "overview" => "A complete seeded project story for exercising public and owner-facing project flows.",
+        "problem" => "Testing project flows needs a record that is published, story-rich, insight-enabled, and GitHub-backed.",
+        "intended_users" => "Developers and admins testing the DevvMe workflow surface.",
+        "why_built" => "This fixture keeps the main project flows available after a fresh development seed.",
+        "role" => "The seeded user owns the project and can edit, reorder, refresh insights, and generate story assets.",
+        "technical_decisions" => "The fixture uses populated JSONB story fields, GitHub summary data, and public URLs.",
+        "hardest_challenge" => "Keeping a compact seed record that still touches the important branches.",
+        "lessons_learned" => "Explicit workflow fixtures make exploratory QA much faster.",
+        "demonstrates" => "Published story display, owner edit controls, Project Insight, and GitHub insight surfaces.",
+        "promotion_notes" => "Use for resume bullet and story builder smoke tests."
+      }
+    },
+    {
+      title: "Workflow Draft Project",
+      description: "Draft project for testing owner-only visibility, draft counters, editing, and publish transitions.",
+      technologies_used: [ "Rails", "Tailwind CSS", "Stimulus" ],
+      source_code_url: "https://github.com/workflow-user/draft-project",
+      status: "draft",
+      featured: false,
+      display_order: 2,
+      project_insight_enabled: false,
+      github_insights_enabled: false,
+      github_insights_sync_status: "never",
+      project_story: {
+        "version" => 1,
+        "overview" => "Draft seeded project visible to owner/admin but hidden from guests.",
+        "problem" => "Draft visibility needs a predictable record.",
+        "role" => "The seeded user can finish and publish this story.",
+        "hardest_challenge" => "Testing owner-only behavior without affecting public explore results.",
+        "lessons_learned" => "",
+        "demonstrates" => "",
+        "promotion_notes" => "Use for draft and publish-flow testing."
+      }
+    },
+    {
+      title: "Workflow Archived Project",
+      description: "Archived project for testing admin moderation, owner project lists, and non-public project states.",
+      technologies_used: [ "Rails", "PostgreSQL" ],
+      source_code_url: "https://github.com/workflow-user/archived-project",
+      status: "archived",
+      featured: false,
+      display_order: 3,
+      project_insight_enabled: false,
+      github_insights_enabled: false,
+      github_insights_sync_status: "failed",
+      github_insights_last_error: "Seeded GitHub insight failure for UI testing.",
+      project_story: {
+        "version" => 1,
+        "overview" => "Archived seeded project for moderation and non-public state testing.",
+        "problem" => "Archived content needs a predictable fixture.",
+        "role" => "The seeded user owns this archived project.",
+        "hardest_challenge" => "Representing inactive content without deleting it.",
+        "lessons_learned" => "Archived states should be visible to managers but not public visitors.",
+        "demonstrates" => "Archived state and failed insight UI.",
+        "promotion_notes" => ""
+      }
+    }
+  ]
+
+  workflow_projects.each do |attrs|
+    story = attrs.delete(:project_story)
+    seeded_github_status = attrs[:github_insights_sync_status]
+    seeded_github_synced_at = attrs[:github_insights_last_synced_at]
+    seeded_github_summary = attrs[:github_insights_summary]
+    seeded_github_error = attrs[:github_insights_last_error]
+    project = workflow_user.projects.find_or_initialize_by(title: attrs[:title])
+    project.assign_attributes(attrs.merge(project_story: story))
+    project.save!
+    project.update_columns(
+      github_insights_sync_status: seeded_github_status,
+      github_insights_last_synced_at: seeded_github_synced_at,
+      github_insights_summary: seeded_github_summary || {},
+      github_insights_last_error: seeded_github_error
+    )
+    project.reload
+
+    if project.github_insights_ready?
+      project.project_github_insight_snapshots.destroy_all
+      project.project_github_insight_snapshots.create!(
+        sync_type: "deep",
+        source: "manual",
+        captured_at: project.github_insights_last_synced_at,
+        duration_ms: 1_450,
+        repo_payload: { "url" => project.project_github_repo_url, "default_branch" => "main" },
+        metrics_payload: { "commits_analyzed" => 42, "files_seen" => 88, "languages" => project.project_insight_analysis["languages"] },
+        highlights_payload: { "highlights" => project.github_insights_summary["highlights"], "tech_stack" => project.github_insights_summary["tech_stack"] },
+        errors_payload: {}
+      )
+    end
+  end
+
+  workflow_blog_posts = [
+    {
+      title: "Workflow Published Blog Post",
+      content: "# Workflow Published Blog Post\n\nA seeded published post for public blog, owner blog, search, and analytics flows.",
+      excerpt: "Seeded published post for workflow testing.",
+      published: true,
+      published_at: 4.days.ago,
+      archived: false,
+      featured: true,
+      views_count: 64
+    },
+    {
+      title: "Workflow Draft Blog Post",
+      content: "# Workflow Draft Blog Post\n\nA seeded draft post for owner-only editing and publish-flow testing.",
+      excerpt: "Seeded draft post for workflow testing.",
+      published: false,
+      published_at: nil,
+      archived: false,
+      featured: false,
+      views_count: 0
+    },
+    {
+      title: "Workflow Archived Blog Post",
+      content: "# Workflow Archived Blog Post\n\nA seeded archived post for admin content moderation and archive/unarchive flows.",
+      excerpt: "Seeded archived post for workflow testing.",
+      published: false,
+      published_at: nil,
+      archived: true,
+      featured: false,
+      views_count: 7
+    }
+  ]
+
+  workflow_blog_posts.each do |attrs|
+    post = workflow_user.blog_posts.find_or_initialize_by(title: attrs[:title])
+    post.assign_attributes(attrs)
+    post.save!
+  end
+
+  workflow_user.create_digest_preference! unless workflow_user.digest_preference
+  workflow_user.digest_preference.update!(
+    enabled: true,
+    frequency: "daily",
+    include_projects: true,
+    include_blog_posts: true,
+    include_profile_updates: true,
+    timezone: "America/Los_Angeles",
+    digest_time: "09:00",
+    last_sent_at: 1.day.ago
+  )
+
+  workflow_pending.create_digest_preference! unless workflow_pending.digest_preference
+  workflow_pending.digest_preference.update!(
+    enabled: false,
+    frequency: "never",
+    include_projects: false,
+    include_blog_posts: false,
+    include_profile_updates: false,
+    timezone: "America/Los_Angeles",
+    digest_time: "09:00",
+    last_sent_at: nil
+  )
+
+  [ User.find_by(email: "john@example.com"), User.find_by(email: "jane@example.com"), mature_user ].compact.each do |followee|
+    workflow_user.follow!(followee)
+    followee.follow!(workflow_user) if followee.can_be_followed?
+  end
+
+  workflow_user.profile_views.delete_all
+  12.times do |index|
+    workflow_user.profile_views.create!(
+      visitor_ip: "203.0.113.#{index + 20}",
+      user_agent: "Mozilla/5.0 Workflow Seed",
+      referrer: [ "https://github.com", "https://linkedin.com", "https://google.com" ].sample,
+      visited_at: rand(1..21).days.ago
+    )
+  end
+
+  [
+    [ "view_admin_dashboard", workflow_superadmin, nil, { seeded: true } ],
+    [ "create_invited_user", workflow_superadmin, workflow_invited, { username: workflow_invited.username, email: workflow_invited.email, invitation_sent: false } ],
+    [ "resend_invitation", workflow_admin, workflow_invited_expired, { username: workflow_invited_expired.username, email: workflow_invited_expired.email } ],
+    [ "moderate_project", workflow_admin, workflow_user.projects.find_by(title: "Workflow Archived Project"), { action: "seeded_review", target_title: "Workflow Archived Project" } ],
+    [ "moderate_blog_post", workflow_admin, workflow_user.blog_posts.find_by(title: "Workflow Archived Blog Post"), { action: "seeded_review", target_title: "Workflow Archived Blog Post" } ]
+  ].each do |action, admin, target, details|
+    activity = AdminActivity.find_or_initialize_by(
+      admin: admin,
+      action: action,
+      target: target
+    )
+    activity.assign_attributes(details: details)
+    if activity.new_record?
+      activity.ip_address = "127.0.0.1"
+      activity.user_agent = "Workflow seed"
+      activity.created_at = rand(1..5).days.ago
+    end
+    activity.save!
+  end
+
+  puts "✅ Workflow user: workflow_user@example.com / password123"
+  puts "✅ Pending user: workflow_pending@example.com / password123"
+  puts "✅ Suspended user: workflow_suspended@example.com / password123"
+  puts "✅ Deactivated user: workflow_deactivated@example.com / password123"
+  puts "✅ Admin user: workflow_admin@example.com / password123"
+  puts "✅ Super admin user: workflow_superadmin@example.com / password123"
+  puts "✅ Invitation claim URL: /invitations/workflow-invited-token (code: 123456)"
+  puts "✅ Expired invitation URL: /invitations/workflow-expired-token (code: 654321)"
+
   puts "✅ Mature demo user ready: maya.demo@example.com / password123"
 
   puts "\n🎉 Seeding completed!"
@@ -1641,6 +2088,9 @@ if Rails.env.development?
   puts "Email: sarah@example.com | Username: sarahcode | Password: password123"
   puts "Email: demo@example.com | Username: demouser | Password: password123"
   puts "Email: maya.demo@example.com | Username: maya_builds | Password: password123"
+  puts "Email: workflow_user@example.com | Username: workflow_user | Password: password123"
+  puts "Email: workflow_admin@example.com | Username: workflow_admin | Password: password123"
+  puts "Email: workflow_superadmin@example.com | Username: workflow_superadmin | Password: password123"
   puts "\nYou can sign in with any of these accounts to explore the application!"
 
   # Load visitor data
